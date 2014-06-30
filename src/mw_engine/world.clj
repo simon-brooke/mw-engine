@@ -1,4 +1,5 @@
 (ns mw-engine.world
+  (:use mw-engine.utils)
   (:require [clojure.math.combinatorics :as combo]))
 
 (defn make-cell 
@@ -39,12 +40,19 @@
     (nth (nth world y) x)))
 
 (defn get-neighbours 
+  ([world x y depth]
   "Get the neighbours to distance depth of the cell at x, y in this world."
-  [world x y depth]
   (map #(get-cell world (first %) (first (rest %))) 
        (combo/cartesian-product 
          (range (- x depth) (+ x depth)) 
          (range (- y depth) (+ y depth)))))
+  ([world cell depth]
+    "Get the neighbours to distance depth of this cell in this world."
+    (get-neighbours world (:x cell) (:y cell) depth))
+  ([world cell]
+    "Get the immediate neighbours of this cell in this world"
+    (get-neighbours world cell 1)))
+  
 
 (defn get-neighbours-with-state 
   "Get the neighbours to distance depth of the cell at x, y in this world which
@@ -63,7 +71,10 @@
   "Format one row in the state of a world for printing"
   [row]
   (apply str  
-         (map #(format "%10s" (truncate-state % 10)) row)))
+         (map #(format "%10s(%d/%d)" 
+                       (truncate-state % 10)
+                       (population % :deer)
+                       (population % :wolves)) row)))
 
 (defn print-world
   "Print the current state of this world, and return nil"

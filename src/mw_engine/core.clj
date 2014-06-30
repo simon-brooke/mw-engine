@@ -1,5 +1,6 @@
 (ns mw-engine.core
-  (:use mw-engine.world
+  (:require mw-engine.world
+        mw-engine.natural-rules
         mw-engine.utils))
 
 ;; every rule is a function of two arguments, a cell and a world. If the rule
@@ -7,60 +8,6 @@
 ;; :y as the old cell. Anything else can be modified.
 ;;
 ;; Rules are applied in turn until one matches.
-
-
-(def treeline 10)
-
-(def natural-rules
-  (list 
-    ;; Randomly, birds plant tree seeds into pasture.
-    (fn [cell world] (cond (and (= (:state cell) :pasture)(< (rand 10) 1))(merge cell {:state :scrub})))
-    ;; Scrub below the treeline grows gradually into forest
-    (fn [cell world] 
-      (cond (and 
-              (= (:state cell) :scrub)
-              (< (:altitude cell) treeline)) 
-        (merge cell {:state :scrub2})))
-    (fn [cell world] (cond (= (:state cell) :scrub2) (merge cell {:state :forest})))
-    ;; Forest on fertile land at low altitude grows to climax
-    (fn [cell world] 
-      (cond 
-        (and 
-          (= (:state cell) :forest) 
-          (> (:fertility cell) 10)) 
-        (merge cell {:state :climax})))
-    ;; Climax forest occasionally catches fire (e.g. lightning strikes)
-    (fn [cell world] (cond (and (= (:state cell) :climax)(< (rand 10) 1)) (merge cell {:state :fire})))
-    ;; Climax forest neighbouring fires is likely to catch fire
-    (fn [cell world]
-      (cond 
-        (and (= (:state cell) :climax)
-             (< (rand 3) 1)
-             (not (empty? (get-neighbours-with-state world (:x cell) (:y cell) 1 :fire))))
-        (merge cell {:state :fire})))
-    ;; After fire we get waste
-    (fn [cell world] (cond (= (:state cell) :fire) (merge cell {:state :waste})))
-    ;; And after waste we get pioneer species; if there's a woodland seed 
-    ;; source, it's going to be scrub, otherwise grassland.
-    (fn [cell world]
-      (cond
-        (and (= (:state cell) :waste)
-             (not 
-               (empty? 
-                 (flatten 
-                   (list 
-                     (get-neighbours-with-state world (:x cell) (:y cell) 1 :scrub2)
-                     (get-neighbours-with-state world (:x cell) (:y cell) 1 :forest)
-                     (get-neighbours-with-state world (:x cell) (:y cell) 1 :climax))))))
-        (merge cell {:state :scrub})))
-    (fn [cell world]
-      (cond (= (:state cell) :waste)
-        (merge cell {:state :pasture})))
-    ;; Forest increases soil fertility
-    (fn [cell world]
-      (cond (member? (:state cell) '(:forest :climax))
-        (merge cell {:fertility (+ (:fertility cell) 1)})))
-  ))
 
 (defn transform-cell 
   "Derive a cell from this cell of this world by applying these rules."
@@ -96,3 +43,10 @@
   [world rules generations]
   (let [state (list world rules)]
     (take generations (iterate transform-world-state state))))
+
+(defn animate-world
+  [world rules generations]
+  (let [state (list world rules)]
+    (dorun 
+      (take generations (iterate transform-world-state state)))
+    nil))
