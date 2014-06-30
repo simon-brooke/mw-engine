@@ -4,7 +4,7 @@
 (defn make-cell 
   "Create a default cell at x, y"
   [x y]
-  {:x x :y y :altitude 1 :state :pasture})
+  {:x x :y y :altitude 1 :state :waste :fertility 1})
 
 (defn make-world-row 
   "Make the (remaining) cells in a row at this height in a world of this width."
@@ -17,14 +17,14 @@
   "Make the (remaining) rows in a world of this width and height, from this
    index."
   (cond (= index height) nil
-    true (cons (apply vector (make-world-row 0 width index))
+    true (cons (make-world-row 0 width index)
                (make-world-rows (+ index 1) width height))))
 
 (defn make-world 
   "Make a world width cells from east to west, and height cells from north to
    south."
   [width height]
-  (apply vector (make-world-rows 0 width height)))
+  (make-world-rows 0 width height))
 
 (defn in-bounds   
   "True if x, y are in bounds for this world (i.e., there is a cell at x, y)
@@ -46,6 +46,12 @@
          (range (- x depth) (+ x depth)) 
          (range (- y depth) (+ y depth)))))
 
+(defn get-neighbours-with-state 
+  "Get the neighbours to distance depth of the cell at x, y in this world which
+   have this state."
+  [world x y depth state]
+  (filter #(= (:state %) state) (get-neighbours world x y depth)))
+
 (defn truncate-state
   "Truncate the print name of the state of this cell to at most limit characters."
   [cell limit]
@@ -60,6 +66,12 @@
          (map #(format "%10s" (truncate-state % 10)) row)))
 
 (defn print-world
-  "Print the current state of this world."
+  "Print the current state of this world, and return nil"
   [world]
-  (dorun (map #(println (format-world-row %)) world)) nil)
+  (println)
+  (dorun 
+    (map 
+      #(println 
+         (format-world-row %)) 
+      world)) 
+  world)
