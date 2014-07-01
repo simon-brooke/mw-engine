@@ -67,14 +67,19 @@
     (cond (> (count (.toString s)) 10) (subs s 0 10)
       true s)))
 
+(defn format-cell 
+  "Return a formatted string summarising the current state of this cell."
+  [cell]
+  (format "%10s(%2d/%2d)" 
+          (truncate-state cell 10)
+          (population cell :deer)
+          (population cell :wolves)))
+
 (defn format-world-row
   "Format one row in the state of a world for printing"
   [row]
   (apply str  
-         (map #(format "%10s(%d/%d)" 
-                       (truncate-state % 10)
-                       (population % :deer)
-                       (population % :wolves)) row)))
+         (map format-cell row)))
 
 (defn print-world
   "Print the current state of this world, and return nil"
