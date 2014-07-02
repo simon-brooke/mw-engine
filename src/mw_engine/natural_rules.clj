@@ -63,8 +63,8 @@
         (merge cell {:fertility (+ (:fertility cell) 1)})))
   ))
 
-;; rules describing animal behaviour
-(def predation-rules
+;; rules describing herbivore behaviour
+(def herbivore-rules
   (list
     ;; deer arrive occasionally at the edge of the map.
     (fn [cell world]
@@ -88,7 +88,11 @@
     (fn [cell world]
       (cond
         (>= (population cell :deer) 2)
-        (merge cell {:deer (int (* (:deer cell) 4))})))
+        (merge cell {:deer (int (* (:deer cell) 4))})))))
+
+  ;; rules describing predator behaviour
+  (def predator-rules
+    (list
     ;; wolves arrive occasionally at the edge of the map.
     (fn [cell world]
       (cond (and (< (count (get-neighbours world cell)) 8)
@@ -117,4 +121,4 @@
       (merge cell {:deer (- (population cell :deer) (population cell :wolves))}))
     ))
 
-(def natural-rules (flatten (list vegetation-rules predation-rules)))
+(def natural-rules (flatten (list vegetation-rules herbivore-rules predator-rules)))
