@@ -108,10 +108,10 @@
                 (>= n 2))
           (merge cell {:wolves 2}))))
     ;; wolves breed.
- ;;   (fn [cell world]
- ;;     (cond 
- ;;       (>= (population cell :wolves) 2)
- ;;       (merge cell {:wolves (int (* (:wolves cell) 2))})))
+    (fn [cell world]
+      (cond 
+        (>= (population cell :wolves) 2)
+        (merge cell {:wolves (int (* (:wolves cell) 2))})))
     ;; wolves eat deer
     (fn [cell world]
       (merge cell {:deer (- (population cell :deer) (population cell :wolves))}))

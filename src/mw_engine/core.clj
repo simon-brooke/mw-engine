@@ -1,5 +1,5 @@
 (ns mw-engine.core
-  (:require mw-engine.world
+  (:require [mw-engine.world :as world]
         mw-engine.natural-rules
         mw-engine.utils))
 
@@ -35,7 +35,7 @@
    these rules. As a side effect, print the world."
   [state]
   (list
-    (print-world (transform-world (first state) (first (rest state))))
+    (world/print-world (transform-world (first state) (first (rest state))))
     (first (rest state))))
 
 (defn run-world 
