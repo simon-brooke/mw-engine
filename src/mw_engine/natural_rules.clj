@@ -1,34 +1,43 @@
+;; A set of MicroWorld rules describing a simplified natural ecosystem.
+
 (ns mw-engine.natural-rules
   (:use mw-engine.utils
         mw-engine.world))
 
-;; rules describing the natural ecosystem
+;; treeline at arbitrary altitude.
+(def treeline 100)
 
-(def treeline 10)
+;; waterline also at arbitrary altitude.
+(def waterline 10)
 
-;; one in fifty chance of lightning strike
-(def lightning-probability 50)
+;; and finally snowline is also arbitrary.
+(def snowline 200)
+
+;; Rare chance of lightning strikes
+(def lightning-probability 500)
+
+;; rules which initialise the world
 
 ;; rules describing vegetation
 (def vegetation-rules
   (list
-    ;; Randomly, birds plant tree seeds into pasture.
-    (fn [cell world] (cond (and (= (:state cell) :pasture)(< (rand 10) 1))(merge cell {:state :scrub})))
-    ;; Scrub below the treeline grows gradually into forest, providing browsing pressure is not to high
+    ;; Randomly, birds plant tree seeds into grassland.
+    (fn [cell world] (cond (and (= (:state cell) :grassland)(< (rand 10) 1))(merge cell {:state :heath})))
+    ;; heath below the treeline grows gradually into forest, providing browsing pressure is not to high
     (fn [cell world]
       (cond (and
-              (= (:state cell) :scrub)
+              (= (:state cell) :heath)
               ;; browsing limit really ought to vary with soil fertility, but...
-              (< (+ (population cell :deer)(or (:sheep cell) 0)) 6)
-              (< (:altitude cell) treeline))
-        (merge cell {:state :scrub2})))
-    (fn [cell world] (cond (= (:state cell) :scrub2) (merge cell {:state :forest})))
-    ;; Forest on fertile land at low altitude grows to climax
+              (< (+ (population cell :deer)(population cell :sheep)) 6)
+              (< (get-int cell :altitude) treeline))
+        (merge cell {:state :scrub})))
+    (fn [cell world] (cond (= (:state cell) :scrub) (merge cell {:state :forest})))
+    ;; Forest on fertile land grows to climax
     (fn [cell world]
       (cond
         (and
           (= (:state cell) :forest)
-          (> (:fertility cell) 10))
+          (> (get-int cell :fertility) 10))
         (merge cell {:state :climax})))
     ;; Climax forest occasionally catches fire (e.g. lightning strikes)
     (fn [cell world] (cond (and (= (:state cell) :climax)(< (rand lightning-probability) 1)) (merge cell {:state :fire})))
@@ -42,7 +51,7 @@
     ;; After fire we get waste
     (fn [cell world] (cond (= (:state cell) :fire) (merge cell {:state :waste})))
     ;; And after waste we get pioneer species; if there's a woodland seed
-    ;; source, it's going to be scrub, otherwise grassland.
+    ;; source, it's going to be heath, otherwise grassland.
     (fn [cell world]
       (cond
         (and (= (:state cell) :waste)
@@ -50,17 +59,17 @@
                (empty?
                  (flatten
                    (list
-                     (get-neighbours-with-state world (:x cell) (:y cell) 1 :scrub2)
+                     (get-neighbours-with-state world (:x cell) (:y cell) 1 :scrub)
                      (get-neighbours-with-state world (:x cell) (:y cell) 1 :forest)
                      (get-neighbours-with-state world (:x cell) (:y cell) 1 :climax))))))
-        (merge cell {:state :scrub})))
+        (merge cell {:state :heath})))
     (fn [cell world]
       (cond (= (:state cell) :waste)
-        (merge cell {:state :pasture})))
+        (merge cell {:state :grassland})))
     ;; Forest increases soil fertility
     (fn [cell world]
       (cond (member? (:state cell) '(:forest :climax))
-        (merge cell {:fertility (+ (:fertility cell) 1)})))
+        (merge cell {:fertility (+ (get-int cell :fertility) 1)})))
   ))
 
 ;; rules describing herbivore behaviour
@@ -75,8 +84,8 @@
     ;; if there are too many deer for the fertility of the area to sustain,
     ;; some die or move on.
     (fn [cell world]
-      (cond (> (* (population cell :deer) 10) (:fertility cell))
-        (merge cell {:deer (int (/ (:fertility cell) 10))})))
+      (cond (> (* (population cell :deer) 10) (get-int cell :fertility))
+        (merge cell {:deer (int (/ (get-int cell :fertility) 10))})))
     ;; deer gradually spread through the world by breeding or migrating.
     (fn [cell world]
       (let [n (apply + (map #(population % :deer) (get-neighbours world cell)))]
@@ -121,4 +130,22 @@
       (merge cell {:deer (- (population cell :deer) (population cell :wolves))}))
     ))
 
-(def natural-rules (flatten (list vegetation-rules herbivore-rules predator-rules)))
+  ;; rules which initialise the world
+  (def init-rules
+    (list
+     ;; below the waterline, we have water.
+     (fn [cell world]
+       (cond (and (= (:state cell) :new) (< (get-int cell :altitude) waterline)) (merge cell {:state :water})))
+     ;; above the snowline, we have snow.
+     (fn [cell world]
+       (cond (and (= (:state cell) :new) (> (get-int cell :altitude) snowline)) (merge cell {:state :snow})))
+     ;; in between, we have a wasteland.
+     (fn [cell world] (cond (= (:state cell) :new) (merge cell {:state :waste}))
+     )))
+
+(def natural-rules (flatten
+                    (list
+                     vegetation-rules
+                     herbivore-rules
+                     predator-rules
+                     )))
