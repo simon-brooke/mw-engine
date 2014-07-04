@@ -113,7 +113,7 @@
 ;;      (fn [cell world]
 ;;        (cond (> (get-int cell :wolves) 8) (merge cell {:wolves 8})))
     ;; if there are not enough deer to sustain the get-int of wolves,
-    ;; some wolves die or move on.
+    ;; some wolves die or move on. (doesn't seem to be working?)
     (fn [cell world]
        (cond (> (get-int cell :wolves) (get-int cell :deer))
          (merge cell {:wolves 0})))
