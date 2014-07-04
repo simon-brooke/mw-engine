@@ -93,7 +93,7 @@
                 (= (population cell :deer) 0)
                 (>= n 2))
           (merge cell {:deer (int (/ n 2))}))))
-    deer breed.
+    ;; deer breed.
     (fn [cell world]
       (cond
         (>= (population cell :deer) 2)
@@ -120,7 +120,7 @@
                 (= (population cell :wolves) 0)
                 (>= n 2))
           (merge cell {:wolves 2}))))
-    wolves breed.
+    ;; wolves breed.
     (fn [cell world]
       (cond
         (>= (population cell :wolves) 2)
