@@ -28,7 +28,7 @@
       (cond (and
               (= (:state cell) :heath)
               ;; browsing limit really ought to vary with soil fertility, but...
-              (< (+ (population cell :deer)(population cell :sheep)) 6)
+              (< (+ (get-int cell :deer)(get-int cell :sheep)) 6)
               (< (get-int cell :altitude) treeline))
         (merge cell {:state :scrub})))
     (fn [cell world] (cond (= (:state cell) :scrub) (merge cell {:state :forest})))
@@ -75,59 +75,68 @@
 ;; rules describing herbivore behaviour
 (def herbivore-rules
   (list
+    ;; if there are too many deer for the fertility of the area to sustain,
+    ;; some die or move on.
+    (fn [cell world]
+      (cond (> (get-int cell :deer) (get-int cell :fertility))
+        (merge cell {:deer (get-int cell :fertility)})))
     ;; deer arrive occasionally at the edge of the map.
     (fn [cell world]
       (cond (and (< (count (get-neighbours world cell)) 8)
                  (< (rand 50) 1)
-                 (= (population cell :deer) 0))
+                 (> (get-int cell :fertility) 0)
+                 (= (get-int cell :deer) 0))
         (merge cell {:deer 2})))
-    ;; if there are too many deer for the fertility of the area to sustain,
-    ;; some die or move on.
-    (fn [cell world]
-      (cond (> (* (population cell :deer) 10) (get-int cell :fertility))
-        (merge cell {:deer (int (/ (get-int cell :fertility) 10))})))
     ;; deer gradually spread through the world by breeding or migrating.
     (fn [cell world]
-      (let [n (apply + (map #(population % :deer) (get-neighbours world cell)))]
+      (let [n (apply + (map #(get-int % :deer) (get-neighbours world cell)))]
         (cond (and
-                (= (population cell :deer) 0)
+                (> (get-int cell :fertility) 0)
+                (= (get-int cell :deer) 0)
                 (>= n 2))
           (merge cell {:deer (int (/ n 2))}))))
     ;; deer breed.
     (fn [cell world]
       (cond
-        (>= (population cell :deer) 2)
-        (merge cell {:deer (int (* (:deer cell) 4))})))))
+        (>= (get-int cell :deer) 2)
+        (merge cell {:deer (int (* (:deer cell) 2))})))))
 
   ;; rules describing predator behaviour
   (def predator-rules
     (list
+     ;; wolves eat deer
+     (fn [cell world]
+      (cond
+       (>= (get-int cell :wolves) 1)
+       (merge cell {:deer (max 0 (- (get-int cell :deer) (get-int cell :wolves)))})))
+;;      ;; not more than eight wolves in a pack, for now (hack because wolves are not dying)
+;;      (fn [cell world]
+;;        (cond (> (get-int cell :wolves) 8) (merge cell {:wolves 8})))
+    ;; if there are not enough deer to sustain the get-int of wolves,
+    ;; some wolves die or move on.
+    (fn [cell world]
+       (cond (> (get-int cell :wolves) (get-int cell :deer))
+         (merge cell {:wolves 0})))
     ;; wolves arrive occasionally at the edge of the map.
     (fn [cell world]
       (cond (and (< (count (get-neighbours world cell)) 8)
                  (< (rand 50) 1)
-                 (= (population cell :wolves) 0))
+                 (not (= (:state cell) :water))
+                 (= (get-int cell :wolves) 0))
         (merge cell {:wolves 2})))
-    ;; if there are not enough deer to sustain the population of wolves,
-    ;; some wolves die or move on.
-     (fn [cell world]
-       (cond (> (population cell :wolves) (population cell :deer))
-         (merge cell {:wolves 0})))
     ;; wolves gradually spread through the world by breeding or migrating.
     (fn [cell world]
-      (let [n (apply + (map #(population % :wolves) (get-neighbours world cell)))]
+      (let [n (apply + (map #(get-int % :wolves) (get-neighbours world cell)))]
         (cond (and
-                (= (population cell :wolves) 0)
+                (not (= (:state cell) :water))
+                (= (get-int cell :wolves) 0)
                 (>= n 2))
           (merge cell {:wolves 2}))))
     ;; wolves breed.
     (fn [cell world]
       (cond
-        (>= (population cell :wolves) 2)
+        (>= (get-int cell :wolves) 2)
         (merge cell {:wolves (int (* (:wolves cell) 2))})))
-    ;; wolves eat deer
-    (fn [cell world]
-      (merge cell {:deer (- (population cell :deer) (population cell :wolves))}))
     ))
 
   ;; rules which initialise the world

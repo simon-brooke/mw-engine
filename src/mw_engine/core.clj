@@ -59,18 +59,18 @@
   * `generations` an (integer) number of generations."
   [world init-rules rules generations]
   (let [state {:world (transform-world world init-rules) :rules rules}]
-    (dorun (take generations (iterate transform-world-state state)))))
+    (take generations (iterate transform-world-state state))))
 
-(defn animate-world
-  "Run this world with these rules for this number of generations, and return nil
-  to avoid cluttering the screen. Principally for debugging.
+;; (defn animate-world
+;;   "Run this world with these rules for this number of generations, and return nil
+;;   to avoid cluttering the screen. Principally for debugging.
 
-  * `world` a world as discussed above;
-  * `init-rules` a sequence of rules as defined above, to be run once to initialise the world;
-  * `rules` a sequence of rules as definied above, to be run iteratively for each generation;
-  * `generations` an (integer) number of generations."
-  [world init-rules rules generations]
-  (let [state (list (transform-world world init-rules) rules)]
-    (dorun
-      (take generations (iterate transform-world-state state)))
-    world))
+;;   * `world` a world as discussed above;
+;;   * `init-rules` a sequence of rules as defined above, to be run once to initialise the world;
+;;   * `rules` a sequence of rules as definied above, to be run iteratively for each generation;
+;;   * `generations` an (integer) number of generations."
+;;   [world init-rules rules generations]
+;;   (let [state (list (transform-world world init-rules) rules)]
+;;     (dorun
+;;       (take generations (iterate transform-world-state state)))
+;;     state))
