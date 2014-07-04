@@ -30,9 +30,11 @@
 (defn get-int
   "Get the value of a property expected to be an integer from a map; if not present (or not an integer) return 0."
   [map key]
-  (let [v (map key)]
-    (cond (integer? v) v
-          true 0)))
+  (cond map
+    (let [v (map key)]
+      (cond (and v (integer? v)) v
+            true 0))
+        true (throw (Exception. "No map passed?"))))
 
 (defn population
   "Return the population of this species in this cell.

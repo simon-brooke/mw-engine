@@ -87,12 +87,12 @@
       (cond (> (* (population cell :deer) 10) (get-int cell :fertility))
         (merge cell {:deer (int (/ (get-int cell :fertility) 10))})))
     ;; deer gradually spread through the world by breeding or migrating.
-    (fn [cell world]
-      (let [n (apply + (map #(population % :deer) (get-neighbours world cell)))]
-        (cond (and
-                (= (population cell :deer) 0)
-                (>= n 2))
-          (merge cell {:deer (int (/ n 2))}))))
+;;     (fn [cell world]
+;;       (let [n (apply + (map #(population % :deer) (get-neighbours world cell)))]
+;;         (cond (and
+;;                 (= (population cell :deer) 0)
+;;                 (>= n 2))
+;;           (merge cell {:deer (int (/ n 2))}))))
     ;; deer breed.
     (fn [cell world]
       (cond
@@ -110,16 +110,16 @@
         (merge cell {:wolves 2})))
     ;; if there are not enough deer to sustain the population of wolves,
     ;; some wolves die or move on.
-    (fn [cell world]
-      (cond (> (population cell :wolves) (population cell :deer))
-        (merge cell {:wolves 0})))
+     (fn [cell world]
+       (cond (> (population cell :wolves) (population cell :deer))
+         (merge cell {:wolves 0})))
     ;; wolves gradually spread through the world by breeding or migrating.
-    (fn [cell world]
-      (let [n (apply + (map #(population % :wolves) (get-neighbours world cell)))]
-        (cond (and
-                (= (population cell :wolves) 0)
-                (>= n 2))
-          (merge cell {:wolves 2}))))
+;;     (fn [cell world]
+;;       (let [n (apply + (map #(population % :wolves) (get-neighbours world cell)))]
+;;         (cond (and
+;;                 (= (population cell :wolves) 0)
+;;                 (>= n 2))
+;;           (merge cell {:wolves 2}))))
     ;; wolves breed.
     (fn [cell world]
       (cond
