@@ -5,7 +5,7 @@
         mw-engine.world))
 
 ;; treeline at arbitrary altitude.
-(def treeline 100)
+(def treeline 150)
 
 ;; waterline also at arbitrary altitude.
 (def waterline 10)
@@ -15,8 +15,6 @@
 
 ;; Rare chance of lightning strikes
 (def lightning-probability 500)
-
-;; rules which initialise the world
 
 ;; rules describing vegetation
 (def vegetation-rules
@@ -156,5 +154,5 @@
                     (list
                      vegetation-rules
                      herbivore-rules
-                     predator-rules
+                     ;; predator-rules
                      )))
