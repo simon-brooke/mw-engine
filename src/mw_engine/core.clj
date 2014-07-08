@@ -9,6 +9,10 @@
 ;; fires, it returns a new cell, which should have the same values for :x and
 ;; :y as the old cell. Anything else can be modified.
 ;;
+;; While any function of two arguments can be used as a rule, a special high
+;; level rule language is provided by the `mw-parser` package, which compiles
+;; rules expressed in a subset of English rules into suitable functions.
+;;
 ;; A cell is a map containing at least values for the keys :x, :y, and :state;
 ;; a transformation should not alter the values of :x or :y, and should not
 ;; return a cell without a keyword as the value of :state. Anything else is
@@ -18,7 +22,9 @@
 ;; that every cell's :x and :y properties reflect its place in the matrix.
 ;; See `world.clj`.
 ;;
-;; Rules are applied in turn until one matches.
+;; Each time the world is transformed (see `transform-world`, for each cell, 
+;; rules are applied in turn until one matches. Once one rule has matched no
+;; further rules can be applied.
 
 (defn- transform-cell
   "Derive a cell from this cell of this world by applying these rules."
@@ -60,17 +66,3 @@
   [world init-rules rules generations]
   (let [state {:world (transform-world world init-rules) :rules rules}]
     (take generations (iterate transform-world-state state))))
-
-;; (defn animate-world
-;;   "Run this world with these rules for this number of generations, and return nil
-;;   to avoid cluttering the screen. Principally for debugging.
-
-;;   * `world` a world as discussed above;
-;;   * `init-rules` a sequence of rules as defined above, to be run once to initialise the world;
-;;   * `rules` a sequence of rules as definied above, to be run iteratively for each generation;
-;;   * `generations` an (integer) number of generations."
-;;   [world init-rules rules generations]
-;;   (let [state (list (transform-world world init-rules) rules)]
-;;     (dorun
-;;       (take generations (iterate transform-world-state state)))
-;;     state))

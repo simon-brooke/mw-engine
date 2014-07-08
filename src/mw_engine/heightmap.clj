@@ -17,7 +17,7 @@
   "Surprisingly, Clojure doesn't seem to have an abs function, or else I've 
    missed it. So here's one of my own. Maps natural numbers onto themselves,
    and negative integers onto natural numbers. Also maps negative real numbers
-   onto positive real numbers, but I don't care so much about them.
+   onto positive real numbers.
 
    * `n` a number, on the set of real numbers."
   [n]
@@ -25,8 +25,7 @@
 
 (defn transform-altitude
   "Set the altitude of this cell from the corresponding pixel of this heightmap.
-   If the heightmap you supply is smaller than the world, this will break and 
-   it's ALL YOUR FAULT.
+   If the heightmap you supply is smaller than the world, this will break.
 
    * `cell` a cell, as discussed in world.clj, q.v. Alternatively, a map;
    * `heightmap` an (ideally) greyscale image, whose x and y dimensions should
@@ -45,15 +44,14 @@
 (defn- apply-heightmap-row
   "Set the altitude of each cell in this sequence from the corresponding pixel 
    of this heightmap.
-   If the heightmap you supply is smaller than the world, this will break and 
-   it's ALL YOUR FAULT.
+   If the heightmap you supply is smaller than the world, this will break.
 
    * `row` a row in a world, as discussed in world.clj, q.v. Alternatively, a
      sequence of maps;
    * `heightmap` an (ideally) greyscale image, whose x and y dimensions should
      exceed those of the world of which the `cell` forms part."  
   [row heightmap]
-  (apply vector (map #(transform-altitude %1 heightmap) row)))
+  (apply vector (map #(transform-altitude % heightmap) row)))
 
 (defn apply-heightmap
   "Apply the image file loaded from this path to this world, and return a world whose
@@ -65,4 +63,4 @@
   [world imagepath]
   ;; bizarrely, the collage load-util is working for me, but the imagez version isn't.
   (let [heightmap (filter-image (grayscale)(load-image imagepath))]
-    (apply vector (map #(apply-heightmap-row %1 heightmap) world))))
+    (apply vector (map #(apply-heightmap-row % heightmap) world))))

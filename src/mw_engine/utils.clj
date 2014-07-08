@@ -51,7 +51,6 @@
 
 
 (defn get-neighbours
-  ([world x y depth]
     "Get the neighbours to distance depth of the cell at x, y in this world.
 
     * `world` a world, as described in world.clj;
@@ -59,26 +58,27 @@
     * `y` an integer representing an y coordinate in that world;
     * `depth` an integer representing the distance from [x,y] that
       should be searched."
-     (remove nil?
-            (map #(get-cell world (first %) (first (rest %)))
-               (remove #(= % (list x y))
-                 (combo/cartesian-product
-                   (range (- x depth) (+ x depth 1))
-                   (range (- y depth) (+ y depth 1)))))))
-   ([world cell depth] 
-    "Get the neighbours to distance depth of this cell in this world.
+    ([world x y depth]
+      (remove nil?
+              (map #(get-cell world (first %) (first (rest %)))
+                   (remove #(= % (list x y))
+                           (combo/cartesian-product
+                             (range (- x depth) (+ x depth 1))
+                             (range (- y depth) (+ y depth 1)))))))
+    ([world cell depth] 
+      "Get the neighbours to distance depth of this cell in this world.
 
-    * `world` a world, as described in world.clj;
-    * `cell` a cell within that world;
-    * `depth` an integer representing the distance from [x,y] that
-      should be searched."
-    (get-neighbours world (:x cell) (:y cell) depth))
-   ([world cell]
-    "Get the immediate neighbours of this cell in this world
+      * `world` a world, as described in world.clj;
+      * `cell` a cell within that world;
+      * `depth` an integer representing the distance from [x,y] that
+        should be searched."
+      (get-neighbours world (:x cell) (:y cell) depth))
+    ([world cell]
+      "Get the immediate neighbours of this cell in this world
 
-    * `world` a world, as described in world.clj;
-    * `cell` a cell within that world."
-    (get-neighbours world cell 1)))
+      * `world` a world, as described in world.clj;
+      * `cell` a cell within that world."
+      (get-neighbours world cell 1)))
 
 (defn get-neighbours-with-property-value
   "Get the neighbours to distance depth of the cell at x, y in this world which
