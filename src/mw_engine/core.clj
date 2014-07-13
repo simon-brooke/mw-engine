@@ -26,14 +26,22 @@
 ;; rules are applied in turn until one matches. Once one rule has matched no
 ;; further rules can be applied.
 
-(defn- transform-cell
+(defn- apply-rules
   "Derive a cell from this cell of this world by applying these rules."
   [cell world rules]
   (cond (empty? rules) cell
     true (let [result (apply (eval (first rules)) (list cell world))]
            (cond result result
-             true (transform-cell cell world (rest rules))))))
+             true (apply-rules cell world (rest rules))))))
 
+(defn- transform-cell
+  "Derive a cell from this cell of this world by applying these rules. If an
+   exception is thrown, cache its message on the cell and set state to error"
+  [cell world rules]
+  (try
+    (apply-rules cell world rules)
+    (catch Exception e (merge {:state :error :error (.getMessage e)} cell)))) 
+ 
 (defn- transform-world-row
   "Return a row derived from this row of this world by applying these rules to each cell."
   [row world rules]
