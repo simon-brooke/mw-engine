@@ -90,8 +90,10 @@
       should be searched;
     * `property` a keyword representing a property of the neighbours.
     * `value` a value of that property"
+  ([world x y depth property value comparator]
+    (filter #(apply comparator (list (get % property) value)) (get-neighbours world x y depth)))
   ([world x y depth property value]
-    (filter #(= (get % property) value) (get-neighbours world x y depth)))
+    (get-neighbours-with-property-value world x y depth property value =))
   ([world cell depth property value]
     (get-neighbours-with-property-value world (:x cell) (:y cell) depth 
                                         property value))
