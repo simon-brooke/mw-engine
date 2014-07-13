@@ -1,14 +1,19 @@
 # mw-engine
 
-A Clojure library designed to ... well, that part is up to you.
+Core cellular automaton engine for MicroWorld.
 
 ## Usage
 
-FIXME
+Primary entry points are make-world and run-world, both in mw-engine.core. See
+source or generated documentation for details. Documentation can be generated
+using
+
+    lein marg
 
 ## License
 
-Copyright © 2014 FIXME
+Copyright © 2014 Simon Brooke
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the terms of the [GNU General Public License v2][1]
+
+[1]: http://www.gnu.org/licenses/gpl-2.0.html
