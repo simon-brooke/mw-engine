@@ -147,7 +147,7 @@
      (fn [cell world]
        (cond (and (= (:state cell) :new) (> (get-int cell :altitude) snowline)) (merge cell {:state :snow})))
      ;; in between, we have a wasteland.
-     (fn [cell world] (cond (= (:state cell) :new) (merge cell {:state :waste}))
+     (fn [cell world] (cond (= (:state cell) :new) (merge cell {:state :grassland}))
      )))
 
 (def natural-rules (flatten

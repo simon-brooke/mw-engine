@@ -88,10 +88,13 @@
     * `cell` a cell within that world;
     * `depth` an integer representing the distance from [x,y] that
       should be searched;
-    * `property` a keyword representing a property of the neighbours.
-    * `value` a value of that property"
-  ([world x y depth property value comparator]
-    (filter #(apply comparator (list (get % property) value)) (get-neighbours world x y depth)))
+    * `property` a keyword representing a property of the neighbours;
+    * `value` a value of that property;
+    * `op` a comparator function to use in place of `=`.
+
+   It gets messy."
+  ([world x y depth property value op]
+    (filter #(eval (list op (get % property) value)) (get-neighbours world x y depth)))
   ([world x y depth property value]
     (get-neighbours-with-property-value world x y depth property value =))
   ([world cell depth property value]

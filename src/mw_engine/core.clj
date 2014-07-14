@@ -39,8 +39,15 @@
    exception is thrown, cache its message on the cell and set state to error"
   [cell world rules]
   (try
-    (apply-rules cell world rules)
-    (catch Exception e (merge {:state :error :error (.getMessage e)} cell)))) 
+    (merge 
+      (apply-rules cell world rules) 
+      {:generation (+ (or (:generation cell) 0) 1)})
+    (catch Exception e 
+      (merge cell {:error 
+                   (format "%s at generation %d when in state %s"
+                           (.getMessage e)
+                           (:generation cell)
+                           (:state cell))})))) 
  
 (defn- transform-world-row
   "Return a row derived from this row of this world by applying these rules to each cell."
