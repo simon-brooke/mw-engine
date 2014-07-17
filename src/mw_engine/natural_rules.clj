@@ -1,4 +1,9 @@
 ;; A set of MicroWorld rules describing a simplified natural ecosystem.
+;;
+;; Since the completion of the rule language this is more or less obsolete - 
+;; there are still a few things that you can do with rules written in Clojure
+;; that you can't do in the rule language, but not many and I doubt they're
+;; important.
 
 (ns mw-engine.natural-rules
   (:use mw-engine.utils

@@ -6,6 +6,7 @@
 (ns mw-engine.heightmap
   (:import [java.awt.image BufferedImage])
   (:use mw-engine.utils
+        mw-engine.world
         ;; interestingly the imagez load-image is failing for me, while the
         ;; collage version is problem free.
         [mikera.image.core :only [filter-image get-pixels]]
@@ -58,9 +59,14 @@
   altitudes are modified (added to) by the altitudes in the heightmap. It is assumed that
   the heightmap is at least as large in x and y dimensions as the world.
 
-  * `world` a world, as defined in `world.clj`, q.v.;
+  * `world` a world, as defined in `world.clj`, q.v.; if world is not supplied,
+    a world the size of the heightmap will be created.
   * `imagepath` a file path or URL which indicates an image file."
-  [world imagepath]
+  ([world imagepath]
   ;; bizarrely, the collage load-util is working for me, but the imagez version isn't.
-  (let [heightmap (filter-image (grayscale)(load-image imagepath))]
-    (apply vector (map #(apply-heightmap-row % heightmap) world))))
+    (let [heightmap (filter-image (grayscale)(load-image imagepath))]
+      (apply vector (map #(apply-heightmap-row % heightmap) world))))
+  ([imagepath]
+    (let [heightmap (filter-image (grayscale)(load-image imagepath))
+          world (make-world (.getWidth heightmap) (.getHeight heightmap))]
+      (apply vector (map #(apply-heightmap-row % heightmap) world)))))
