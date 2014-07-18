@@ -14,6 +14,5 @@ using
 
 Copyright © 2014 Simon Brooke
 
-Distributed under the terms of the [GNU General Public License v2][1]
-
-[1]: http://www.gnu.org/licenses/gpl-2.0.html
+Distributed under the terms of the [GNU General Public License v2]
+(http://www.gnu.org/licenses/gpl-2.0.html)
