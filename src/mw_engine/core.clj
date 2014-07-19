@@ -26,11 +26,37 @@
 ;; rules are applied in turn until one matches. Once one rule has matched no
 ;; further rules can be applied.
 
+
+(defn apply-rule 
+  "Apply a single rule to a cell. What this is about is that I want to be able,
+   for debugging purposes, to tag a cell with the rule text of the rule which
+   fired (and especially so when an exception is thrown. So a rule may be either
+   an ifn, or a list (ifn source-text). This function deals with despatching
+   on those two possibilities."
+  ([cell world rule]
+   (cond
+     (ifn? rule) (apply-rule cell world rule nil)
+     (seq? rule) (let [[afn src] rule] (apply-rule cell world afn src))))
+                  ;; {:afn afn :src src})))
+     ;; (apply-rule cell world (first rule) (first (rest rule)))))
+  ([cell world rule source]
+    (try
+      (let [result (apply rule (list cell world))]
+        (cond 
+          (and result source) (merge result {:rule source})
+          true result))
+      (catch Exception e
+        (merge cell {:error (format "%s at generation %d when in state %s"
+                           (.getMessage e)
+                           (:generation cell)
+                           (:state cell))
+                     :error-rule source})))))
+
 (defn- apply-rules
   "Derive a cell from this cell of this world by applying these rules."
   [cell world rules]
   (cond (empty? rules) cell
-    true (let [result (apply (eval (first rules)) (list cell world))]
+    true (let [result (apply-rule cell world (first rules))]
            (cond result result
              true (apply-rules cell world (rest rules))))))
 
