@@ -33,7 +33,7 @@
    * `map` a map;
    * `key` a symbol or keyword, presumed to be a key into the `map`."
   [map key]
-  (cond map
+  (cond (map? map)
     (let [v (map key)]
       (cond (and v (integer? v)) v
             true 0))
@@ -89,12 +89,17 @@
     * `depth` an integer representing the distance from [x,y] that
       should be searched;
     * `property` a keyword representing a property of the neighbours;
-    * `value` a value of that property;
+    * `value` a value of that property (or, possibly, the name of another);
     * `op` a comparator function to use in place of `=`.
 
    It gets messy."
   ([world x y depth property value op]
-    (filter #(eval (list op (get % property) value)) (get-neighbours world x y depth)))
+    (filter 
+      #(eval 
+         (list op 
+               (or (get % property) (get-int % property)) 
+               value)) 
+      (get-neighbours world x y depth)))
   ([world x y depth property value]
     (get-neighbours-with-property-value world x y depth property value =))
   ([world cell depth property value]

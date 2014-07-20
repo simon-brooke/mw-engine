@@ -1,8 +1,5 @@
 (ns mw-engine.utils-test
-  (:use [mw-engine.core :as core] 
-        [mw-engine.world :as world]
-        [mw-engine.heightmap :as height]
-        [mw-engine.natural-rules :as rules])
+  (:use [mw-engine.world :as world])
   (:require [clojure.test :refer :all]
             [mw-engine.utils :refer :all]))
 
@@ -65,5 +62,42 @@
                           { :altitude 72, :x 3, :y 2, } 
                           { :altitude 91, :x 4, :y 2, })))
                  (is (= (get-neighbours-with-property-value world 3 3 1 :altitude 100)
-                       '({ :altitude 100, :x 3, :y 4, }))))))
-
+                       '({ :altitude 100, :x 3, :y 4, }))))
+           (let [world '(({ :altitude 13, :x 0, :y 0, :deer 0}
+                           { :altitude 20, :x 1, :y 0, :deer 0}
+                           { :altitude 29, :x 2, :y 0, :deer 0}
+                           { :altitude 39, :x 3, :y 0, :deer 0}
+                           { :altitude 51, :x 4, :y 0, :deer 0})
+                          ({ :altitude 19, :x 0, :y 1, :deer 0}
+                            { :altitude 29, :x 1, :y 1, :deer 0}
+                            { :altitude 41, :x 2, :y 1, :deer 0}
+                            { :altitude 55, :x 3, :y 1, :deer 0}
+                            { :altitude 72, :x 4, :y 1, :deer 0})
+                          ({ :altitude 27, :x 0, :y 2, :deer 0}
+                            { :altitude 41, :x 1, :y 2, :deer 0}
+                            { :altitude 55, :x 2, :y 2, :deer 0}
+                            { :altitude 72, :x 3, :y 2, :deer 2}
+                            { :altitude 91, :x 4, :y 2, :deer 0})
+                          ({ :altitude 33, :x 0, :y 3, :deer 0}
+                            { :altitude 47, :x 1, :y 3, :deer 0}
+                            { :altitude 68, :x 2, :y 3, :deer 4}
+                            { :altitude 91, :x 3, :y 3, :deer 0}
+                            { :altitude 111, :x 4, :y 3, :deer 4})
+                          ({ :altitude 36, :x 0, :y 4, :deer 0}
+                            { :altitude 53, :x 1, :y 4, :deer 0}
+                            { :altitude 75, :x 2, :y 4, }
+                            { :altitude 100, :x 3, :y 4, :deer 2}
+                            { :altitude 123, :x 4, :y 4,}))]
+                 (is (= (get-neighbours-with-property-value world 3 3 1 :deer 2
+                                                            >)
+                        '({:altitude 68, :x 2, :y 3, :deer 4} 
+                           {:altitude 111, :x 4, :y 3, :deer 4})))
+                 (is (= (get-neighbours-with-property-value world 3 3 1 :deer 2
+                                                            <)
+                        '({:altitude 55, :x 2, :y 2, :deer 0} 
+                           {:altitude 75, :x 2, :y 4} 
+                           {:altitude 91, :x 4, :y 2, :deer 0} 
+                           {:altitude 123, :x 4, :y 4})))
+                 (is (= (get-neighbours-with-property-value world 3 3 1 :deer 2)
+                        '({:altitude 72, :x 3, :y 2, :deer 2} 
+                           {:altitude 100, :x 3, :y 4, :deer 2}))))))
