@@ -37,7 +37,7 @@
   * `width` total width of the matrix, in cells;
   * `height` total height of the matrix, in cells."
   (cond (= index height) nil
-    true (cons (make-world-row 0 width index)
+    true (cons (apply vector (make-world-row 0 width index))
                (make-world-rows (+ index 1) width height))))
 
 (defn make-world
@@ -47,7 +47,7 @@
   * `width` a natural number representing the width of the matrix to be created;
   * `height` a natural number representing the height of the matrix to be created."
   [width height]
-  (make-world-rows 0 width height))
+  (apply vector (make-world-rows 0 width height)))
 
 (defn truncate-state
   "Truncate the print name of the state of this cell to at most limit characters."
