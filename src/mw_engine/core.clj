@@ -36,20 +36,11 @@
    (cond
      (ifn? rule) (apply-rule cell world rule nil)
      (seq? rule) (let [[afn src] rule] (apply-rule cell world afn src))))
-                  ;; {:afn afn :src src})))
-     ;; (apply-rule cell world (first rule) (first (rest rule)))))
   ([cell world rule source]
-    (try
-      (let [result (apply rule (list cell world))]
-        (cond 
-          (and result source) (merge result {:rule source})
-          true result))
-      (catch Exception e
-        (merge cell {:error (format "%s at generation %d when in state %s"
-                           (.getMessage e)
-                           (:generation cell)
-                           (:state cell))
-                     :error-rule source})))))
+    (let [result (apply rule (list cell world))]
+      (cond 
+        (and result source) (merge result {:rule source})
+        true result))))
 
 (defn- apply-rules
   "Derive a cell from this cell of this world by applying these rules."
@@ -72,19 +63,20 @@
                    (format "%s at generation %d when in state %s"
                            (.getMessage e)
                            (:generation cell)
-                           (:state cell))})))) 
- 
+                           (:state cell))}))))
+
 (defn- transform-world-row
   "Return a row derived from this row of this world by applying these rules to each cell."
   [row world rules]
-  (map #(transform-cell % world rules) row))
+  (apply vector (map #(transform-cell % world rules) row)))
 
 (defn transform-world
   "Return a world derived from this world by applying these rules to each cell."
   [world rules]
-  (map
-    #(transform-world-row % world rules)
-    world))
+  (apply vector 
+          (map
+            #(transform-world-row % world rules)
+            world)))
 
 (defn- transform-world-state
   "Consider this single argument as a map of `:world` and `:rules`; apply the rules
