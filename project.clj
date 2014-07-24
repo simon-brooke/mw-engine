@@ -1,4 +1,4 @@
-(defproject mw-engine "0.1.1"
+(defproject mw-engine "0.1.2-SNAPSHOT"
   :description "Cellular automaton world builder."
   :url "http://example.com/FIXME"
   :license {:name "GNU General Public License v2"
