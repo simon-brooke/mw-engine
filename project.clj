@@ -8,4 +8,4 @@
                  [org.clojure/math.combinatorics "0.0.7"]
                  [org.clojure/tools.trace "0.7.8"]
                  [net.mikera/imagez "0.3.1"]
-                 [fivetonine/collage "0.2.0"]])
+                 [fivetonine/collage "0.2.1"]])
