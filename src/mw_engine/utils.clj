@@ -132,7 +132,7 @@
   [cell x y property value]
   (cond 
     (and (= x (:x cell)) (= y (:y cell)))
-    (merge cell {property value})
+    (merge cell {property value :rule "Set by user"})
     true
     cell))
 
