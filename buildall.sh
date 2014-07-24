@@ -4,6 +4,10 @@
 # Expects to be run from the parent directory of the directory which contains all
 # the MicroWorld projects.
 
+# WARNING: The regexps in this are fair awfy fragile. Edit with care.
+
+# Simon Broooke <simon@jasmine.org.uk>
+
 release=""
 
 case $1 in
@@ -32,15 +36,19 @@ do
 
 	if [ "${release}" != "" ]
 	then
-		old=`cat project.clj | grep 'defproject mw' | sed 's/(defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\).*)\"/\1/'`
+		old=`cat project.clj | grep 'defproject mw' | sed 's/.*defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\)".*/\1/'`
 
-		echo "foo ${old}"
 		# Does the 'old' version tag end with the token "-SNAPSHOT"? it probably does!
-		echo "${old}" | grep 'SNAPSHOT$' 
+		echo "${old}" | grep 'SNAPSHOT' 
 		if [ $? -eq 0 ]
 		then
 			# It does... 
-			interim=`echo ${old} | sed 's/\([A-Za-z0-9_.-]*-SNAPSHOT/\1/'`
+			interim=`echo ${old} | sed 's/\([A-Za-z0-9_.-]*\)-SNAPSHOT.*/\1/'`
+			if [ "${interim}" = "" ]
+			then
+				echo "Failed to compute interim version tag from '${old}'" 1>&2
+				exit 1;
+			fi
 			cat project.clj > project.bak.1
 			sed "s/${old}/${interim}/" project.bak.1 > project.clj
 			echo "Upversioned from ${old} to ${interim}"
