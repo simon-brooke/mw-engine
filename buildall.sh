@@ -37,6 +37,7 @@ do
 	if [ "${release}" != "" ]
 	then
 		old=`cat project.clj | grep 'defproject mw' | sed 's/.*defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\)".*/\1/'`
+		message="Preparing ${old} for release"
 
 		# Does the 'old' version tag end with the token "-SNAPSHOT"? it probably does!
 		echo "${old}" | grep 'SNAPSHOT' 
@@ -51,10 +52,12 @@ do
 			fi
 			cat project.clj > project.bak.1
 			sed "s/${old}/${interim}/" project.bak.1 > project.clj
-			echo "Upversioned from ${old} to ${interim}"
+			message="Upversioned from ${old} to ${interim} for release"
 			old=${interim}
 		fi
 	fi
+
+	echo $message
 
 	lein clean
 	lein compile
@@ -63,15 +66,23 @@ do
 		echo "Sub-project ${dir} failed in compile" 1>&2
 		exit 1
 	fi
+
   lein test
 	if [ $? -ne 0 ]
 	then
 		echo "Sub-project ${dir} failed in test" 1>&2
 		exit 1
 	fi
+
 	lein marg
 	lein install
-	git commit -a
+	
+	if [ "${message}" = "" ]
+	then
+		git commit -a
+	else
+		git commit -a -m $message
+	fi
 	# git push origin master
 	if [ "${release}" != "" ]
 	then
@@ -80,17 +91,22 @@ do
 		# git push origin "${branch}"
 		cat project.clj > project.bak.2
 		sed "s/${interim}/${release}-SNAPSHOT/" project.bak.2 > project.clj
-		echo "Upversioned from ${interim} to ${release}"
+		message="Upversioned from ${interim} to ${release}-SNAPSHOT"
+
+		echo $message
+
+		lein clean
 		lein compile
 		if [ $? -ne 0 ]
 		then
 			echo "Sub-project ${dir} failed in compile after branch to ${release}!" 1>&2
 			exit 1
 		fi
-		message="Upversioned from ${old} to ${release}-SNAPSHOT"
+		lein marg
+		lein install
 		git commit -a -m "${message}"
 		echo ${message}
-		# git push origin master
+		git push origin master
 	fi
 
 	# Finally, if we're in the UI project, build the uberwar - and should probably deploy it
