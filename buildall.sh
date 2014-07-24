@@ -4,7 +4,7 @@
 # Expects to be run from the parent directory of the directory which contains all
 # the MicroWorld projects.
 
-# WARNING: The regexps in this are fair awfy fragile. Edit with care.
+# WARNING: The regexps in this are fair awfy bruckle. Edit with care.
 
 # Simon Broooke <simon@jasmine.org.uk>
 
@@ -81,9 +81,10 @@ do
 	then
 		git commit -a
 	else
-		git commit -a -m $message
+		git commit -a -m "$message"
 	fi
-	# git push origin master
+	git push origin master
+
 	if [ "${release}" != "" ]
 	then
 		branch="${old}_MAINTENANCE"
