@@ -124,3 +124,30 @@
     (get-neighbours-with-state world (:x cell) (:y cell) depth state))
   ([world cell state]
     (get-neighbours-with-state world cell 1 state)))
+
+(defn- set-cell-property
+  "If this `cell`s x and y properties are equal to these `x` and `y` values,
+   return a cell like this cell but with the value of this `property` set to
+   this `value`. Otherwise, just return this `cell`."
+  [cell x y property value]
+  (cond 
+    (and (= x (:x cell)) (= y (:y cell)))
+    (merge cell {property value})
+    true
+    cell))
+
+(defn set-property
+  "Return a world like this `world` but with the value of exactly one `property`
+   of one `cell` changed to this `value`"
+  ([world cell property value]
+    (set-property world (:x cell) (:y cell) property value))
+  ([world x y property value]
+    (apply 
+      vector ;; we want a vector of vectors, not a list of lists, for efficiency
+      (map
+        (fn [row]
+          (apply
+            vector
+            (map #(set-cell-property % x y property value)
+                 row)))
+        world))))

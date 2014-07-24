@@ -1,6 +1,7 @@
 (ns mw-engine.utils-test
   (:use [mw-engine.world :as world])
   (:require [clojure.test :refer :all]
+            [clojure.math.combinatorics :as combo]
             [mw-engine.utils :refer :all]))
 
 (deftest get-neighbours-test
@@ -101,3 +102,45 @@
                  (is (= (get-neighbours-with-property-value world 3 3 1 :deer 2)
                         '({:altitude 72, :x 3, :y 2, :deer 2} 
                            {:altitude 100, :x 3, :y 4, :deer 2}))))))
+
+(deftest set-property-test
+  (testing "The set-property utility function"
+           (let [w1a (make-world 3 3)
+                 w2b (set-property w1a (get-cell w1a 1 1) :location :centre)
+                 w3c (set-property w2b 0 0 :location :top-left)]
+             (is (= (:location (get-cell w3c 0 0) :top-left)))
+             (is (= (:location (get-cell w3c 1 1) :centre)))
+             (is (nil? (:location (get-cell w3c 2 2))) 
+                 "Cell at 2,2 should not have location set")
+             (is (= (count (remove nil? (map #(:location %) (flatten w3c)))) 2)
+                 "Third world should have two location properties set")
+             (is (= (count (remove nil? (map #(:location %) (flatten w2b)))) 1)
+                 "Second world should have only one location set")
+             (is (zero? (count (remove nil? (map #(:location %) (flatten w1a)))))
+                 "First world should not have any location properties set")
+             (is 
+               (empty?
+                 (remove 
+                   true? 
+                   (map #(= (:x (get-cell w3c (nth % 0) (nth % 1))) (nth % 0))
+                        (combo/cartesian-product (range 0 3)
+                                                 (range 0 3)))))
+               "No X coordinates were injured in the production of this world")
+             (is 
+               (empty?
+                 (remove 
+                   true? 
+                   (map #(= (:y (get-cell w3c (nth % 0) (nth % 1))) (nth % 1)) 
+                        (combo/cartesian-product (range 0 3)
+                                                 (range 0 3)))))
+               "No Y coordinates were injured in the production of this world")
+             (is 
+               (empty?
+                 (remove 
+                   false? 
+                   (map #(= (:y (get-cell w3c (nth % 0) (nth % 1))) 1234567) 
+                        (combo/cartesian-product (range 0 3)
+                                                 (range 0 3)))))
+               "General sanity test")
+             )))
+            
