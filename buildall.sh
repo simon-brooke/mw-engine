@@ -32,7 +32,7 @@ do
 
 	if [ "${release}" != "" ]
 	then
-		old=`cat project.clj | grep 'defproject mw' | sed 's/(defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\).*)"/\1/'`
+		old=`cat project.clj | grep 'defproject mw' | sed 's/(defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\).*)\"/\1/'`
 
 		echo "foo ${old}"
 		# Does the 'old' version tag end with the token "-SNAPSHOT"? it probably does!
@@ -44,7 +44,7 @@ do
 			cat project.clj > project.bak.1
 			sed "s/${old}/${interim}/" project.bak.1 > project.clj
 			echo "Upversioned from ${old} to ${interim}"
-			old="${interim}"
+			old=${interim}
 		fi
 	fi
 
@@ -71,7 +71,7 @@ do
 		git branch "${branch}"
 		# git push origin "${branch}"
 		cat project.clj > project.bak.2
-		sed "s/${interim}/${release}-SNAPSHOT" project.bak.2 > project.clj
+		sed "s/${interim}/${release}-SNAPSHOT/" project.bak.2 > project.clj
 		echo "Upversioned from ${interim} to ${release}"
 		lein compile
 		if [ $? -ne 0 ]
