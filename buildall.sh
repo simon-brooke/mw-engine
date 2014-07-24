@@ -32,10 +32,11 @@ do
 
 	if [ "${release}" != "" ]
 	then
-		old=`cat project.clj | grep "^(defproject mw-" | sed 's/(defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\)"/\1/'`
+		old=`cat project.clj | grep 'defproject mw' | sed 's/(defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\).*)"/\1/'`
 
+		echo "foo ${old}"
 		# Does the 'old' version tag end with the token "-SNAPSHOT"? it probably does!
-		echo "${old}" | grep "-SNAPSHOT$" 
+		echo "${old}" | grep 'SNAPSHOT$' 
 		if [ $? -eq 0 ]
 		then
 			# It does... 
