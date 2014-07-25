@@ -17,6 +17,19 @@
   [world x y]
   (and (>= x 0)(>= y 0)(< y (count world))(< x (count (first world)))))
 
+(defn map-world 
+  "Apply this `function` to each cell in this `world` to produce a new world.
+   the arguments to the function will be the cell, the world, and any 
+   `additional-args` supplied"
+  ([world function]
+    (map-world world function nil))
+  ([world function additional-args]
+    (apply vector ;; vectors are more efficient for scanning, which we do a lot.
+         (for [row world]
+           (apply vector 
+                  (map #(apply function (cons world (cons % additional-args))) 
+                       row))))))
+
 (defn get-cell
   "Return the cell a x, y in this world, if any.
 

@@ -116,6 +116,7 @@ do
   then
     lein ring uberwar
 		sudo cp target/microworld.war /var/lib/tomcat7/webapps
+		echo "Deployed new WAR file to local Tomcat"
   fi
 	popd
 done

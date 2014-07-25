@@ -24,23 +24,41 @@
   [n]
   (cond (< n 0) (- 0 n) true n))
 
+(defn tag-gradient
+  "Set the `gradient` property of this `cell` of this `world` to the difference in
+   altitude between its highest and lowest neghbours."
+  [cell world]
+  (let [heights (map '(:altitude %) (get-neighbours world cell))
+        highest (apply max heights)
+        lowest (apply min heights)]
+    #(merge cell {:gradient (- highest lowest)})))
+
+(defn tag-gradients 
+  "Set the `gradient` property of each cell in this `world` to the difference in
+   altitude between its highest and lowest neghbours."
+  (map-world world tag-gradient))
+
 (defn transform-altitude
   "Set the altitude of this cell from the corresponding pixel of this heightmap.
    If the heightmap you supply is smaller than the world, this will break.
 
+   * `world` not actually used, but present to enable this function to be
+     passed as an argument to `mw-engine.utils/map-world`, q.v.
    * `cell` a cell, as discussed in world.clj, q.v. Alternatively, a map;
    * `heightmap` an (ideally) greyscale image, whose x and y dimensions should
      exceed those of the world of which the `cell` forms part."
-  [cell heightmap]
-  (merge cell
-         {:altitude
-          (+ (get-int cell :altitude)
-           (- 256
-              (abs
-               (mod
-                (.getRGB heightmap
-                         (get-int cell :x)
-                         (get-int cell :y)) 256))))}))
+  ([world cell heightmap]
+    (transform-altitude cell heightmap))
+  ([cell heightmap]
+    (merge cell
+           {:altitude
+            (+ (get-int cell :altitude)
+               (- 256
+                  (abs
+                    (mod
+                      (.getRGB heightmap
+                        (get-int cell :x)
+                        (get-int cell :y)) 256))))})))
 
 (defn- apply-heightmap-row
   "Set the altitude of each cell in this sequence from the corresponding pixel 
@@ -65,8 +83,12 @@
   ([world imagepath]
   ;; bizarrely, the collage load-util is working for me, but the imagez version isn't.
     (let [heightmap (filter-image (grayscale)(load-image imagepath))]
-      (apply vector (map #(apply-heightmap-row % heightmap) world))))
-  ([imagepath]
+      (map-world 
+        (map-world world transform-altitude (list heigtmap))
+        tag-gradient)))
+   ([imagepath]
     (let [heightmap (filter-image (grayscale)(load-image imagepath))
           world (make-world (.getWidth heightmap) (.getHeight heightmap))]
-      (apply vector (map #(apply-heightmap-row % heightmap) world)))))
+      (map-world
+        (map-world world transform-altitude (list heigtmap))
+        tag-gradient))))
