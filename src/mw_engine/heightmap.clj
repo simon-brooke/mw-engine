@@ -85,11 +85,11 @@
   ;; bizarrely, the collage load-util is working for me, but the imagez version isn't.
     (let [heightmap (filter-image (grayscale)(load-image imagepath))]
       (map-world 
-        (map-world world transform-altitude (list heigtmap))
+        (map-world world transform-altitude (list heightmap))
         tag-gradient)))
    ([imagepath]
     (let [heightmap (filter-image (grayscale)(load-image imagepath))
           world (make-world (.getWidth heightmap) (.getHeight heightmap))]
       (map-world
-        (map-world world transform-altitude (list heigtmap))
+        (map-world world transform-altitude (list heightmap))
         tag-gradient))))
