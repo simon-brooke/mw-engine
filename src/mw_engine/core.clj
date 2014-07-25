@@ -1,8 +1,9 @@
 ;; Functions to transform a world and run rules.
 
 (ns mw-engine.core
+  (:use mw-engine.utils)
   (:require [mw-engine.world :as world]
-            mw-engine.utils))
+            ))
 
 ;; Every rule is a function of two arguments, a cell and a world. If the rule
 ;; fires, it returns a new cell, which should have the same values for :x and
@@ -27,12 +28,13 @@
 
 
 (defn apply-rule 
-  "Apply a single rule to a cell. What this is about is that I want to be able,
+  "Apply a single `rule` to a `cell`. What this is about is that I want to be able,
    for debugging purposes, to tag a cell with the rule text of the rule which
    fired (and especially so when an exception is thrown. So a rule may be either
    an ifn, or a list (ifn source-text). This function deals with despatching
-   on those two possibilities."
-  ([cell world rule]
+   on those two possibilities. `world` is also passed in in order to be able
+   to access neighbours."
+  ([world cell rule]
    (cond
      (ifn? rule) (apply-rule cell world rule nil)
      (seq? rule) (let [[afn src] rule] (apply-rule cell world afn src))))
@@ -43,40 +45,33 @@
         true result))))
 
 (defn- apply-rules
-  "Derive a cell from this cell of this world by applying these rules."
-  [cell world rules]
+  "Derive a cell from this `cell` of this `world` by applying these `rules`."
+  [world cell rules]
   (cond (empty? rules) cell
-    true (let [result (apply-rule cell world (first rules))]
+    true (let [result (apply-rule world cell (first rules))]
            (cond result result
-             true (apply-rules cell world (rest rules))))))
+             true (apply-rules world cell (rest rules))))))
 
 (defn- transform-cell
-  "Derive a cell from this cell of this world by applying these rules. If an
-   exception is thrown, cache its message on the cell and set state to error"
-  [cell world rules]
+  "Derive a cell from this `cell` of this `world` by applying these `rules`. If an
+   exception is thrown, cache its message on the cell and set it's state to error"
+  [world cell rules]
   (try
     (merge 
-      (apply-rules cell world rules) 
+      (apply-rules world cell rules) 
       {:generation (+ (or (:generation cell) 0) 1)})
     (catch Exception e 
       (merge cell {:error 
                    (format "%s at generation %d when in state %s"
                            (.getMessage e)
                            (:generation cell)
-                           (:state cell))}))))
-
-(defn- transform-world-row
-  "Return a row derived from this row of this world by applying these rules to each cell."
-  [row world rules]
-  (apply vector (map #(transform-cell % world rules) row)))
+                           (:state cell))
+                   :state :error}))))
 
 (defn transform-world
-  "Return a world derived from this world by applying these rules to each cell."
+  "Return a world derived from this `world` by applying these `rules` to each cell."
   [world rules]
-  (apply vector 
-          (map
-            #(transform-world-row % world rules)
-            world)))
+  (map-world world transform-cell (list rules)))
 
 (defn- transform-world-state
   "Consider this single argument as a map of `:world` and `:rules`; apply the rules
@@ -86,7 +81,6 @@
   (let [world (transform-world (:world state) (:rules state))]
     (world/print-world world)
     {:world world :rules (:rules state)}))
-
 
 (defn run-world
   "Run this world with these rules for this number of generations.

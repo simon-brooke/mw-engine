@@ -143,4 +143,19 @@
                                                  (range 0 3)))))
                "General sanity test")
              )))
+
+(deftest map-world-test
+  (testing "map-world utility function"
+           (let [w1a (make-world 3 3)
+                 w2b (map-world w1a #(merge %2 {:test true}))
+                 w3c (map-world w2b #(merge %2 {:number (+ %3 %4)}) '(4 4))]
+             (is (= (count w1a) (count w3c)) "No change in world size")
+             (is (= (count (flatten w1a)) (count (flatten w3c)))
+                 "No change in world size")
+             (is (empty? (remove true? (map #(:test %) (flatten w3c))))
+                 "All cells should have property 'test' set to true")
+             (is (empty? (remove #(= % 8) (map #(:number %) (flatten w3c))))
+                 "All cells should have property 'number' set to 8"))))
+             
+  
             

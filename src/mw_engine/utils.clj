@@ -19,7 +19,7 @@
 
 (defn map-world 
   "Apply this `function` to each cell in this `world` to produce a new world.
-   the arguments to the function will be the cell, the world, and any 
+   the arguments to the function will be the world, the cell, and any 
    `additional-args` supplied"
   ([world function]
     (map-world world function nil))

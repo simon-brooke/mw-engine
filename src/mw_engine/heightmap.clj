@@ -27,11 +27,14 @@
 (defn tag-gradient
   "Set the `gradient` property of this `cell` of this `world` to the difference in
    altitude between its highest and lowest neghbours."
-  [cell world]
-  (let [heights (map '(:altitude %) (get-neighbours world cell))
-        highest (apply max heights)
-        lowest (apply min heights)]
-    #(merge cell {:gradient (- highest lowest)})))
+  [world cell]
+  (let [heights (remove nil? (map #(:altitude %) (get-neighbours world cell)))
+        highest (cond (empty? heights) 0 ;; shouldn't happen
+                  true (apply max heights))
+        lowest (cond (empty? heights) 0 ;; shouldn't
+                 true (apply min heights))
+        gradient (- highest lowest)]
+    (merge cell {:gradient gradient})))
 
 (defn tag-gradients 
   "Set the `gradient` property of each cell in this `world` to the difference in
@@ -61,18 +64,6 @@
                         (get-int cell :x)
                         (get-int cell :y)) 256))))})))
 
-(defn- apply-heightmap-row
-  "Set the altitude of each cell in this sequence from the corresponding pixel 
-   of this heightmap.
-   If the heightmap you supply is smaller than the world, this will break.
-
-   * `row` a row in a world, as discussed in world.clj, q.v. Alternatively, a
-     sequence of maps;
-   * `heightmap` an (ideally) greyscale image, whose x and y dimensions should
-     exceed those of the world of which the `cell` forms part."  
-  [row heightmap]
-  (apply vector (map #(transform-altitude % heightmap) row)))
-
 (defn apply-heightmap
   "Apply the image file loaded from this path to this world, and return a world whose
   altitudes are modified (added to) by the altitudes in the heightmap. It is assumed that
@@ -84,12 +75,12 @@
   ([world imagepath]
   ;; bizarrely, the collage load-util is working for me, but the imagez version isn't.
     (let [heightmap (filter-image (grayscale)(load-image imagepath))]
-      (map-world 
+      (map-world
         (map-world world transform-altitude (list heightmap))
         tag-gradient)))
    ([imagepath]
     (let [heightmap (filter-image (grayscale)(load-image imagepath))
           world (make-world (.getWidth heightmap) (.getHeight heightmap))]
-      (map-world
-        (map-world world transform-altitude (list heightmap))
+      (map-world 
+        (map-world world transform-altitude (list heightmap)) 
         tag-gradient))))
