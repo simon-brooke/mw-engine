@@ -36,6 +36,7 @@
 (defn tag-gradients 
   "Set the `gradient` property of each cell in this `world` to the difference in
    altitude between its highest and lowest neghbours."
+  [world]
   (map-world world tag-gradient))
 
 (defn transform-altitude
