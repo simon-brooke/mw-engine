@@ -13,6 +13,7 @@ fullname=`grep ${USER} /etc/passwd | awk -F\: '{print $5}' | awk -F\, '{print $1
 webappsdir="/var/lib/tomcat7/webapps"
 release=""
 trial="FALSE"
+tmp=buildall.tmp.$$
 
 # Builds the build signature properties in the manifest map file
 # expected arguments: old version tag, version tag, full name of user, 
@@ -52,12 +53,12 @@ function setup-build-sig {
 		t=`date --rfc-3339 seconds`
 	fi
 
-cat <<-EOF > buildall.tmp/manifest.sed
+cat <<-EOF > ${tmp}/manifest.sed
 s/${o}/${v}/g
-s/^ *"build-signature-version" ".*" *\$/\t\t"build-signature-version" "${v}"/
 s/^ *"build-signature-user" ".*" *\$/\t\t"build-signature-user" "${u}"/
 s/^ *"build-signature-email" ".*" *\$/\t\t"build-signature-email" "${e}"/
 s/^ *"build-signature-timestamp" ".*" *\$/\t\t"build-signature-timestamp" "${t}"/
+s/^ *"build-signature-version" ".*" *\$/\t\t"build-signature-version" "${v}"/
 EOF
 }
 
@@ -125,13 +126,13 @@ for dir in mw-*
 do
 	pushd ${dir}
 	
-	if [ ! -d "buildall.tmp" ]
+	if [ ! -d "${tmp}" ]
 	then
-		rm -f "buildall.tmp"
-		mkdir "buildall.tmp"
+		rm -f "${tmp}"
+		mkdir "${tmp}"
 	fi
 
-	cat project.clj > buildall.tmp/project.bak.1
+	cat project.clj > ${tmp}/project.bak.1
 	old=`cat project.clj | grep 'defproject mw' | sed 's/.*defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\)".*/\1/'`
 
 	if [ "${release}" != "" ]
@@ -153,13 +154,13 @@ do
 			message="Upversioned from ${old} to ${interim} for release"
 			old=${interim}
 		else
-			setup-build-sig "${old}" "${old}" "${fullname}" "${email}"
+			setup-build-sig "unset" "${old}" "${fullname}" "${email}"
 		fi
 	else
-		setup-build-sig "${old}" "${old}" "${fullname}" "${email}"	
+		setup-build-sig "unset" "${old}" "${fullname}" "${email}"	
 	fi
 			
-	sed -f buildall.tmp/manifest.sed buildall.tmp/project.bak.1 > project.clj
+	sed -f ${tmp}/manifest.sed ${tmp}/project.bak.1 > project.clj
 
 	echo $message
 
@@ -181,9 +182,9 @@ do
 	lein marg
 	lein install
 	
-	cat project.clj > buildall.tmp/project.bak.2
-	setup-build-sig "${old}"
-	sed -f buildall.tmp/manifest.sed buildall.tmp/project.bak.2 > project.clj
+	cat project.clj > ${tmp}/project.bak.2
+	setup-build-sig
+	sed -f ${tmp}/manifest.sed ${tmp}/project.bak.2 > project.clj
 
 	if [ "${trial}" = "FALSE" ]
 	then
@@ -205,9 +206,9 @@ do
 			git push origin "${branch}"
 		fi
 		
-		cat project.clj > buildall.tmp/project.bak.3
+		cat project.clj > ${tmp}/project.bak.3
 		setup-build-sig "${old}" "${release}-SNAPSHOT" "${fullname}" "${email}"
-		sed -f buildall.tmp/manifest.sed buildall.tmp/project.bak.3 > project.clj
+		sed -f ${tmp}/manifest.sed ${tmp}/project.bak.3 > project.clj
 		message="Upversioned from ${interim} to ${release}-SNAPSHOT"
 
 		echo $message
@@ -222,9 +223,9 @@ do
 		lein marg
 		lein install
 		
-		cat project.clj > buildall.tmp/project.bak.4
-		setup-build-sig "${release}-SNAPSHOT"
-		sed -f buildall.tmp/manifest.sed buildall.tmp/project.bak.4 > project.clj
+		cat project.clj > ${tmp}/project.bak.4
+		setup-build-sig
+		sed -f ${tmp}/manifest.sed ${tmp}/project.bak.4 > project.clj
 		
 		if [ "${trial}" = "FALSE" ]
 		then
@@ -239,9 +240,11 @@ do
 	if [ "${dir}" = "mw-ui" ]
 	then
     	lein ring uberwar
-		sudo cp buildall.tmp/microworld.war /var/lib/tomcat7/webapps
+		sudo cp target/microworld.war /var/lib/tomcat7/webapps
 		echo "Deployed new WAR file to local Tomcat"
 	fi
+
+	# rm -rf "${tmp}"
 	popd
 done
 
