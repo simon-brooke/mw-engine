@@ -1,13 +1,13 @@
-(defproject mw-engine "0.1.2-SNAPSHOT"
+(defproject mw-engine "unset"
   :description "Cellular automaton world builder."
   :url "http://www.journeyman.cc/microworld/"
   :manifest {
              ;; do not reformat this! It is important for the buildall script
              ;; that each of these properties is on a line with nothing else.
 		"build-signature-version" "unset"
-		"build-signature-user" "unset"
-		"build-signature-email" "unset"
-		"build-signature-timestamp" "unset"
+		"build-signature-user" "Simon Brooke"
+		"build-signature-email" "simon@journeyman.cc"
+		"build-signature-timestamp" "2014-07-27 11:19:57+01:00"
              }
 
   :license {:name "GNU General Public License v2"

@@ -130,9 +130,11 @@ for dir in mw-*
 do
 	pushd ${dir}
 
+	old=`cat project.clj | grep 'defproject mw' | sed 's/.*defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\)".*/\1/'`
+	cat project.clj > target/project.bak.1
+
 	if [ "${release}" != "" ]
 	then
-		old=`cat project.clj | grep 'defproject mw' | sed 's/.*defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\)".*/\1/'`
 		message="Preparing ${old} for release"
 
 		# Does the 'old' version tag end with the token "-SNAPSHOT"? it probably does!
@@ -146,13 +148,17 @@ do
 				echo "Failed to compute interim version tag from '${old}'" 1>&2
 				exit 1;
 			fi
-			cat project.clj > project.bak.1
 			setup-build-sig "${old}" "${interim}" "${fullname}" "${email}"
-			sed -f target/manifest.sed project.bak.1 > project.clj
 			message="Upversioned from ${old} to ${interim} for release"
 			old=${interim}
+		else
+			setup-build-sig "${old}" "${old}" "${fullname}" "${email}"
 		fi
+	else
+		setup-build-sig "${old}" "${old}" "${fullname}" "${email}"	
 	fi
+			
+	sed -f target/manifest.sed target/project.bak.1 > project.clj
 
 	echo $message
 
@@ -174,9 +180,9 @@ do
 	lein marg
 	lein install
 	
-	cat project.clj > project.bak.2
+	cat project.clj > target/project.bak.2
 	setup-build-sig "${old}"
-	sed -f target/manifest.sed project.bak.2 > project.clj
+	sed -f target/manifest.sed target/project.bak.2 > project.clj
 
 	if [ "${trial}" = "FALSE" ]
 	then
@@ -198,9 +204,9 @@ do
 			git push origin "${branch}"
 		fi
 		
-		cat project.clj > project.bak.3
+		cat project.clj > target/project.bak.3
 		setup-build-sig "${old}" "${release}-SNAPSHOT" "${fullname}" "${email}"
-		sed -f target/manifest.sed project.bak.3 > project.clj
+		sed -f target/manifest.sed target/project.bak.3 > project.clj
 		message="Upversioned from ${interim} to ${release}-SNAPSHOT"
 
 		echo $message
@@ -215,9 +221,9 @@ do
 		lein marg
 		lein install
 		
-		cat project.clj > project.bak.4
+		cat project.clj > target/project.bak.4
 		setup-build-sig "${release}-SNAPSHOT"
-		sed -f target/manifest.sed project.bak.4 > project.clj
+		sed -f target/manifest.sed target/project.bak.4 > project.clj
 		
 		if [ "${trial}" = "FALSE" ]
 		then
