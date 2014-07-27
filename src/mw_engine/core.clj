@@ -2,8 +2,7 @@
 
 (ns mw-engine.core
   (:use mw-engine.utils)
-  (:require [mw-engine.world :as world]
-            ))
+  (:require [mw-engine.world :as world]))
 
 ;; Every rule is a function of two arguments, a cell and a world. If the rule
 ;; fires, it returns a new cell, which should have the same values for :x and

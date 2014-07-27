@@ -49,16 +49,19 @@ function setup-build-sig {
 	if [ "${2}${3}${4}" = "" ]
 	then
 		t="unset"
+		i="unset"
 	else
 		t=`date --rfc-3339 seconds`
+		i="${v} built by ${u} on ${t}"
 	fi
 
 cat <<-EOF > ${tmp}/manifest.sed
 s/${o}/${v}/g
-s/^ *"build-signature-user" ".*" *\$/\t\t"build-signature-user" "${u}"/
-s/^ *"build-signature-email" ".*" *\$/\t\t"build-signature-email" "${e}"/
-s/^ *"build-signature-timestamp" ".*" *\$/\t\t"build-signature-timestamp" "${t}"/
-s/^ *"build-signature-version" ".*" *\$/\t\t"build-signature-version" "${v}"/
+s/"build-signature-user" *".*"/"build-signature-user" "${u}"/
+s/"build-signature-email" *".*"/"build-signature-email" "${e}"/
+s/"build-signature-timestamp" *".*"/"build-signature-timestamp" "${t}"/
+s/"build-signature-version" *".*"/"build-signature-version" "${v}"/
+s/"Implementation-Version" *".*"/"Implementation-Version" "${i}"/
 EOF
 }
 
@@ -125,7 +128,8 @@ fi
 for dir in mw-*
 do
 	pushd ${dir}
-	
+
+	# Make a temporary directory to keep the work-in-progress files.
 	if [ ! -d "${tmp}" ]
 	then
 		rm -f "${tmp}"
@@ -182,6 +186,16 @@ do
 	lein marg
 	lein install
 	
+	# If we're in the UI project, build the uberwar - and should 
+	# probably deploy it to local Tomcat for test
+	if [ "${dir}" = "mw-ui" -a "${webappsdir}" != "" ]
+	then
+    	lein ring uberwar
+		sudo cp target/microworld.war "${webappsdir}"
+		echo "Deployed new WAR file to local Tomcat at ${webappsdir}"
+	fi
+
+		# Then unset manifest properties prior to committing.
 	cat project.clj > ${tmp}/project.bak.2
 	setup-build-sig
 	sed -f ${tmp}/manifest.sed ${tmp}/project.bak.2 > project.clj
@@ -223,6 +237,7 @@ do
 		lein marg
 		lein install
 		
+		# Then unset manifest properties prior to committing.
 		cat project.clj > ${tmp}/project.bak.4
 		setup-build-sig
 		sed -f ${tmp}/manifest.sed ${tmp}/project.bak.4 > project.clj
@@ -235,15 +250,7 @@ do
 		fi
 	fi
 
-	# Finally, if we're in the UI project, build the uberwar - and should 
-	# probably deploy it to local Tomcat for test
-	if [ "${dir}" = "mw-ui" ]
-	then
-    	lein ring uberwar
-		sudo cp target/microworld.war /var/lib/tomcat7/webapps
-		echo "Deployed new WAR file to local Tomcat"
-	fi
-
+	# if nothing broke so far, clean up...
 	# rm -rf "${tmp}"
 	popd
 done
