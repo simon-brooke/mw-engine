@@ -7,11 +7,8 @@
   (:import [java.awt.image BufferedImage])
   (:use mw-engine.utils
         mw-engine.world
-        ;; interestingly the imagez load-image is failing for me, while the
-        ;; collage version is problem free.
-        [mikera.image.core :only [filter-image get-pixels]]
+        [mikera.image.core :only [load-image filter-image get-pixels]]
         [mikera.image.filters]
-        [fivetonine.collage.util]
         ))
 
 (defn- abs 
@@ -42,7 +39,7 @@
   [world]
   (map-world world tag-gradient))
 
-(defn transform-altitude
+(defn tag-altitude
   "Set the altitude of this cell from the corresponding pixel of this heightmap.
    If the heightmap you supply is smaller than the world, this will break.
 
@@ -52,7 +49,7 @@
    * `heightmap` an (ideally) greyscale image, whose x and y dimensions should
      exceed those of the world of which the `cell` forms part."
   ([world cell heightmap]
-    (transform-altitude cell heightmap))
+    (tag-altitude cell heightmap))
   ([cell heightmap]
     (merge cell
            {:altitude
@@ -73,14 +70,13 @@
     a world the size of the heightmap will be created.
   * `imagepath` a file path or URL which indicates an image file."
   ([world imagepath]
-  ;; bizarrely, the collage load-util is working for me, but the imagez version isn't.
     (let [heightmap (filter-image (grayscale)(load-image imagepath))]
       (map-world
-        (map-world world transform-altitude (list heightmap))
+        (map-world world tag-altitude (list heightmap))
         tag-gradient)))
    ([imagepath]
     (let [heightmap (filter-image (grayscale)(load-image imagepath))
           world (make-world (.getWidth heightmap) (.getHeight heightmap))]
       (map-world 
-        (map-world world transform-altitude (list heightmap)) 
+        (map-world world tag-altitude (list heightmap)) 
         tag-gradient))))

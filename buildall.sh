@@ -8,27 +8,123 @@
 
 # Simon Broooke <simon@jasmine.org.uk>
 
+email=`grep ${USER} /etc/passwd | awk -F\: '{print $5}' | awk -F\, '{print $4}'`
+fullname=`grep ${USER} /etc/passwd | awk -F\: '{print $5}' | awk -F\, '{print $1}'`
+webappsdir="/var/lib/tomcat7/webapps"
 release=""
+trial="FALSE"
 
-case $1 in
-	build) 
-		# 'build' is the expected normal case.
-		;; 
-	release) 
-		# release is branch a release and upversion to new label
-		release=$2;
-		if [ "${release}" = "" ]
-		then
-			echo "Release flagged, but no release tag supplied" 1>&2;
-			exit 1;
-		fi;;
-	*)
-		echo "Usage:" 1>&2;
-		echo "  ${0} build             Build all components and commit to master" 1>&2;
-		echo "  ${0} release [LABEL]   Build all components, branch for release on " 1>&2;
-		echo "        old label, then upversion to new LABEL and commit to master" 1>&2;
-		exit 1;;
-esac
+# Builds the build signature properties in the manifest map file
+# expected arguments: old version tag, version tag, full name of user, 
+# email of user; if not passed, all these will be set to "unset".
+# The objective I'm trying to achieve is that when committed to version
+# control, these are all always unset; but they're all valid in a build.
+function setup-build-sig {
+	if [ "${1}" = "" ]
+	then
+		o="unset"
+	else
+		o="${1}" 
+	fi
+	if [ "${2}" = "" ]
+	then
+		v="unset"
+	else
+		v="${2}" 
+	fi
+	if [ "${3}" = "" ]
+	then
+		u="unset"
+	else
+		u="${3}" 
+	fi
+	if [ "${4}" = "" ]
+	then
+		e="unset"
+	else
+		e="${4}" 
+	fi
+
+	if [ "${2}${3}${4}" = "" ]
+	then
+		t="unset"
+	else
+		t=`date --rfc-3339 seconds`
+	fi
+
+	if [ ! -d "target" ]
+	then
+		mkdir "target"
+	fi
+
+cat <<-EOF > target/manifest.sed
+s/${o}/${v}/g
+s/^ *"build-signature-version" ".*" *\$/\t\t"build-signature-version" "${v}"/
+s/^ *"build-signature-user" ".*" *\$/\t\t"build-signature-user" "${u}"/
+s/^ *"build-signature-email" ".*" *\$/\t\t"build-signature-email" "${e}"/
+s/^ *"build-signature-timestamp" ".*" *\$/\t\t"build-signature-timestamp" "${t}"/
+EOF
+}
+
+if [ $# -lt 1 ]
+then
+	cat <<-EOF 1>&2
+	Usage:
+	  -build             Build all components and commit to master.
+	  -email [ADDRESS]   Your email address, to be recorded in the build signature.
+	  -fullname [NAME]   Your full name, to be recorded in the build signature.
+	  -release [LABEL]   Build all components, branch for release on old label, then 
+	                     upversion to new LABEL and commit to master.
+	  -trial             Trial build only, do not commit.
+	  -webapps [PATH]    Set the path to the local tomcat webapps directory
+EOF
+	exit 1
+fi
+while (( "$#" ))
+do
+	case $1 in
+		-b|-build) 
+			# 'build' is the expected normal case.
+			trial="FALSE";
+			;; 
+		-e|-email)
+			shift;
+			email=$1;;
+		-f|-fullname)
+			shift;
+			fullname=$1;;
+		-r|-release) 
+			# release is branch a release and upversion to new label
+			shift;
+			release=$1;
+			trial="FALSE";
+			if [ "${release}" = "" ]
+			then
+				echo "Release flagged, but no release tag supplied" 1>&2;
+				exit 1;
+			fi;;
+		-t|-trial)
+			trial="TRUE";;
+		-w|-webapps)
+			# Set the tomcat webapps directory to release to
+			shift;
+			webappsdir=$1;;
+		*)
+			echo "Unrecognised option '${1}', exiting." 1>&2;
+			exit 1;;
+	esac
+
+	shift
+done
+
+echo "Trial: ${trial}; email: ${email}; fullname ${fullname}; release: ${release}; webapps: $webappsdir"
+
+ls mw-* > /dev/null 2>&1
+if [ $? -ne 0 ]
+then
+	echo "No subdirectories matching 'mw-*' found, exiting." 1>&2;
+	exit 1;
+fi
 
 for dir in mw-*
 do
@@ -51,7 +147,8 @@ do
 				exit 1;
 			fi
 			cat project.clj > project.bak.1
-			sed "s/${old}/${interim}/" project.bak.1 > project.clj
+			setup-build-sig "${old}" "${interim}" "${fullname}" "${email}"
+			sed -f target/manifest.sed project.bak.1 > project.clj
 			message="Upversioned from ${old} to ${interim} for release"
 			old=${interim}
 		fi
@@ -67,7 +164,7 @@ do
 		exit 1
 	fi
 
-  lein test
+  	lein test
 	if [ $? -ne 0 ]
 	then
 		echo "Sub-project ${dir} failed in test" 1>&2
@@ -77,21 +174,33 @@ do
 	lein marg
 	lein install
 	
-	if [ "${message}" = "" ]
+	cat project.clj > project.bak.2
+	setup-build-sig "${old}"
+	sed -f target/manifest.sed project.bak.2 > project.clj
+
+	if [ "${trial}" = "FALSE" ]
 	then
-		git commit -a
-	else
-		git commit -a -m "$message"
+		if [ "${message}" = "" ]
+		then
+			git commit -a
+		else
+			git commit -a -m "$message"
+		fi
+		git push origin master
 	fi
-	git push origin master
 
 	if [ "${release}" != "" ]
 	then
 		branch="${old}_MAINTENANCE"
-		git branch "${branch}"
-		# git push origin "${branch}"
-		cat project.clj > project.bak.2
-		sed "s/${interim}/${release}-SNAPSHOT/" project.bak.2 > project.clj
+		if [ "${trial}" = "FALSE" ]
+		then
+			git branch "${branch}"
+			git push origin "${branch}"
+		fi
+		
+		cat project.clj > project.bak.3
+		setup-build-sig "${old}" "${release}-SNAPSHOT" "${fullname}" "${email}"
+		sed -f target/manifest.sed project.bak.3 > project.clj
 		message="Upversioned from ${interim} to ${release}-SNAPSHOT"
 
 		echo $message
@@ -105,19 +214,27 @@ do
 		fi
 		lein marg
 		lein install
-		git commit -a -m "${message}"
-		echo ${message}
-		git push origin master
+		
+		cat project.clj > project.bak.4
+		setup-build-sig "${release}-SNAPSHOT"
+		sed -f target/manifest.sed project.bak.4 > project.clj
+		
+		if [ "${trial}" = "FALSE" ]
+		then
+			git commit -a -m "${message}"
+			echo ${message}
+			git push origin master
+		fi
 	fi
 
-	# Finally, if we're in the UI project, build the uberwar - and should probably deploy it
-	# to local Tomcat for test
+	# Finally, if we're in the UI project, build the uberwar - and should 
+	# probably deploy it to local Tomcat for test
 	if [ "${dir}" = "mw-ui" ]
-  then
-    lein ring uberwar
+	then
+    	lein ring uberwar
 		sudo cp target/microworld.war /var/lib/tomcat7/webapps
 		echo "Deployed new WAR file to local Tomcat"
-  fi
+	fi
 	popd
 done
 
