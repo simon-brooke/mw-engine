@@ -1,11 +1,12 @@
 (ns mw-engine.heightmap-test
+  (:use clojure.java.io)
   (:require [clojure.test :refer :all]
             [mw-engine.heightmap :refer :all]
             [clojure.math.combinatorics :as combo]))
 
 (deftest apply-heightmap-test
   (testing "Heightmap functionality"
-           (let [world (apply-heightmap "heightmaps/test9x9.png")
+           (let [world (apply-heightmap (as-file "resources/heightmaps/test9x9.png"))
                  altitudes (map #(:altitude %) (flatten world))
                  gradients (map #(:gradient %) (flatten world))]
              (is (= (count world) 9) "World should be 9x9")

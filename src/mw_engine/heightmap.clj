@@ -6,10 +6,10 @@
 (ns mw-engine.heightmap
   (:import [java.awt.image BufferedImage])
   (:use mw-engine.utils
-        mw-engine.world
-        [mikera.image.core :only [load-image filter-image get-pixels]]
-        [mikera.image.filters]
-        ))
+        mw-engine.world)
+  (:require [fivetonine.collage.util :as collage]
+            [mikera.image.core :as imagez :only [filter-image get-pixels]]
+            [mikera.image.filters :as filters]))
 
 (defn- abs 
   "Surprisingly, Clojure doesn't seem to have an abs function, or else I've 
@@ -70,12 +70,16 @@
     a world the size of the heightmap will be created.
   * `imagepath` a file path or URL which indicates an image file."
   ([world imagepath]
-    (let [heightmap (filter-image (grayscale)(load-image imagepath))]
+    (let [heightmap (imagez/filter-image 
+                      (filters/grayscale)
+                      (collage/load-image imagepath))]
       (map-world
         (map-world world tag-altitude (list heightmap))
         tag-gradient)))
    ([imagepath]
-    (let [heightmap (filter-image (grayscale)(load-image imagepath))
+    (let [heightmap (imagez/filter-image 
+                      (filters/grayscale)
+                      (collage/load-image imagepath))
           world (make-world (.getWidth heightmap) (.getHeight heightmap))]
       (map-world 
         (map-world world tag-altitude (list heightmap)) 

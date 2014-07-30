@@ -251,7 +251,7 @@ do
 	fi
 
 	# if nothing broke so far, clean up...
-	# rm -rf "${tmp}"
+	rm -rf "${tmp}"
 	popd
 done
 
