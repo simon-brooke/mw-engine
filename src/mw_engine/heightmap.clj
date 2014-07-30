@@ -7,7 +7,7 @@
   (:import [java.awt.image BufferedImage])
   (:use mw-engine.utils
         mw-engine.world)
-  (:require [fivetonine.collage.util :as collage]
+  (:require [fivetonine.collage.util :as collage :only [load-image]]
             [mikera.image.core :as imagez :only [filter-image get-pixels]]
             [mikera.image.filters :as filters]))
 
