@@ -8,15 +8,18 @@
 
 # Simon Broooke <simon@jasmine.org.uk>
 
+# Variable and glag initialisation
+archive=FALSE
 email=`grep ${USER} /etc/passwd | awk -F\: '{print $5}' | awk -F\, '{print $4}'`
 fullname=`grep ${USER} /etc/passwd | awk -F\: '{print $5}' | awk -F\, '{print $1}'`
-webappsdir="/var/lib/tomcat7/webapps"
+old="unset"
 release=""
-trial="FALSE"
 tmp=buildall.tmp.$$
+trial="FALSE"
+webappsdir="/var/lib/tomcat7/webapps"
 
 # Builds the build signature properties in the manifest map file
-# expected arguments: old version tag, version tag, full name of user, 
+# expected arguments: old version tag, version tag, full name of user,
 # email of user; if not passed, all these will be set to "unset".
 # The objective I'm trying to achieve is that when committed to version
 # control, these are all always unset; but they're all valid in a build.
@@ -25,25 +28,25 @@ function setup-build-sig {
 	then
 		o="unset"
 	else
-		o="${1}" 
+		o="${1}"
 	fi
 	if [ "${2}" = "" ]
 	then
 		v="unset"
 	else
-		v="${2}" 
+		v="${2}"
 	fi
 	if [ "${3}" = "" ]
 	then
 		u="unset"
 	else
-		u="${3}" 
+		u="${3}"
 	fi
 	if [ "${4}" = "" ]
 	then
 		e="unset"
 	else
-		e="${4}" 
+		e="${4}"
 	fi
 
 	if [ "${2}${3}${4}" = "" ]
@@ -69,10 +72,11 @@ if [ $# -lt 1 ]
 then
 	cat <<-EOF 1>&2
 	Usage:
+    -archive           Create a tar archive of the current state of the source.
 	  -build             Build all components and commit to master.
 	  -email [ADDRESS]   Your email address, to be recorded in the build signature.
 	  -fullname [NAME]   Your full name, to be recorded in the build signature.
-	  -release [LABEL]   Build all components, branch for release on old label, then 
+	  -release [LABEL]   Build all components, branch for release on old label, then
 	                     upversion to new LABEL and commit to master.
 	  -trial             Trial build only, do not commit.
 	  -webapps [PATH]    Set the path to the local tomcat webapps directory
@@ -82,17 +86,19 @@ fi
 while (( "$#" ))
 do
 	case $1 in
-		-b|-build) 
+    -a|-archive)
+      archive="TRUE";;
+		-b|-build)
 			# 'build' is the expected normal case.
 			trial="FALSE";
-			;; 
+			;;
 		-e|-email)
 			shift;
 			email=$1;;
 		-f|-fullname)
 			shift;
 			fullname=$1;;
-		-r|-release) 
+		-r|-release)
 			# release is branch a release and upversion to new label
 			shift;
 			release=$1;
@@ -144,10 +150,10 @@ do
 		message="Preparing ${old} for release"
 
 		# Does the 'old' version tag end with the token "-SNAPSHOT"? it probably does!
-		echo "${old}" | grep 'SNAPSHOT' 
+		echo "${old}" | grep 'SNAPSHOT'
 		if [ $? -eq 0 ]
 		then
-			# It does... 
+			# It does...
 			interim=`echo ${old} | sed 's/\([A-Za-z0-9_.-]*\)-SNAPSHOT.*/\1/'`
 			if [ "${interim}" = "" ]
 			then
@@ -161,9 +167,9 @@ do
 			setup-build-sig "unset" "${old}" "${fullname}" "${email}"
 		fi
 	else
-		setup-build-sig "unset" "${old}" "${fullname}" "${email}"	
+		setup-build-sig "unset" "${old}" "${fullname}" "${email}"
 	fi
-			
+
 	sed -f ${tmp}/manifest.sed ${tmp}/project.bak.1 > project.clj
 
 	echo $message
@@ -185,8 +191,8 @@ do
 
 	lein marg
 	lein install
-	
-	# If we're in the UI project, build the uberwar - and should 
+
+	# If we're in the UI project, build the uberwar - and should
 	# probably deploy it to local Tomcat for test
 	if [ "${dir}" = "mw-ui" -a "${webappsdir}" != "" ]
 	then
@@ -219,7 +225,7 @@ do
 			git branch "${branch}"
 			git push origin "${branch}"
 		fi
-		
+
 		cat project.clj > ${tmp}/project.bak.3
 		setup-build-sig "${old}" "${release}-SNAPSHOT" "${fullname}" "${email}"
 		sed -f ${tmp}/manifest.sed ${tmp}/project.bak.3 > project.clj
@@ -236,12 +242,12 @@ do
 		fi
 		lein marg
 		lein install
-		
+
 		# Then unset manifest properties prior to committing.
 		cat project.clj > ${tmp}/project.bak.4
 		setup-build-sig
 		sed -f ${tmp}/manifest.sed ${tmp}/project.bak.4 > project.clj
-		
+
 		if [ "${trial}" = "FALSE" ]
 		then
 			git commit -a -m "${message}"
@@ -254,5 +260,28 @@ do
 	rm -rf "${tmp}"
 	popd
 done
+
+
+if [ "${archive}" ]
+then
+  for dir in mw-*
+  do
+    pushd ${dir}
+    version=`cat project.clj | grep 'defproject mw' | sed 's/.*defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\)".*/\1/'`
+    lein clean
+    popd
+  done
+
+  tmp=microworld-${version}
+  mkdir ${tmp}
+  pushd ${tmp}
+  for dir in ../mw-*
+  do
+    cp -r $dir .
+  done
+  popd
+  tar czvf ${tmp}.orig.tar.gz ${tmp}
+  rm -rf ${tmp}
+fi
 
 

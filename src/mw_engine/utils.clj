@@ -3,6 +3,16 @@
 (ns mw-engine.utils
   (:require [clojure.math.combinatorics :as combo]))
 
+(defn abs
+  "Surprisingly, Clojure doesn't seem to have an abs function, or else I've
+   missed it. So here's one of my own. Maps natural numbers onto themselves,
+   and negative integers onto natural numbers. Also maps negative real numbers
+   onto positive real numbers.
+
+   * `n` a number, on the set of real numbers."
+  [n]
+  (cond (< n 0) (- 0 n) true n))
+
 (defn member?
   "True if elt is a member of col."
   [elt col] (some #(= elt %) col))
@@ -17,17 +27,17 @@
   [world x y]
   (and (>= x 0)(>= y 0)(< y (count world))(< x (count (first world)))))
 
-(defn map-world 
+(defn map-world
   "Apply this `function` to each cell in this `world` to produce a new world.
-   the arguments to the function will be the world, the cell, and any 
+   the arguments to the function will be the world, the cell, and any
    `additional-args` supplied"
   ([world function]
     (map-world world function nil))
   ([world function additional-args]
     (apply vector ;; vectors are more efficient for scanning, which we do a lot.
          (for [row world]
-           (apply vector 
-                  (map #(apply function (cons world (cons % additional-args))) 
+           (apply vector
+                  (map #(apply function (cons world (cons % additional-args)))
                        row))))))
 
 (defn get-cell
@@ -42,7 +52,7 @@
 
 (defn get-int
   "Get the value of a property expected to be an integer from a map; if not present (or not an integer) return 0.
-  
+
    * `map` a map;
    * `key` a symbol or keyword, presumed to be a key into the `map`."
   [map key]
@@ -54,7 +64,7 @@
 
 (defn population
   "Return the population of this species in this cell. Currently a synonym for
-   `get-int`, but may not always be (depending whether species are later 
+   `get-int`, but may not always be (depending whether species are later
    implemented as actors)
 
   * `cell` a map;
@@ -78,7 +88,7 @@
                            (combo/cartesian-product
                              (range (- x depth) (+ x depth 1))
                              (range (- y depth) (+ y depth 1)))))))
-    ([world cell depth] 
+    ([world cell depth]
       "Get the neighbours to distance depth of this cell in this world.
 
       * `world` a world, as described in world.clj;
@@ -107,19 +117,19 @@
 
    It gets messy."
   ([world x y depth property value op]
-    (filter 
-      #(eval 
-         (list op 
-               (or (get % property) (get-int % property)) 
-               value)) 
+    (filter
+      #(eval
+         (list op
+               (or (get % property) (get-int % property))
+               value))
       (get-neighbours world x y depth)))
   ([world x y depth property value]
     (get-neighbours-with-property-value world x y depth property value =))
   ([world cell depth property value]
-    (get-neighbours-with-property-value world (:x cell) (:y cell) depth 
+    (get-neighbours-with-property-value world (:x cell) (:y cell) depth
                                         property value))
   ([world cell property value]
-    (get-neighbours-with-property-value world cell 1 
+    (get-neighbours-with-property-value world cell 1
                                         property value)))
 
 (defn get-neighbours-with-state
@@ -138,12 +148,28 @@
   ([world cell state]
     (get-neighbours-with-state world cell 1 state)))
 
+(defn get-least-cell
+  "Return the cell from among these `cells` which has the lowest numeric value
+  for this `property`; if the property is absent or not a number, use this
+  `default`"
+  ([cells property default]
+  (cond
+   (empty? cells) nil
+   true (let [downstream (get-least-cell (rest cells) property default)]
+          (cond (<
+                 (or (property (first cells)) default)
+                 (or (property downstream) default)) (first cells)
+                true downstream))))
+  ([cells property]
+   (get-least-cell cells property (. Integer MAX_VALUE))))
+
+
 (defn- set-cell-property
   "If this `cell`s x and y properties are equal to these `x` and `y` values,
    return a cell like this cell but with the value of this `property` set to
    this `value`. Otherwise, just return this `cell`."
   [cell x y property value]
-  (cond 
+  (cond
     (and (= x (:x cell)) (= y (:y cell)))
     (merge cell {property value :rule "Set by user"})
     true
@@ -155,7 +181,7 @@
   ([world cell property value]
     (set-property world (:x cell) (:y cell) property value))
   ([world x y property value]
-    (apply 
+    (apply
       vector ;; we want a vector of vectors, not a list of lists, for efficiency
       (map
         (fn [row]
