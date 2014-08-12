@@ -12,7 +12,31 @@
             [mikera.image.core :as imagez :only [filter-image get-pixels]]
             [mikera.image.filters :as filters]))
 
-(defn tag-gradient
+
+(defn- tag-property
+  "Set the value of this `property` of this cell from the corresponding pixel of this `heightmap`.
+   If the heightmap you supply is smaller than the world, this will break.
+
+   * `world` not actually used, but present to enable this function to be
+     passed as an argument to `mw-engine.utils/map-world`, q.v.
+   * `cell` a cell, as discussed in world.clj, q.v. Alternatively, a map;
+   * `property` the property (normally a keyword) whose value will be set on the cell.
+   * `heightmap` an (ideally) greyscale image, whose x and y dimensions should
+     exceed those of the world of which the `cell` forms part."
+  ([world cell property heightmap]
+    (tag-property cell property heightmap))
+  ([cell property heightmap]
+    (merge cell
+           {property
+            (+ (get-int cell property)
+               (- 256
+                  (abs
+                    (mod
+                      (.getRGB heightmap
+                        (get-int cell :x)
+                        (get-int cell :y)) 256))))})))
+
+(defn- tag-gradient
   "Set the `gradient` property of this `cell` of this `world` to the difference in
    altitude between its highest and lowest neghbours."
   [world cell]
@@ -30,36 +54,29 @@
   [world]
   (map-world world tag-gradient))
 
-(defn tag-altitude
+(defn- tag-altitude
   "Set the altitude of this cell from the corresponding pixel of this heightmap.
    If the heightmap you supply is smaller than the world, this will break.
 
    * `world` not actually used, but present to enable this function to be
-     passed as an argument to `mw-engine.utils/map-world`, q.v.
+     passed as an argument to `mw-engine.utils/map-world`, q.v.;
    * `cell` a cell, as discussed in world.clj, q.v. Alternatively, a map;
    * `heightmap` an (ideally) greyscale image, whose x and y dimensions should
      exceed those of the world of which the `cell` forms part."
   ([world cell heightmap]
-    (tag-altitude cell heightmap))
+    (tag-property cell :altitude heightmap))
   ([cell heightmap]
-    (merge cell
-           {:altitude
-            (+ (get-int cell :altitude)
-               (- 256
-                  (abs
-                    (mod
-                      (.getRGB heightmap
-                        (get-int cell :x)
-                        (get-int cell :y)) 256))))})))
+    (tag-property cell :altitude heightmap)))
 
 (defn apply-heightmap
   "Apply the image file loaded from this path to this world, and return a world whose
   altitudes are modified (added to) by the altitudes in the heightmap. It is assumed that
-  the heightmap is at least as large in x and y dimensions as the world.
+  the heightmap is at least as large in x and y dimensions as the world. Note that, in
+  addition to setting the `:altitude` of each cell, this function also sets the `:gradient`.
 
   * `world` a world, as defined in `world.clj`, q.v.; if world is not supplied,
-    a world the size of the heightmap will be created.
-  * `imagepath` a file path or URL which indicates an image file."
+    a world the size of the heightmap will be created;
+  * `imagepath` a file path or URL which indicates an (ideally greyscale) image file."
   ([world imagepath]
     (let [heightmap (imagez/filter-image
                       (filters/grayscale)
@@ -75,3 +92,17 @@
       (map-world
         (map-world world tag-altitude (list heightmap))
         tag-gradient))))
+
+(defn apply-valuemap
+  "Generalised from apply-heightmap, set an arbitrary property on each cell
+   of this `world` from the values in this (ideally greyscale) heightmap.
+
+   * `world` a world, as defined in `world.clj`, q.v.;
+   * `imagepath` a file path or URL which indicates an (ideally greyscale) image file;
+   * `property` the property of each cell whose value should be added to from the
+      intensity of the corresponding cell of the image."
+  [world imagepath property]
+    (let [heightmap (imagez/filter-image
+                      (filters/grayscale)
+                      (collage/load-image imagepath))]
+      (map-world world tag-property (list property heightmap))))

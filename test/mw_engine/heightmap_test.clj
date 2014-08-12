@@ -21,4 +21,14 @@
              (is (> (apply + gradients) 0)
                  "At least some gradients must be positive, none should be negative")
            )))
-           
+
+
+
+(deftest apply-valuemap-test
+  (testing "Valuemap functionality"
+    (let [image (as-file "resources/heightmaps/test9x9.png")
+          world (apply-valuemap (apply-heightmap image) image :arbitrary)
+          altitudes (map #(:altitude %) (flatten world))
+          arbitraries (map #(:arbitrary %) (flatten world))]
+      (is (= altitudes arbitraries) "Altitudes and arbitraries are derived from same map so should be identical.")
+      )))
