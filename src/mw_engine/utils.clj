@@ -11,7 +11,7 @@
 
    * `n` a number, on the set of real numbers."
   [n]
-  (cond (< n 0) (- 0 n) true n))
+  (cond (neg? n) (- 0 n) true n))
 
 (defn member?
   "True if elt is a member of col."
@@ -161,7 +161,7 @@
                  (or (property downstream) default)) (first cells)
                 true downstream))))
   ([cells property]
-   (get-least-cell cells property (. Integer MAX_VALUE))))
+   (get-least-cell cells property (Integer/MAX_VALUE))))
 
 
 (defn- set-cell-property

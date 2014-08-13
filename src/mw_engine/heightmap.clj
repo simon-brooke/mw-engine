@@ -40,7 +40,7 @@
   "Set the `gradient` property of this `cell` of this `world` to the difference in
    altitude between its highest and lowest neghbours."
   [world cell]
-  (let [heights (remove nil? (map #(:altitude %) (get-neighbours world cell)))
+  (let [heights (remove nil? (map :altitude (get-neighbours world cell)))
         highest (cond (empty? heights) 0 ;; shouldn't happen
                   true (apply max heights))
         lowest (cond (empty? heights) 0 ;; shouldn't

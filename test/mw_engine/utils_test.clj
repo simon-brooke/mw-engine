@@ -4,6 +4,14 @@
             [clojure.math.combinatorics :as combo]
             [mw-engine.utils :refer :all]))
 
+(deftest abs-test 
+  (testing "Absolute value function"
+           (is (= (abs 0) 0) "Corner case: nothing comes of nothing, nothing ever could.")
+           (is (= (abs 1) 1) "Corner case: one is one and all alone and ever more shall be so.")
+           (is (= (abs -1) 1) "Corner case: when others are cast down and afflicted, thou shalt be able to raise them up.")
+           (is (= (abs -90371) 90371) "Random check")
+           (is (= (abs 30971) 30971) "Another random check")))
+
 (deftest get-neighbours-test
   (testing "Gross functionality of get-neighbours: checks the right number of 
             neighbours returned, doesn't actually check they're the right ones."

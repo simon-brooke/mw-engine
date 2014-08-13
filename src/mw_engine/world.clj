@@ -8,7 +8,8 @@
 ;; that every cell's :x and :y properties reflect its place in the matrix.
 
 (ns mw-engine.world
-  (:use mw-engine.utils))
+  (:use mw-engine.utils)
+	(:require [clojure.string :as string :only [join]]))
 
 (defn- make-cell
   "Create a minimal default cell at x, y
@@ -27,7 +28,7 @@
   [index width height]
   (cond (= index width) nil
     true (cons (make-cell index height)
-               (make-world-row (+ index 1) width height))))
+               (make-world-row (inc index) width height))))
 
 (defn- make-world-rows [index width height]
   "Make the (remaining) rows in a world of this width and height, from this
@@ -38,7 +39,7 @@
   * `height` total height of the matrix, in cells."
   (cond (= index height) nil
     true (cons (apply vector (make-world-row 0 width index))
-               (make-world-rows (+ index 1) width height))))
+               (make-world-rows (inc index) width height))))
 
 (defn make-world
   "Make a world width cells from east to west, and height cells from north to
@@ -53,7 +54,7 @@
   "Truncate the print name of the state of this cell to at most limit characters."
   [cell limit]
   (let [s (:state cell)]
-    (cond (> (count (.toString s)) 10) (subs s 0 10)
+    (cond (> (count (str s)) limit) (subs s 0 limit)
       true s)))
 
 (defn format-cell
@@ -67,8 +68,7 @@
 (defn- format-world-row
   "Format one row in the state of a world for printing."
   [row]
-  (apply str
-         (map format-cell row)))
+  (string/join (map format-cell row)))
 
 (defn print-world
   "Print the current state of this world, and return nil.
