@@ -35,4 +35,4 @@
   [world]
   (apply vector
     (cons :table
-      (map render-world-row world)))
+      (map render-world-row world))))

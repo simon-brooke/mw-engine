@@ -30,13 +30,14 @@
     true (cons (make-cell index height)
                (make-world-row (inc index) width height))))
 
-(defn- make-world-rows [index width height]
+(defn- make-world-rows
   "Make the (remaining) rows in a world of this width and height, from this
    index.
 
   * `index` y coordinate of the next row to be created;
   * `width` total width of the matrix, in cells;
   * `height` total height of the matrix, in cells."
+  [index width height]
   (cond (= index height) nil
     true (cons (apply vector (make-world-row 0 width index))
                (make-world-rows (inc index) width height))))
