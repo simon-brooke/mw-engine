@@ -2,7 +2,8 @@
 
 (ns mw-engine.core
   (:use mw-engine.utils)
-  (:require [mw-engine.world :as world])
+  (:require [clojure.core.reducers :as r]
+            [mw-engine.world :as world])
   (:gen-class))
 
 ;; Every rule is a function of two arguments, a cell and a world. If the rule
@@ -79,16 +80,34 @@
    these `:rules`. As a side effect, print the world."
   [state]
   (let [world (transform-world (:world state) (:rules state))]
-    (world/print-world world)
+    ;;(world/print-world world)
     {:world world :rules (:rules state)}))
+
 
 (defn run-world
   "Run this world with these rules for this number of generations.
 
   * `world` a world as discussed above;
   * `init-rules` a sequence of rules as defined above, to be run once to initialise the world;
-  * `rules` a sequence of rules as definied above, to be run iteratively for each generation;
-  * `generations` an (integer) number of generations."
-  [world init-rules rules generations]
+  * `rules` a sequence of rules as defined above, to be run iteratively for each generation;
+  * `generations` an (integer) number of generations.
+
+  Return the final generation of the world."
+  [world init-rules rules generations]  
   (let [state {:world (transform-world world init-rules) :rules rules}]
-    (take generations (iterate transform-world-state state))))
+    (:world 
+      (last 
+        (do-all 
+          (take generations 
+                (iterate transform-world-state state)))))))
+
+(defn run-world2
+  "Doesn't work yet"
+  [world init-rules rules generations]
+  (with-local-vars [r (ref (transform-world world init-rules))]
+    (dotimes [g generations]
+      (dosync
+        (ref-set r (transform-world (deref r) rules))))
+    (deref r)))
+        
+  

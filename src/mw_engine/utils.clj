@@ -1,7 +1,9 @@
 ;; Utility functions needed by MicroWorld and, specifically, in the interpretation of MicroWorld rule.
 
 (ns mw-engine.utils
-  (:require [clojure.math.combinatorics :as combo]))
+  (:require 
+    [clojure.core.reducers :as r]
+    [clojure.math.combinatorics :as combo]))
 
 (defn abs
   "Surprisingly, Clojure doesn't seem to have an abs function, or else I've
@@ -34,11 +36,13 @@
   ([world function]
     (map-world world function nil))
   ([world function additional-args]
-    (apply vector ;; vectors are more efficient for scanning, which we do a lot.
-         (for [row world]
-           (apply vector
-                  (map #(apply function (cons world (cons % additional-args)))
-                       row))))))
+    (into [] ;; vectors are more efficient for scanning, which we do a lot.
+           (r/map (fn [row]
+                    (into [] (r/map 
+                             #(apply function 
+                                     (cons world (cons % additional-args)))
+                             row)))
+                  world))))
 
 (defn get-cell
   "Return the cell a x, y in this world, if any.
