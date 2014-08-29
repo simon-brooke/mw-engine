@@ -97,7 +97,7 @@
   (let [state {:world (transform-world world init-rules) :rules rules}]
     (:world 
       (last 
-        (do-all 
+        (doall 
           (take generations 
                 (iterate transform-world-state state)))))))
 
@@ -109,5 +109,12 @@
       (dosync
         (ref-set r (transform-world (deref r) rules))))
     (deref r)))
+
+(defn run-world3
+  [world init-rules rules generations]
+  (reduce (fn [world _iteration] 
+            (transform-world world rules))
+        (transform-world world init-rules)
+        (range generations)))
         
   
