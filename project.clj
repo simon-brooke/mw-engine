@@ -8,7 +8,7 @@
              "build-signature-timestamp" "unset"
              "Implementation-Version" "unset"
              }
-  :jvm-opts ["-Xmx2g"]
+  :jvm-opts ["-Xmx4g"]
   :license {:name "GNU General Public License v2"
             :url "http://www.gnu.org/licenses/gpl-2.0.html"}
   :plugins [[lein-marginalia "0.7.1"]
