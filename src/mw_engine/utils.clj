@@ -1,7 +1,7 @@
 ;; Utility functions needed by MicroWorld and, specifically, in the interpretation of MicroWorld rule.
 
 (ns mw-engine.utils
-  (:require 
+  (:require
     [clojure.core.reducers :as r]
     [clojure.math.combinatorics :as combo]))
 
@@ -36,10 +36,10 @@
   ([world function]
     (map-world world function nil))
   ([world function additional-args]
-    (into [] ;; vectors are more efficient for scanning, which we do a lot.
+    (into []
            (r/map (fn [row]
-                    (into [] (r/map 
-                             #(apply function 
+                    (into [] (r/map
+                             #(apply function
                                      (cons world (cons % additional-args)))
                              row)))
                   world))))

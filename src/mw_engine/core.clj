@@ -23,12 +23,12 @@
 ;; that every cell's :x and :y properties reflect its place in the matrix.
 ;; See `world.clj`.
 ;;
-;; Each time the world is transformed (see `transform-world`, for each cell, 
+;; Each time the world is transformed (see `transform-world`, for each cell,
 ;; rules are applied in turn until one matches. Once one rule has matched no
 ;; further rules can be applied.
 
 
-(defn apply-rule 
+(defn apply-rule
   "Apply a single `rule` to a `cell`. What this is about is that I want to be able,
    for debugging purposes, to tag a cell with the rule text of the rule which
    fired (and especially so when an exception is thrown. So a rule may be either
@@ -41,7 +41,7 @@
      (seq? rule) (let [[afn src] rule] (apply-rule cell world afn src))))
   ([cell world rule source]
     (let [result (apply rule (list cell world))]
-      (cond 
+      (cond
         (and result source) (merge result {:rule source})
         true result))))
 
@@ -58,11 +58,11 @@
    exception is thrown, cache its message on the cell and set it's state to error"
   [world cell rules]
   (try
-    (merge 
-      (apply-rules world cell rules) 
+    (merge
+      (apply-rules world cell rules)
       {:generation (+ (or (:generation cell) 0) 1)})
-    (catch Exception e 
-      (merge cell {:error 
+    (catch Exception e
+      (merge cell {:error
                    (format "%s at generation %d when in state %s"
                            (.getMessage e)
                            (:generation cell)
@@ -93,28 +93,10 @@
   * `generations` an (integer) number of generations.
 
   Return the final generation of the world."
-  [world init-rules rules generations]  
-  (let [state {:world (transform-world world init-rules) :rules rules}]
-    (:world 
-      (last 
-        (doall 
-          (take generations 
-                (iterate transform-world-state state)))))))
-
-(defn run-world2
-  "Doesn't work yet"
   [world init-rules rules generations]
-  (with-local-vars [r (ref (transform-world world init-rules))]
-    (dotimes [g generations]
-      (dosync
-        (ref-set r (transform-world (deref r) rules))))
-    (deref r)))
-
-(defn run-world3
-  [world init-rules rules generations]
-  (reduce (fn [world _iteration] 
+  (reduce (fn [world _iteration]
             (transform-world world rules))
         (transform-world world init-rules)
         (range generations)))
-        
-  
+
+

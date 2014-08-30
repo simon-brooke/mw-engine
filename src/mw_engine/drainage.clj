@@ -2,8 +2,12 @@
 ;; assumed to have altitudes already set from a heighmap.
 
 (ns mw-engine.drainage
+  (:require
+    [clojure.core.reducers :as r])
   (:use mw-engine.utils
         mw-engine.world))
+
+(def ^:dynamic *sealevel* 10)
 
 (defn rain-world
   "Simulate rainfall on this `world`. TODO: Doesn't really work just now - should
@@ -16,12 +20,13 @@
   `cell` and for which this cell is the lowest neighbour"
   [world cell]
   (remove nil?
-          (map
-           (fn [n]
-             (cond (= cell (get-least-cell (get-neighbours world n) :altitude)) n))
-           (get-neighbours-with-property-value world (:x cell) (:y cell) 1
+          (into []
+            (r/map
+             (fn [n]
+               (cond (= cell (get-least-cell (get-neighbours world n) :altitude)) n))
+             (get-neighbours-with-property-value world (:x cell) (:y cell) 1
                                                                   :altitude
-                                                                  (or (:altitude cell) 0) >))))
+                                                                  (or (:altitude cell) 0) >)))))
 
 (defn flow
   "Compute the total flow upstream of this `cell` in this `world`, and return a cell identical
@@ -29,11 +34,14 @@
 
    Flow comes from a higher cell to a lower only if the lower is the lowest neighbour of the higher."
    [world cell]
+   (cond
+    (> (or (:altitude cell) 0) *sealevel*)
       (merge cell
            {:flow (+ (:rainfall cell)
                (apply +
                  (map (fn [neighbour] (:flow (flow world neighbour)))
-                      (flow-contributors world cell))))}))
+                      (flow-contributors world cell))))})
+    true cell))
 
 (defn flow-world
   "Return a world like this `world`, but with cells tagged with the amount of
