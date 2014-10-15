@@ -1,4 +1,4 @@
-(defproject mw-engine "0.1.4-SNAPSHOT"
+(defproject mw-engine "0.1.4"
   :description "Cellular automaton world builder."
   :url "http://www.journeyman.cc/microworld/"
   :manifest {
@@ -16,5 +16,6 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/math.combinatorics "0.0.7"]
                  [org.clojure/tools.trace "0.7.8"]
+                 [org.clojure/tools.namespace "0.2.4"]
                  [net.mikera/imagez "0.3.1"]
                  [fivetonine/collage "0.2.0"]])
