@@ -2,7 +2,7 @@
 
 (ns mw-engine.utils
   (:require
-    [clojure.core.reducers :as r]
+;;    [clojure.core.reducers :as r]
     [clojure.math.combinatorics :as combo]))
 
 (defn abs
@@ -32,13 +32,16 @@
 (defn map-world
   "Apply this `function` to each cell in this `world` to produce a new world.
    the arguments to the function will be the world, the cell, and any
-   `additional-args` supplied"
+   `additional-args` supplied. Note that we parallel map over rows but
+   just map over cells within a row. That's because it isn't worth starting
+   a new thread for each cell, but there may be efficiency gains in 
+   running rows in parallel."
   ([world function]
     (map-world world function nil))
   ([world function additional-args]
     (into []
-           (r/map (fn [row]
-                    (into [] (r/map
+           (pmap (fn [row]
+                    (into [] (map
                              #(apply function
                                      (cons world (cons % additional-args)))
                              row)))

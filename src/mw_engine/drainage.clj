@@ -28,21 +28,22 @@
                                                                   :altitude
                                                                   (or (:altitude cell) 0) >)))))
 
-(defn flow
+(def flow
   "Compute the total flow upstream of this `cell` in this `world`, and return a cell identical
    to this one but having a value of its flow property set from that computation.
 
    Flow comes from a higher cell to a lower only if the lower is the lowest neighbour of the higher."
-   [world cell]
-   (cond
-     (not (nil? (:flow cell))) cell
-     (<= (or (:altitude cell) 0) *sealevel*) cell
-     true
-      (merge cell
-           {:flow (+ (:rainfall cell)
-               (apply +
-                 (map (fn [neighbour] (:flow (flow world neighbour)))
-                      (flow-contributors world cell))))})))
+   (memoize 
+     (fn [world cell]
+       (cond
+         (not (nil? (:flow cell))) cell
+         (<= (or (:altitude cell) 0) *sealevel*) cell
+         true
+         (merge cell
+                {:flow (+ (:rainfall cell)
+                          (apply +
+                                 (map (fn [neighbour] (:flow (flow world neighbour)))
+                                      (flow-contributors world cell))))})))))
 
 (defn flow-world
   "Return a world like this `world`, but with cells tagged with the amount of
