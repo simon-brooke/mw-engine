@@ -2,8 +2,6 @@
 ;; assumed to have altitudes already set from a heighmap.
 
 (ns mw-engine.drainage
-  (:require
-    [clojure.core.reducers :as r])
   (:use mw-engine.utils
         mw-engine.world))
 
@@ -21,7 +19,7 @@
   [world cell]
   (remove nil?
           (into []
-            (r/map
+            (map
              (fn [n]
                (cond (= cell (get-least-cell (get-neighbours world n) :altitude)) n))
              (get-neighbours-with-property-value world (:x cell) (:y cell) 1
@@ -30,10 +28,12 @@
 
 (def flow
   "Compute the total flow upstream of this `cell` in this `world`, and return a cell identical
-   to this one but having a value of its flow property set from that computation.
+   to this one but having a value of its flow property set from that computation. The function is
+   memoised because the consequence of mapping a recursive function across an array is that many
+   cells will be revisited - potentially many times.
 
    Flow comes from a higher cell to a lower only if the lower is the lowest neighbour of the higher."
-   (memoize 
+   (memoize
      (fn [world cell]
        (cond
          (not (nil? (:flow cell))) cell
