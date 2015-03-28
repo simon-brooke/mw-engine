@@ -16,7 +16,17 @@ using
     lein marg
 
 To build the whole system, place all MicroWorld projects in a common directory,
-and from that directory run *buildall.sh*.
+and from that directory run *buildall.sh*. Alternatively, in each MicroWorld 
+project directory, run
+
+	lein clean
+	lein compile
+	lein marg
+	lein install
+
+and then from the mw-ui directory, run
+
+	lein ring server
 
 ## License
 
