@@ -99,6 +99,9 @@ do
 		-f|-fullname)
 			shift;
 			fullname=$1;;
+	    -p|-pull)
+	      	# pull from remote Git origin
+	      	git pull origin master;;
 		-r|-release)
 			# release is branch a release and upversion to new label
 			shift;
@@ -109,9 +112,6 @@ do
 				echo "Release flagged, but no release tag supplied" 1>&2;
 				exit 1;
 			fi;;
-	    -p|-pull)
-	      	# pull from remote Git origin
-	      	git pull origin master;;
 		-t|-trial)
 			trial="TRUE";;
 		-w|-webapps)

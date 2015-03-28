@@ -2,12 +2,16 @@
 
 Core cellular automaton engine for MicroWorld.
 
-## Part of the overall Microworld system 
+## Part of the overall MicroWorld system 
 
 While this code works and is interesting on its own, you also need at least
 [mw-parser](https://github.com/simon-brooke/mw-parser) and 
 [mw-ui](https://github.com/simon-brooke/mw-ui). There will be other 
 modules in due course.
+
+You can see MicroWorld in action [here](http://www.journeyman.cc/microworld/) -
+but please don't be mean to my poor little server. If you want to run big maps
+or complex rule-sets, please run it on your own machines.
 
 ## Usage
 
