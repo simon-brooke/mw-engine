@@ -5,7 +5,9 @@ Core cellular automaton engine for MicroWorld.
 ## Part of the overall Microworld system 
 
 While this code works and is interesting on its own, you also need at least
-*mw-parser* and *mw-ui*. There will be other modules in due course.
+[mw-parser](https://github.com/simon-brooke/mw-parser) and 
+[mw-ui](https://github.com/simon-brooke/mw-ui). There will be other 
+modules in due course.
 
 ## Usage
 
