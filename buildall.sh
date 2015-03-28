@@ -6,7 +6,7 @@
 
 # WARNING: The regexps in this are fair awfy bruckle. Edit with care.
 
-# Simon Broooke <simon@jasmine.org.uk>
+# Simon Broooke <simon@journeyman.cc>
 
 # Variable and glag initialisation
 archive=FALSE
@@ -72,10 +72,11 @@ if [ $# -lt 1 ]
 then
 	cat <<-EOF 1>&2
 	Usage:
-    -archive           Create a tar archive of the current state of the source.
+      -archive           Create a tar archive of the current state of the source.
 	  -build             Build all components and commit to master.
 	  -email [ADDRESS]   Your email address, to be recorded in the build signature.
 	  -fullname [NAME]   Your full name, to be recorded in the build signature.
+	  -pull				 Pull from remote git repository
 	  -release [LABEL]   Build all components, branch for release on old label, then
 	                     upversion to new LABEL and commit to master.
 	  -trial             Trial build only, do not commit.
@@ -86,8 +87,8 @@ fi
 while (( "$#" ))
 do
 	case $1 in
-    -a|-archive)
-      archive="TRUE";;
+    	-a|-archive)
+      		archive="TRUE";;
 		-b|-build)
 			# 'build' is the expected normal case.
 			trial="FALSE";
@@ -108,9 +109,9 @@ do
 				echo "Release flagged, but no release tag supplied" 1>&2;
 				exit 1;
 			fi;;
-    -p|-pull)
-      # pull from remote Git origin
-      git pull origin master;;
+	    -p|-pull)
+	      	# pull from remote Git origin
+	      	git pull origin master;;
 		-t|-trial)
 			trial="TRUE";;
 		-w|-webapps)
