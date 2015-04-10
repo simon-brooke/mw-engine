@@ -13,7 +13,7 @@
             [mikera.image.filters :as filters]))
 
 
-(defn- tag-property
+(defn tag-property
   "Set the value of this `property` of this cell from the corresponding pixel of this `heightmap`.
    If the heightmap you supply is smaller than the world, this will break.
 
@@ -36,7 +36,7 @@
                         (get-int cell :x)
                         (get-int cell :y)) 256))))})))
 
-(defn- tag-gradient
+(defn tag-gradient
   "Set the `gradient` property of this `cell` of this `world` to the difference in
    altitude between its highest and lowest neghbours."
   [world cell]
@@ -54,7 +54,7 @@
   [world]
   (map-world world tag-gradient))
 
-(defn- tag-altitude
+(defn tag-altitude
   "Set the altitude of this cell from the corresponding pixel of this heightmap.
    If the heightmap you supply is smaller than the world, this will break.
 
