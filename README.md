@@ -2,6 +2,13 @@
 
 Core cellular automaton engine for MicroWorld.
 
+## Part of the overall Microworld system 
+
+While this code works and is interesting on its own, you also need at least
+[mw-parser](https://github.com/simon-brooke/mw-parser) and 
+[mw-ui](https://github.com/simon-brooke/mw-ui). There will be other 
+modules in due course.
+
 ## Usage
 
 Primary entry points are make-world and run-world, both in mw-engine.core. See
@@ -9,6 +16,19 @@ source or generated documentation for details. Documentation can be generated
 using
 
     lein marg
+
+To build the whole system, place all MicroWorld projects in a common directory,
+and from that directory run *buildall.sh*. Alternatively, in each MicroWorld 
+project directory, run
+
+	lein clean
+	lein compile
+	lein marg
+	lein install
+
+and then from the mw-ui directory, run
+
+	lein ring server
 
 ## License
 
