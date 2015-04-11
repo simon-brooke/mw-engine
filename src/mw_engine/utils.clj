@@ -29,12 +29,39 @@
   [world x y]
   (and (>= x 0)(>= y 0)(< y (count world))(< x (count (first world)))))
 
+(defn map-world-n-n
+  "Wholly non-parallel map world implementation"
+  ([world function]
+    (map-world-n-n world function nil))
+  ([world function additional-args]
+    (into []
+           (map (fn [row]
+                    (into [] (map
+                             #(apply function
+                                     (cons world (cons % additional-args)))
+                             row)))
+                  world))))
+
+(defn map-world-p-p
+  "Wholly parallel map world implementation"
+  ([world function]
+    (map-world-p-p world function nil))
+  ([world function additional-args]
+    (into []
+           (pmap (fn [row]
+                    (into [] (pmap
+                             #(apply function
+                                     (cons world (cons % additional-args)))
+                             row)))
+                  world))))
+
+
 (defn map-world
   "Apply this `function` to each cell in this `world` to produce a new world.
    the arguments to the function will be the world, the cell, and any
    `additional-args` supplied. Note that we parallel map over rows but
    just map over cells within a row. That's because it isn't worth starting
-   a new thread for each cell, but there may be efficiency gains in 
+   a new thread for each cell, but there may be efficiency gains in
    running rows in parallel."
   ([world function]
     (map-world world function nil))
