@@ -16,5 +16,6 @@
                  [org.clojure/math.combinatorics "0.0.7"]
                  [org.clojure/tools.trace "0.7.8"]
                  [org.clojure/tools.namespace "0.2.4"]
+                 [hiccup "1.0.5"]
                  [net.mikera/imagez "0.3.1"]
                  [fivetonine/collage "0.2.0"]])

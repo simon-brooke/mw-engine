@@ -13,7 +13,7 @@
 
    * `n` a number, on the set of real numbers."
   [n]
-  (cond (neg? n) (- 0 n) true n))
+  (if (neg? n) (- 0 n) n))
 
 (defn member?
   "True if elt is a member of col."
@@ -225,4 +225,16 @@
                  row)))
         world))))
 
-
+(defn merge-cell
+  "Return a world like this `world`, but merge the values from this `cell` with
+   those from the cell in the world with the same co-ordinates"
+  [world cell]
+  (if (in-bounds world (:x cell) (:y cell))
+    (map-world world
+               #(if 
+                  (and
+                    (= (:x cell)(:x %2))
+                    (= (:y cell)(:y %2)))
+                  (merge %2 cell)
+                  %2))
+    world))

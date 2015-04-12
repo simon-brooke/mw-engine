@@ -164,6 +164,18 @@
                  "All cells should have property 'test' set to true")
              (is (empty? (remove #(= % 8) (map #(:number %) (flatten w3c))))
                  "All cells should have property 'number' set to 8"))))
+
+(deftest merge-cell-test
+  (testing "merge-cell utility function"
+           (let [w1a (make-world 3 3)
+                 w2b (merge-cell w1a {:x 5 :y 5 :out-of-bounds true})
+                 w3c (merge-cell w1a {:x 2 :y 2 :test true})]
+             (is (= w1a w2b) "Out of bound cell makes no difference")
+             (is (empty? (filter #(:out-of-bounds %) (flatten w2b)))
+                 "No cell has :out-of-bounds set")
+             (is (= 1 (count (filter #(:test %) (flatten w3c))))
+                 "Exactly one cell has :test set")
+             (is (:test (get-cell w3c 2 2))
+                 "The cell with :test set is at 2, 2"))))
+
              
-  
-            
