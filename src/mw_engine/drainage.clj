@@ -22,22 +22,45 @@
   `cell` and for which this cell is the lowest neighbour, or which are at the 
    same altitude and have greater flow"
   [world cell]
-  (remove nil?
-          (into []
-            (map
-             (fn [n]
-               (cond (= cell (get-least-cell (get-neighbours world n) :altitude)) n
-                 (and (= (:altitude cell) (:altitude n))(> (or (:flow n) 0) (or (:flow cell) 0))) n))
-             (get-neighbours-with-property-value world (:x cell) (:y cell) 1
-                                                                  :altitude
-                                                                  (or (:altitude cell) 0) >=)))))
+  (filter #(map? %)
+          (map
+            (fn [n]
+              (cond 
+                (= cell (get-least-cell (get-neighbours world n) :altitude)) n
+                (and (= (:altitude cell) (:altitude n))
+                     (> (or (:flow n) 0) (or (:flow cell) 0))) n))
+            (get-neighbours-with-property-value 
+              world (:x cell) (:y cell) 1 :altitude
+              (or (:altitude cell) 0) >=))))
+
+(defn is-hollow
+  "Detects point hollows - that is, individual cells all of whose neighbours 
+   are higher. Return true if this `cell` has an altitude lower than any of 
+   its neighbours in this `world`" 
+  [world cell]
+  ;; quicker to count the elements of the list and compare equality of numbers
+  ;; than recursive equality check on members, I think. But worth benchmarking.
+  (let [neighbours (get-neighbours world cell)
+        altitude (or (:altitude cell) 0)]
+    (= (count neighbours)
+       (count (get-neighbours-with-property-value 
+                world (:x cell) (:y cell) 1 :altitude >)))))
 
 (defn flood-hollow
-  "Raise the altitude of a copy of this `cell` of this `world` to one unit above the lowest of these `neighbours`, and reflow."
-  [cell world neighbours]
-  (let [lowest (get-least-cell neighbours :altitude)]
-    (flow world (merge cell {:altitude (+ (:altitude lowest) 1)}))))
-;;  cell)
+  "Raise the altitude of a copy of this `cell` of this `world` to the altitude  
+   of the lowest of its `neighbours`."
+  ([world cell neighbours]
+    (let [lowest (get-least-cell neighbours :altitude)]
+      (merge cell {:state :water :altitude (:altitude lowest)})))
+  ([world cell]
+    (flood-hollow world cell (get-neighbours world cell))))
+
+(defn flood-hollows 
+  "Flood all local hollows in this `world`. At this stage only floods single
+   cell hollows."
+  [world]
+  (map-world world 
+             #(if (is-hollow %1 %2) (flood-hollow %1 %2) %2)))
 
 (def flow
   "Compute the total flow upstream of this `cell` in this `world`, and return a cell identical
@@ -52,17 +75,11 @@
       (not (nil? (:flow cell))) cell
       (<= (or (:altitude cell) 0) *sealevel*) cell
       true
-      (let [contributors (flow-contributors world cell)]
-;;        (if
-;;          (= (count contributors) 8)
-          ;; local lowspot - lake bottom
-;;          (flood-hollow cell world contributors)
-          ;; otherwise...
-          (merge cell
-                 {:flow (+ (:rainfall cell)
-                           (apply +
-                                  (map (fn [neighbour] (:flow (flow world neighbour)))
-                                       (flow-contributors world cell))))}))))))
+      (merge cell
+             {:flow (+ (:rainfall cell)
+                       (apply +
+                              (map (fn [neighbour] (:flow (flow world neighbour)))
+                                   (flow-contributors world cell))))})))))
 
 (defn flow-world
   "Return a world like this `world`, but with cells tagged with the amount of

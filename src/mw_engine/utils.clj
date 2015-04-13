@@ -106,6 +106,16 @@
   [cell species]
   (get-int cell species))
 
+(def memo-get-neighbours
+  "Memoised core primitive for `get-neighbours` for efficiency."
+  (memoize
+   (fn [world x y depth]
+     (remove nil?
+             (map #(get-cell world (first %) (first (rest %)))
+                  (remove #(= % (list x y))
+                          (combo/cartesian-product
+                            (range (- x depth) (+ x depth 1))
+                            (range (- y depth) (+ y depth 1)))))))))
 
 (defn get-neighbours
     "Get the neighbours to distance depth of the cell at x, y in this world.
@@ -116,12 +126,7 @@
     * `depth` an integer representing the distance from [x,y] that
       should be searched."
     ([world x y depth]
-      (remove nil?
-              (map #(get-cell world (first %) (first (rest %)))
-                   (remove #(= % (list x y))
-                           (combo/cartesian-product
-                             (range (- x depth) (+ x depth 1))
-                             (range (- y depth) (+ y depth 1)))))))
+      (memo-get-neighbours world x y depth))
     ([world cell depth]
       "Get the neighbours to distance depth of this cell in this world.
 
@@ -129,7 +134,7 @@
       * `cell` a cell within that world;
       * `depth` an integer representing the distance from [x,y] that
         should be searched."
-      (get-neighbours world (:x cell) (:y cell) depth))
+      (memo-get-neighbours world (:x cell) (:y cell) depth))
     ([world cell]
       "Get the immediate neighbours of this cell in this world
 
