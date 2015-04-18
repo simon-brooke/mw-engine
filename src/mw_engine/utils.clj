@@ -1,4 +1,5 @@
-;; Utility functions needed by MicroWorld and, specifically, in the interpretation of MicroWorld rule.
+;; Utility functions needed by MicroWorld and, specifically, in the 
+;; interpretation of MicroWorld rule.
 
 (ns mw-engine.utils
   (:require
