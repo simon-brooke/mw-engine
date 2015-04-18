@@ -11,7 +11,7 @@
                      (world/make-world 3 3)
                      #(merge %2 {:altitude 100}))
                    1 1 :altitude 90)]
-             (is (is-hollow world (utils/get-cell world 1 1))
+             (is (is-hollow (utils/get-cell world 1 1) world)
                  "Cell at 1, 1 should be a hollow"))))
 
 (deftest flood-hollow-test

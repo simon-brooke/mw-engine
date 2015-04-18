@@ -3,7 +3,8 @@
 
 (ns mw-engine.drainage
   (:use mw-engine.utils
-        mw-engine.world)
+        mw-engine.world
+        mw-engine.core)
   (:require [mw-engine.heightmap :as heightmap]))
 
 (def ^:dynamic *sealevel* 10)
@@ -21,7 +22,7 @@
   "Return a list of the cells in this `world` which are higher than this
   `cell` and for which this cell is the lowest neighbour, or which are at the 
    same altitude and have greater flow"
-  [world cell]
+  [cell world]
   (filter #(map? %)
           (map
             (fn [n]
@@ -41,10 +42,10 @@
   ;; quicker to count the elements of the list and compare equality of numbers
   ;; than recursive equality check on members, I think. But worth benchmarking.
   (let [neighbours (get-neighbours world cell)
-        altitude (or (:altitude cell) 0)]
+        altitude (get-int-or-zero cell :altitude)]
     (= (count neighbours)
        (count (get-neighbours-with-property-value 
-                world (:x cell) (:y cell) 1 :altitude >)))))
+                world (:x cell) (:y cell) 1 :altitude altitude >)))))
 
 (defn flood-hollow
   "Raise the altitude of a copy of this `cell` of this `world` to the altitude  
@@ -62,6 +63,23 @@
   (map-world world 
              #(if (is-hollow %1 %2) (flood-hollow %1 %2) %2)))
 
+(def max-altitude 255)
+
+(defn flow-nr
+  "Experimental non recursive flow algorithm, needs to be run on a world as 
+   many times as there are distinct altitude values. This algorithm works only
+   if applied sequentially from the highest altitude to the lowest, see
+   `flow-world-nr`."
+  [cell world]
+  (if (= (- max-altitude (get-int-or-zero cell :generation))
+         (get-int-or-zero cell :altitude))
+    (merge cell 
+           {:flow (reduce + 
+                          (map 
+                            #(+ (get-int-or-zero % :rainfall)
+                                (get-int-or-zero % :flow))
+                            (flow-contributors cell world)))})))
+
 (def flow
   "Compute the total flow upstream of this `cell` in this `world`, and return a cell identical
   to this one but having a value of its flow property set from that computation. The function is
@@ -70,7 +88,7 @@
 
   Flow comes from a higher cell to a lower only if the lower is the lowest neighbour of the higher."
   (memoize
-   (fn [world cell]
+   (fn [cell world]
      (cond
       (not (nil? (:flow cell))) cell
       (<= (or (:altitude cell) 0) *sealevel*) cell
@@ -78,8 +96,13 @@
       (merge cell
              {:flow (+ (:rainfall cell)
                        (apply +
-                              (map (fn [neighbour] (:flow (flow world neighbour)))
-                                   (flow-contributors world cell))))})))))
+                              (map (fn [neighbour] (:flow (flow neighbour world)))
+                                   (flow-contributors cell world))))})))))
+
+(defn flow-world-nr
+  "Experimental non-recursive flow-world algorithm"
+  [world]
+  (run-world world nil (list flow-nr) max-altitude))
 
 (defn flow-world
   "Return a world like this `world`, but with cells tagged with the amount of
@@ -91,4 +114,4 @@
   [hmap]
   "Create a world from the heightmap `hmap`, rain on it, and then compute river 
    flows."
-  (flow-world (rain-world (heightmap/apply-heightmap hmap))))
+  (flow-world (rain-world (flood-hollows (heightmap/apply-heightmap hmap)))))

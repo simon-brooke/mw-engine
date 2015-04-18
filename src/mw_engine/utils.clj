@@ -19,6 +19,22 @@
   "True if elt is a member of col."
   [elt col] (some #(= elt %) col))
 
+(defn get-int-or-zero
+  "Return the value of this `property` from this `map` if it is a integer; 
+   otherwise return zero."
+  [map property]
+  (let [value (map property)]
+    (if (integer? value) value 0)))
+
+(defn init-generation 
+  "Return a cell like this `cell`, but having a value for :generation, zero if
+   the cell passed had no integer value for generation, otherwise the value
+   taken from the cell passed. The `world` argument is present only for 
+   consistency with the rule engine and is ignored." 
+  [world cell]
+  (merge cell {:generation (get-int-or-zero cell :generation)}))
+
+
 (defn in-bounds
   "True if x, y are in bounds for this world (i.e., there is a cell at x, y)
    else false.

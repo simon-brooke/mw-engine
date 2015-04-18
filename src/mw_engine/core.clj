@@ -60,7 +60,7 @@
   (try
     (merge
       (apply-rules world cell rules)
-      {:generation (+ (or (:generation cell) 0) 1)})
+      {:generation (+ (get-int-or-zero cell :generation) 1)})
     (catch Exception e
       (merge cell {:error
                    (format "%s at generation %d when in state %s"
