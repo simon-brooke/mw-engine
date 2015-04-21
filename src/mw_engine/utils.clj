@@ -1,4 +1,4 @@
-;; Utility functions needed by MicroWorld and, specifically, in the 
+;; Utility functions needed by MicroWorld and, specifically, in the
 ;; interpretation of MicroWorld rule.
 
 (ns mw-engine.utils
@@ -21,17 +21,17 @@
   [elt col] (some #(= elt %) col))
 
 (defn get-int-or-zero
-  "Return the value of this `property` from this `map` if it is a integer; 
+  "Return the value of this `property` from this `map` if it is a integer;
    otherwise return zero."
   [map property]
   (let [value (map property)]
     (if (integer? value) value 0)))
 
-(defn init-generation 
+(defn init-generation
   "Return a cell like this `cell`, but having a value for :generation, zero if
    the cell passed had no integer value for generation, otherwise the value
-   taken from the cell passed. The `world` argument is present only for 
-   consistency with the rule engine and is ignored." 
+   taken from the cell passed. The `world` argument is present only for
+   consistency with the rule engine and is ignored."
   [world cell]
   (merge cell {:generation (get-int-or-zero cell :generation)}))
 
@@ -124,7 +124,10 @@
   (get-int cell species))
 
 (def memo-get-neighbours
-  "Memoised core primitive for `get-neighbours` for efficiency."
+  "Memoised get neighbours is more efficient when running deeply recursive
+   algorithms on the same world. But it's less efficient when running the
+   engine in its normal iterative style, because then we will rarely call
+   get naighbours on the same cell of the same world twice."
   (memoize
    (fn [world x y depth]
      (remove nil?
@@ -135,28 +138,36 @@
                             (range (- y depth) (+ y depth 1)))))))))
 
 (defn get-neighbours
-    "Get the neighbours to distance depth of the cell at x, y in this world.
+    "Get the neighbours to distance depth of a cell in this world.
+
+    Several overloads:
+    * `world` a world, as described in world.clj;
+    * `cell` a cell within that world
+    Gets immediate neighbours of the specified cell.
+
+    * `world` a world, as described in world.clj;
+    * `cell` a cell within that world
+    * `depth` an integer representing the depth to search from the
+      `cell`
+    Gets neighbours within the specified distance of the cell.
 
     * `world` a world, as described in world.clj;
     * `x` an integer representing an x coordinate in that world;
     * `y` an integer representing an y coordinate in that world;
     * `depth` an integer representing the distance from [x,y] that
-      should be searched."
+      should be searched
+    Gets the neighbours within the specified distance of the cell at
+    coordinates [x,y] in this world."
     ([world x y depth]
-      (memo-get-neighbours world x y depth))
+      (remove nil?
+             (map #(get-cell world (first %) (first (rest %)))
+                  (remove #(= % (list x y))
+                          (combo/cartesian-product
+                            (range (- x depth) (+ x depth 1))
+                            (range (- y depth) (+ y depth 1)))))))
     ([world cell depth]
-      "Get the neighbours to distance depth of this cell in this world.
-
-      * `world` a world, as described in world.clj;
-      * `cell` a cell within that world;
-      * `depth` an integer representing the distance from [x,y] that
-        should be searched."
       (memo-get-neighbours world (:x cell) (:y cell) depth))
     ([world cell]
-      "Get the immediate neighbours of this cell in this world
-
-      * `world` a world, as described in world.clj;
-      * `cell` a cell within that world."
       (get-neighbours world cell 1)))
 
 (defn get-neighbours-with-property-value
@@ -166,10 +177,10 @@
     * `world` a world, as described in `world.clj`;
     * `cell` a cell within that world;
     * `depth` an integer representing the distance from [x,y] that
-      should be searched;
+      should be searched (optional);
     * `property` a keyword representing a property of the neighbours;
     * `value` a value of that property (or, possibly, the name of another);
-    * `op` a comparator function to use in place of `=`.
+    * `op` a comparator function to use in place of `=` (optional).
 
    It gets messy."
   ([world x y depth property value op]
@@ -253,7 +264,7 @@
   [world cell]
   (if (in-bounds world (:x cell) (:y cell))
     (map-world world
-               #(if 
+               #(if
                   (and
                     (= (:x cell)(:x %2))
                     (= (:y cell)(:y %2)))
