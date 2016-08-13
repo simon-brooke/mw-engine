@@ -1,10 +1,28 @@
-;; Utility functions needed by MicroWorld and, specifically, in the
-;; interpretation of MicroWorld rule.
-
-(ns mw-engine.utils
+(ns ^{:doc " Utility functions needed by MicroWorld and, specifically, in the
+      interpretation of MicroWorld rule."
+      :author "Simon Brooke"}
+  mw-engine.utils
   (:require
-;;    [clojure.core.reducers :as r]
     [clojure.math.combinatorics :as combo]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License
+;; as published by the Free Software Foundation; either version 2
+;; of the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+;; USA.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn abs
   "Surprisingly, Clojure doesn't seem to have an abs function, or else I've
@@ -16,9 +34,11 @@
   [n]
   (if (neg? n) (- 0 n) n))
 
+
 (defn member?
   "True if elt is a member of col."
   [elt col] (some #(= elt %) col))
+
 
 (defn get-int-or-zero
   "Return the value of this `property` from this `map` if it is a integer;
@@ -26,6 +46,7 @@
   [map property]
   (let [value (map property)]
     (if (integer? value) value 0)))
+
 
 (defn init-generation
   "Return a cell like this `cell`, but having a value for :generation, zero if
@@ -46,8 +67,9 @@
   [world x y]
   (and (>= x 0)(>= y 0)(< y (count world))(< x (count (first world)))))
 
+
 (defn map-world-n-n
-  "Wholly non-parallel map world implementation"
+  "Wholly non-parallel map world implementation; see documentation for `map-world`."
   ([world function]
     (map-world-n-n world function nil))
   ([world function additional-args]
@@ -59,8 +81,9 @@
                              row)))
                   world))))
 
+
 (defn map-world-p-p
-  "Wholly parallel map world implementation"
+  "Wholly parallel map-world implementation; see documentation for `map-world`."
   ([world function]
     (map-world-p-p world function nil))
   ([world function additional-args]
@@ -91,6 +114,7 @@
                              row)))
                   world))))
 
+
 (defn get-cell
   "Return the cell a x, y in this world, if any.
 
@@ -100,6 +124,7 @@
   [world x y]
   (cond (in-bounds world x y)
     (nth (nth world y) x)))
+
 
 (defn get-int
   "Get the value of a property expected to be an integer from a map; if not present (or not an integer) return 0.
@@ -113,6 +138,7 @@
             true 0))
         true (throw (Exception. "No map passed?"))))
 
+
 (defn population
   "Return the population of this species in this cell. Currently a synonym for
    `get-int`, but may not always be (depending whether species are later
@@ -122,6 +148,7 @@
   * `species` a keyword representing a species which may populate that cell."
   [cell species]
   (get-int cell species))
+
 
 (def memo-get-neighbours
   "Memoised get neighbours is more efficient when running deeply recursive
@@ -136,6 +163,7 @@
                           (combo/cartesian-product
                             (range (- x depth) (+ x depth 1))
                             (range (- y depth) (+ y depth 1)))))))))
+
 
 (defn get-neighbours
     "Get the neighbours to distance depth of a cell in this world.
@@ -169,6 +197,7 @@
       (memo-get-neighbours world (:x cell) (:y cell) depth))
     ([world cell]
       (get-neighbours world cell 1)))
+
 
 (defn get-neighbours-with-property-value
   "Get the neighbours to distance depth of the cell at x, y in this world which
@@ -215,6 +244,7 @@
   ([world cell state]
     (get-neighbours-with-state world cell 1 state)))
 
+
 (defn get-least-cell
   "Return the cell from among these `cells` which has the lowest numeric value
   for this `property`; if the property is absent or not a number, use this
@@ -242,6 +272,7 @@
     true
     cell))
 
+
 (defn set-property
   "Return a world like this `world` but with the value of exactly one `property`
    of one `cell` changed to this `value`"
@@ -257,6 +288,7 @@
             (map #(set-cell-property % x y property value)
                  row)))
         world))))
+
 
 (defn merge-cell
   "Return a world like this `world`, but merge the values from this `cell` with

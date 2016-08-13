@@ -1,3 +1,28 @@
+(ns ^{:doc "Functions to create and to print two dimensional cellular automata."
+       :author "Simon Brooke"}
+  mw-engine.world
+	(:require [clojure.string :as string :only [join]]
+            [mw-engine.utils :refer [population]]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License
+;; as published by the Free Software Foundation; either version 2
+;; of the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+;; USA.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
 ;; Functions to create and to print two dimensional cellular automata. Nothing in this
 ;; file should determine what states are possible within the automaton, except for the
 ;; initial state, :new.
@@ -6,10 +31,9 @@
 ;;
 ;; A world is a two dimensional matrix (sequence of sequences) of cells, such
 ;; that every cell's :x and :y properties reflect its place in the matrix.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(ns mw-engine.world
-  (:use mw-engine.utils)
-	(:require [clojure.string :as string :only [join]]))
 
 (defn- make-cell
   "Create a minimal default cell at x, y
@@ -18,6 +42,7 @@
   * `y` the y coordinate at which this cell is created."
   [x y]
   {:x x :y y :state :new})
+
 
 (defn- make-world-row
   "Make the (remaining) cells in a row at this height in a world of this width.
@@ -29,6 +54,7 @@
   (cond (= index width) nil
     true (cons (make-cell index height)
                (make-world-row (inc index) width height))))
+
 
 (defn- make-world-rows
   "Make the (remaining) rows in a world of this width and height, from this
@@ -51,12 +77,14 @@
   [width height]
   (apply vector (make-world-rows 0 width height)))
 
+
 (defn truncate-state
   "Truncate the print name of the state of this cell to at most limit characters."
   [cell limit]
   (let [s (:state cell)]
     (cond (> (count (str s)) limit) (subs s 0 limit)
       true s)))
+
 
 (defn format-cell
   "Return a formatted string summarising the current state of this cell."
@@ -66,10 +94,12 @@
           (population cell :deer)
           (population cell :wolves)))
 
+
 (defn- format-world-row
   "Format one row in the state of a world for printing."
   [row]
   (string/join (map format-cell row)))
+
 
 (defn print-world
   "Print the current state of this world, and return nil.

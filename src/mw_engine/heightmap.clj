@@ -1,15 +1,36 @@
-;; Functions to apply a heightmap to a world.
+(ns ^{:doc "Functions to apply a heightmap to a world."
+      :author "Simon Brooke"}
+  mw-engine.heightmap
+  (:import [java.awt.image BufferedImage])
+  (:require [fivetonine.collage.util :as collage :only [load-image]]
+            [mikera.image.core :as imagez :only [filter-image get-pixels]]
+            [mikera.image.filters :as filters]
+            [mw-engine.utils :refer [abs get-int get-neighbours map-world]]
+            [mw-engine.world :refer [make-world]]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License
+;; as published by the Free Software Foundation; either version 2
+;; of the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+;; USA.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Heightmaps are considered only as greyscale images, so colour is redundent (will be
 ;; ignored). Darker shades are higher.
-
-(ns mw-engine.heightmap
-  (:import [java.awt.image BufferedImage])
-  (:use mw-engine.utils
-        mw-engine.world)
-  (:require [fivetonine.collage.util :as collage :only [load-image]]
-            [mikera.image.core :as imagez :only [filter-image get-pixels]]
-            [mikera.image.filters :as filters]))
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (defn tag-property
@@ -35,6 +56,7 @@
                         (get-int cell :x)
                         (get-int cell :y)) 256))))})))
 
+
 (defn tag-gradient
   "Set the `gradient` property of this `cell` of this `world` to the difference in
    altitude between its highest and lowest neghbours."
@@ -47,11 +69,13 @@
         gradient (- highest lowest)]
     (merge cell {:gradient gradient})))
 
+
 (defn tag-gradients
   "Set the `gradient` property of each cell in this `world` to the difference in
    altitude between its highest and lowest neghbours."
   [world]
   (map-world world tag-gradient))
+
 
 (defn tag-altitude
   "Set the altitude of this cell from the corresponding pixel of this heightmap.
@@ -66,6 +90,7 @@
     (tag-property cell :altitude heightmap))
   ([cell heightmap]
     (tag-property cell :altitude heightmap)))
+
 
 (defn apply-heightmap
   "Apply the image file loaded from this path to this world, and return a world whose
@@ -91,6 +116,7 @@
       (map-world
         (map-world world tag-altitude (list heightmap))
         tag-gradient))))
+
 
 (defn apply-valuemap
   "Generalised from apply-heightmap, set an arbitrary property on each cell

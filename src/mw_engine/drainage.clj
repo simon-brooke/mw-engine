@@ -1,11 +1,33 @@
-;; Experimental, probably of no interest to anyone else; attempt to compute drainage on a world,
-;; assumed to have altitudes already set from a heighmap.
+(ns ^{:doc "Experimental, probably of no interest to anyone else; attempt to
+      compute drainage on a world, assumed to have altitudes already set
+      from a heightmap."
+      :author "Simon Brooke"}
+  mw-engine.drainage
+  (:require [mw-engine.core :refer [run-world]]
+            [mw-engine.heightmap :as heightmap]
+            [mw-engine.utils :refer [get-int-or-zero get-least-cell get-neighbours
+                                     get-neighbours-with-property-value
+                                     map-world]]))
 
-(ns mw-engine.drainage
-  (:use mw-engine.utils
-        mw-engine.world
-        mw-engine.core)
-  (:require [mw-engine.heightmap :as heightmap]))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License
+;; as published by the Free Software Foundation; either version 2
+;; of the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+;; USA.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (def ^:dynamic *sealevel* 10)
 
@@ -18,37 +40,40 @@
   [world]
   (map-world world (fn [world cell] (merge cell {:rainfall 1}))))
 
+
 (defn flow-contributors
   "Return a list of the cells in this `world` which are higher than this
-  `cell` and for which this cell is the lowest neighbour, or which are at the 
+  `cell` and for which this cell is the lowest neighbour, or which are at the
    same altitude and have greater flow"
   [cell world]
   (filter #(map? %)
           (map
             (fn [n]
-              (cond 
+              (cond
                 (= cell (get-least-cell (get-neighbours world n) :altitude)) n
                 (and (= (:altitude cell) (:altitude n))
                      (> (or (:flow n) 0) (or (:flow cell) 0))) n))
-            (get-neighbours-with-property-value 
+            (get-neighbours-with-property-value
               world (:x cell) (:y cell) 1 :altitude
               (or (:altitude cell) 0) >=))))
 
+
 (defn is-hollow
-  "Detects point hollows - that is, individual cells all of whose neighbours 
-   are higher. Return true if this `cell` has an altitude lower than any of 
-   its neighbours in this `world`" 
+  "Detects point hollows - that is, individual cells all of whose neighbours
+   are higher. Return true if this `cell` has an altitude lower than any of
+   its neighbours in this `world`"
   [world cell]
   ;; quicker to count the elements of the list and compare equality of numbers
   ;; than recursive equality check on members, I think. But worth benchmarking.
   (let [neighbours (get-neighbours world cell)
         altitude (get-int-or-zero cell :altitude)]
     (= (count neighbours)
-       (count (get-neighbours-with-property-value 
+       (count (get-neighbours-with-property-value
                 world (:x cell) (:y cell) 1 :altitude altitude >)))))
 
+
 (defn flood-hollow
-  "Raise the altitude of a copy of this `cell` of this `world` to the altitude  
+  "Raise the altitude of a copy of this `cell` of this `world` to the altitude
    of the lowest of its `neighbours`."
   ([world cell neighbours]
     (let [lowest (get-least-cell neighbours :altitude)]
@@ -56,29 +81,32 @@
   ([world cell]
     (flood-hollow world cell (get-neighbours world cell))))
 
-(defn flood-hollows 
+
+(defn flood-hollows
   "Flood all local hollows in this `world`. At this stage only floods single
    cell hollows."
   [world]
-  (map-world world 
+  (map-world world
              #(if (is-hollow %1 %2) (flood-hollow %1 %2) %2)))
+
 
 (def max-altitude 255)
 
 (defn flow-nr
-  "Experimental non recursive flow algorithm, needs to be run on a world as 
+  "Experimental non recursive flow algorithm, needs to be run on a world as
    many times as there are distinct altitude values. This algorithm works only
    if applied sequentially from the highest altitude to the lowest, see
    `flow-world-nr`."
   [cell world]
   (if (= (- max-altitude (get-int-or-zero cell :generation))
          (get-int-or-zero cell :altitude))
-    (merge cell 
-           {:flow (reduce + 
-                          (map 
+    (merge cell
+           {:flow (reduce +
+                          (map
                             #(+ (get-int-or-zero % :rainfall)
                                 (get-int-or-zero % :flow))
                             (flow-contributors cell world)))})))
+
 
 (def flow
   "Compute the total flow upstream of this `cell` in this `world`, and return a cell identical
@@ -99,6 +127,7 @@
                               (map (fn [neighbour] (:flow (flow neighbour world)))
                                    (flow-contributors cell world))))})))))
 
+
 (defn flow-world-nr
   "Experimental non-recursive flow-world algorithm"
   [world]
@@ -110,8 +139,9 @@
   [world]
   (map-world (rain-world world) flow))
 
+
 (defn run-drainage
   [hmap]
-  "Create a world from the heightmap `hmap`, rain on it, and then compute river 
+  "Create a world from the heightmap `hmap`, rain on it, and then compute river
    flows."
   (flow-world (rain-world (flood-hollows (heightmap/apply-heightmap hmap)))))

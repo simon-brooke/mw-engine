@@ -1,25 +1,51 @@
-;; A set of MicroWorld rules describing a simplified natural ecosystem.
+(ns ^{:doc "A set of MicroWorld rules describing a simplified natural ecosystem."
+       :author "Simon Brooke"}
+  mw-engine.natural-rules
+  (:require mw-engine.utils
+        mw-engine.world))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;; Since the completion of the rule language this is more or less obsolete - 
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License
+;; as published by the Free Software Foundation; either version 2
+;; of the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+;; USA.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Since the completion of the rule language this is more or less obsolete -
 ;; there are still a few things that you can do with rules written in Clojure
 ;; that you can't do in the rule language, but not many and I doubt they're
 ;; important.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(ns mw-engine.natural-rules
-  (:use mw-engine.utils
-        mw-engine.world))
 
 ;; treeline at arbitrary altitude.
 (def treeline 150)
 
+
 ;; waterline also at arbitrary altitude.
 (def waterline 10)
+
 
 ;; and finally snowline is also arbitrary.
 (def snowline 200)
 
+
 ;; Rare chance of lightning strikes
 (def lightning-probability 500)
+
 
 ;; rules describing vegetation
 (def vegetation-rules
@@ -72,8 +98,8 @@
     ;; Forest increases soil fertility
     (fn [cell world]
       (cond (member? (:state cell) '(:forest :climax))
-        (merge cell {:fertility (+ (get-int cell :fertility) 1)})))
-  ))
+        (merge cell {:fertility (+ (get-int cell :fertility) 1)})))))
+
 
 ;; rules describing herbivore behaviour
 (def herbivore-rules
@@ -139,8 +165,8 @@
     (fn [cell world]
       (cond
         (>= (get-int cell :wolves) 2)
-        (merge cell {:wolves (int (* (:wolves cell) 2))})))
-    ))
+        (merge cell {:wolves (int (* (:wolves cell) 2))})))))
+
 
   ;; rules which initialise the world
   (def init-rules
@@ -152,12 +178,11 @@
      (fn [cell world]
        (cond (and (= (:state cell) :new) (> (get-int cell :altitude) snowline)) (merge cell {:state :snow})))
      ;; in between, we have a wasteland.
-     (fn [cell world] (cond (= (:state cell) :new) (merge cell {:state :grassland}))
-     )))
+     (fn [cell world] (cond (= (:state cell) :new) (merge cell {:state :grassland})))))
+
 
 (def natural-rules (flatten
                     (list
                      vegetation-rules
                      herbivore-rules
-                     ;; predator-rules
-                     )))
+                     predator-rules)))
