@@ -1,14 +1,14 @@
 (ns ^{:doc "Functions to transform a world and run rules."
       :author "Simon Brooke"}
-  mw-engine.core
+  microworld.engine.core
   (:require [clojure.core.reducers :as r]
-            [mw-engine.world :as world]
-            [mw-engine.utils :refer [get-int-or-zero map-world]])
+            [microworld.engine.world :as world]
+            [microworld.engine.utils :refer [get-int-or-zero map-world]])
   (:gen-class))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
-;;;; mw-engine: the state/transition engine of MicroWorld.
+;;;; microworld.engine: the state/transition engine of MicroWorld.
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or
 ;;;; modify it under the terms of the GNU General Public License

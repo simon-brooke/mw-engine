@@ -1,8 +1,8 @@
-(ns mw-engine.heightmap-test
+(ns microworld.engine.heightmap-test
   (:use clojure.java.io)
   (:require [clojure.test :refer :all]
-            [mw-engine.heightmap :refer :all]
-            [mw-engine.world :as world :only [make-world]]
+            [microworld.engine.heightmap :refer :all]
+            [microworld.engine.world :as world :only [make-world]]
             [clojure.math.combinatorics :as combo]))
 
 (deftest apply-heightmap-test

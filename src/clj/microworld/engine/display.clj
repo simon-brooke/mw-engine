@@ -1,13 +1,13 @@
 (ns ^{:doc "Simple functions to allow a world to be visualised."
       :author "Simon Brooke"}
-  mw-engine.display
+  microworld.engine.display
   (:require [hiccup.core :refer [html]]
-            mw-engine.utils
-            mw-engine.world))
+            microworld.engine.utils
+            microworld.engine.world))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
-;;;; mw-engine: the state/transition engine of MicroWorld.
+;;;; microworld.engine: the state/transition engine of MicroWorld.
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or
 ;;;; modify it under the terms of the GNU General Public License

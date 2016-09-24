@@ -2,16 +2,16 @@
       compute drainage on a world, assumed to have altitudes already set
       from a heightmap."
       :author "Simon Brooke"}
-  mw-engine.drainage
-  (:require [mw-engine.core :refer [run-world]]
-            [mw-engine.heightmap :as heightmap]
-            [mw-engine.utils :refer [get-int-or-zero get-least-cell get-neighbours
+  microworld.engine.drainage
+  (:require [microworld.engine.core :refer [run-world]]
+            [microworld.engine.heightmap :as heightmap]
+            [microworld.engine.utils :refer [get-int-or-zero get-least-cell get-neighbours
                                      get-neighbours-with-property-value
                                      map-world]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
-;;;; mw-engine: the state/transition engine of MicroWorld.
+;;;; microworld.engine: the state/transition engine of MicroWorld.
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or
 ;;;; modify it under the terms of the GNU General Public License

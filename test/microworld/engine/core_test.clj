@@ -1,6 +1,6 @@
-(ns mw-engine.core-test
+(ns microworld.engine.core-test
   (:require [clojure.test :refer :all]
-            [mw-engine.core :refer :all]))
+            [microworld.engine.core :refer :all]))
 
 (deftest apply-rule-test
   (testing "Application of a single rule"

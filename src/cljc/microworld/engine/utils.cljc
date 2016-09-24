@@ -1,13 +1,13 @@
-(ns ^{:doc " Utility functions needed by MicroWorld and, specifically, in the
+(ns ^{:doc "Utility functions needed by MicroWorld and, specifically, in the
       interpretation of MicroWorld rule."
       :author "Simon Brooke"}
-  mw-engine.utils
+  microworld.engine.utils
   (:require
     [clojure.math.combinatorics :as combo]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
-;;;; mw-engine: the state/transition engine of MicroWorld.
+;;;; microworld.engine: the state/transition engine of MicroWorld.
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or
 ;;;; modify it under the terms of the GNU General Public License

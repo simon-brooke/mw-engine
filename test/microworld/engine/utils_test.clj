@@ -1,8 +1,8 @@
-(ns mw-engine.utils-test
-  (:use [mw-engine.world :as world])
+(ns microworld.engine.utils-test
+  (:use [microworld.engine.world :as world])
   (:require [clojure.test :refer :all]
             [clojure.math.combinatorics :as combo]
-            [mw-engine.utils :refer :all]))
+            [microworld.engine.utils :refer :all]))
 
 (deftest abs-test 
   (testing "Absolute value function"

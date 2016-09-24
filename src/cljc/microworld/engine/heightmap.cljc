@@ -1,16 +1,16 @@
 (ns ^{:doc "Functions to apply a heightmap to a world."
       :author "Simon Brooke"}
-  mw-engine.heightmap
+  microworld.engine.heightmap
   (:import [java.awt.image BufferedImage])
   (:require [fivetonine.collage.util :as collage :only [load-image]]
             [mikera.image.core :as imagez :only [filter-image get-pixels]]
             [mikera.image.filters :as filters]
-            [mw-engine.utils :refer [abs get-int get-neighbours map-world]]
-            [mw-engine.world :refer [make-world]]))
+            [microworld.engine.utils :refer [abs get-int get-neighbours map-world]]
+            [microworld.engine.world :refer [make-world]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
-;;;; mw-engine: the state/transition engine of MicroWorld.
+;;;; microworld.engine: the state/transition engine of MicroWorld.
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or
 ;;;; modify it under the terms of the GNU General Public License
@@ -42,7 +42,7 @@
    If the heightmap you supply is smaller than the world, this will break.
 
    * `world` not actually used, but present to enable this function to be
-     passed as an argument to `mw-engine.utils/map-world`, q.v.
+     passed as an argument to `microworld.engine.utils/map-world`, q.v.
    * `cell` a cell, as discussed in world.clj, q.v. Alternatively, a map;
    * `property` the property (normally a keyword) whose value will be set on the cell.
    * `heightmap` an (ideally) greyscale image, whose x and y dimensions should
@@ -86,7 +86,7 @@
    If the heightmap you supply is smaller than the world, this will break.
 
    * `world` not actually used, but present to enable this function to be
-     passed as an argument to `mw-engine.utils/map-world`, q.v.;
+     passed as an argument to `microworld.engine.utils/map-world`, q.v.;
    * `cell` a cell, as discussed in world.clj, q.v. Alternatively, a map;
    * `heightmap` an (ideally) greyscale image, whose x and y dimensions should
      exceed those of the world of which the `cell` forms part."

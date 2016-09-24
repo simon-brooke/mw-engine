@@ -1,8 +1,8 @@
-(ns mw-engine.drainage-test
+(ns microworld.engine.drainage-test
   (:require [clojure.test :refer :all]
-            [mw-engine.world :as world]
-            [mw-engine.utils :as utils]
-            [mw-engine.drainage :refer :all]))
+            [microworld.engine.world :as world]
+            [microworld.engine.utils :as utils]
+            [microworld.engine.drainage :refer :all]))
 
 (deftest is-hollow-test
   (testing "detection of hollows"

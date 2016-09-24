@@ -1,12 +1,12 @@
 (ns ^{:doc "Functions to create and to print two dimensional cellular automata."
        :author "Simon Brooke"}
-  mw-engine.world
+  microworld.engine.world
 	(:require [clojure.string :as string :only [join]]
-            [mw-engine.utils :refer [population]]))
+            [microworld.engine.utils :refer [population]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
-;;;; mw-engine: the state/transition engine of MicroWorld.
+;;;; microworld.engine: the state/transition engine of MicroWorld.
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or
 ;;;; modify it under the terms of the GNU General Public License

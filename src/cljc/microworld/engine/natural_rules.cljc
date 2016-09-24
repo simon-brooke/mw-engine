@@ -1,12 +1,12 @@
 (ns ^{:doc "A set of MicroWorld rules describing a simplified natural ecosystem."
        :author "Simon Brooke"}
-  mw-engine.natural-rules
-  (:require mw-engine.utils
-        mw-engine.world))
+  microworld.engine.natural-rules
+  (:require microworld.engine.utils
+        microworld.engine.world))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
-;;;; mw-engine: the state/transition engine of MicroWorld.
+;;;; microworld.engine: the state/transition engine of MicroWorld.
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or
 ;;;; modify it under the terms of the GNU General Public License
