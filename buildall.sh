@@ -140,138 +140,141 @@ fi
 
 for dir in mw-*
 do
-	pushd ${dir}
-
-	# Make a temporary directory to keep the work-in-progress files.
-	if [ ! -d "${tmp}" ]
-	then
-		rm -f "${tmp}"
-		mkdir "${tmp}"
-	fi
-
-	cat project.clj > ${tmp}/project.bak.1
-	old=`cat project.clj | grep 'defproject mw' | sed 's/.*defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\)".*/\1/'`
-
-	if [ "${release}" != "" ]
-	then
-		message="Preparing ${old} for release"
-
-		# Does the 'old' version tag end with the token "-SNAPSHOT"? it probably does!
-		echo "${old}" | grep 'SNAPSHOT'
-		if [ $? -eq 0 ]
-		then
-			# It does...
-			interim=`echo ${old} | sed 's/\([A-Za-z0-9_.-]*\)-SNAPSHOT.*/\1/'`
-			if [ "${interim}" = "" ]
-			then
-				echo "Failed to compute interim version tag from '${old}'" 1>&2
-				exit 1;
-			fi
-			setup-build-sig "${old}" "${interim}" "${fullname}" "${email}"
-			message="Upversioned from ${old} to ${interim} for release"
-			old=${interim}
-		else
-			setup-build-sig "unset" "${old}" "${fullname}" "${email}"
-		fi
-	else
-		setup-build-sig "unset" "${old}" "${fullname}" "${email}"
-	fi
-
-	sed -f ${tmp}/manifest.sed ${tmp}/project.bak.1 > project.clj
-
-	echo $message
-
-	lein clean
-	lein compile
-	if [ $? -ne 0 ]
-	then
-		echo "Sub-project ${dir} failed in compile" 1>&2
-		exit 1
-	fi
-
-  	lein test
-	if [ $? -ne 0 ]
-	then
-		echo "Sub-project ${dir} failed in test" 1>&2
-		exit 1
-	fi
-
-	lein marg
-	lein install
-
-	# If we're in the UI project, build the uberwar - and should
-	# probably deploy it to local Tomcat for test
-	if [ "${dir}" = "mw-ui" -a "${webappsdir}" != "" ]
-	then
-    lein ring uberwar
-		sudo cp target/microworld.war "${webappsdir}"
-		echo "Deployed new WAR file to local Tomcat at ${webappsdir}"
-	fi
-
-  if [ "${dir}" = "mw-ui" -a "${docker}" = "TRUE" ]
+  if [ "${dir}" != "mw-explore" ]
   then
-    lein docker build
-    lein docker push
+    pushd ${dir}
+
+    # Make a temporary directory to keep the work-in-progress files.
+    if [ ! -d "${tmp}" ]
+    then
+      rm -f "${tmp}"
+      mkdir "${tmp}"
+    fi
+
+    cat project.clj > ${tmp}/project.bak.1
+    old=`cat project.clj | grep 'defproject mw' | sed 's/.*defproject mw-[a-z]* "\([A-Za-z0-9_.-]*\)".*/\1/'`
+
+    if [ "${release}" != "" ]
+    then
+      message="Preparing ${old} for release"
+
+      # Does the 'old' version tag end with the token "-SNAPSHOT"? it probably does!
+      echo "${old}" | grep 'SNAPSHOT'
+      if [ $? -eq 0 ]
+      then
+        # It does...
+        interim=`echo ${old} | sed 's/\([A-Za-z0-9_.-]*\)-SNAPSHOT.*/\1/'`
+        if [ "${interim}" = "" ]
+        then
+          echo "Failed to compute interim version tag from '${old}'" 1>&2
+          exit 1;
+        fi
+        setup-build-sig "${old}" "${interim}" "${fullname}" "${email}"
+        message="Upversioned from ${old} to ${interim} for release"
+        old=${interim}
+      else
+        setup-build-sig "unset" "${old}" "${fullname}" "${email}"
+      fi
+    else
+      setup-build-sig "unset" "${old}" "${fullname}" "${email}"
+    fi
+
+    sed -f ${tmp}/manifest.sed ${tmp}/project.bak.1 > project.clj
+
+    echo $message
+
+    lein clean
+    lein compile
+    if [ $? -ne 0 ]
+    then
+      echo "Sub-project ${dir} failed in compile" 1>&2
+      exit 1
+    fi
+
+      lein test
+    if [ $? -ne 0 ]
+    then
+      echo "Sub-project ${dir} failed in test" 1>&2
+      exit 1
+    fi
+
+    lein marg
+    lein install
+
+    # If we're in the UI project, build the uberwar - and should
+    # probably deploy it to local Tomcat for test
+    if [ "${dir}" = "mw-ui" -a "${webappsdir}" != "" ]
+    then
+      lein ring uberwar
+      sudo cp target/microworld.war "${webappsdir}"
+      echo "Deployed new WAR file to local Tomcat at ${webappsdir}"
+    fi
+
+    if [ "${dir}" = "mw-ui" -a "${docker}" = "TRUE" ]
+    then
+      lein docker build
+      lein docker push
+    fi
+
+    # Then unset manifest properties prior to committing.
+    cat project.clj > ${tmp}/project.bak.2
+    setup-build-sig
+    sed -f ${tmp}/manifest.sed ${tmp}/project.bak.2 > project.clj
+
+    if [ "${trial}" = "FALSE" ]
+    then
+      if [ "${message}" = "" ]
+      then
+        git commit -a
+      else
+        git commit -a -m "$message"
+      fi
+      git push origin master
+    fi
+
+    if [ "${release}" != "" ]
+    then
+      branch="${old}_MAINTENANCE"
+      if [ "${trial}" = "FALSE" ]
+      then
+        git branch "${branch}"
+        git push origin "${branch}"
+      fi
+
+      cat project.clj > ${tmp}/project.bak.3
+      setup-build-sig "${old}" "${release}-SNAPSHOT" "${fullname}" "${email}"
+      sed -f ${tmp}/manifest.sed ${tmp}/project.bak.3 > project.clj
+      message="Upversioned from ${interim} to ${release}-SNAPSHOT"
+
+      echo $message
+
+      lein clean
+      lein compile
+      if [ $? -ne 0 ]
+      then
+        echo "Sub-project ${dir} failed in compile after branch to ${release}!" 1>&2
+        exit 1
+      fi
+      lein marg
+      lein install
+
+      # Then unset manifest properties prior to committing.
+      cat project.clj > ${tmp}/project.bak.4
+      setup-build-sig
+      sed -f ${tmp}/manifest.sed ${tmp}/project.bak.4 > project.clj
+
+      if [ "${trial}" = "FALSE" ]
+      then
+        git commit -a -m "${message}"
+        echo ${message}
+        git push origin master
+      fi
+    fi
+
+    # if nothing broke so far, clean up...
+    rm -rf "${tmp}"
+    popd
   fi
-
-	# Then unset manifest properties prior to committing.
-	cat project.clj > ${tmp}/project.bak.2
-	setup-build-sig
-	sed -f ${tmp}/manifest.sed ${tmp}/project.bak.2 > project.clj
-
-	if [ "${trial}" = "FALSE" ]
-	then
-		if [ "${message}" = "" ]
-		then
-			git commit -a
-		else
-			git commit -a -m "$message"
-		fi
-		git push origin master
-	fi
-
-	if [ "${release}" != "" ]
-	then
-		branch="${old}_MAINTENANCE"
-		if [ "${trial}" = "FALSE" ]
-		then
-			git branch "${branch}"
-			git push origin "${branch}"
-		fi
-
-		cat project.clj > ${tmp}/project.bak.3
-		setup-build-sig "${old}" "${release}-SNAPSHOT" "${fullname}" "${email}"
-		sed -f ${tmp}/manifest.sed ${tmp}/project.bak.3 > project.clj
-		message="Upversioned from ${interim} to ${release}-SNAPSHOT"
-
-		echo $message
-
-		lein clean
-		lein compile
-		if [ $? -ne 0 ]
-		then
-			echo "Sub-project ${dir} failed in compile after branch to ${release}!" 1>&2
-			exit 1
-		fi
-		lein marg
-		lein install
-
-		# Then unset manifest properties prior to committing.
-		cat project.clj > ${tmp}/project.bak.4
-		setup-build-sig
-		sed -f ${tmp}/manifest.sed ${tmp}/project.bak.4 > project.clj
-
-		if [ "${trial}" = "FALSE" ]
-		then
-			git commit -a -m "${message}"
-			echo ${message}
-			git push origin master
-		fi
-	fi
-
-	# if nothing broke so far, clean up...
-	rm -rf "${tmp}"
-	popd
 done
 
 
