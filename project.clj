@@ -10,6 +10,7 @@
              }
   :jvm-opts ["-Xmx4g"]
   :source-paths ["src/clj" "src/cljc"]
+  :resource-paths ["resources"]
   :license {:name "GNU General Public License v2"
             :url "http://www.gnu.org/licenses/gpl-2.0.html"}
   :plugins [[lein-marginalia "0.7.1"]]
@@ -18,5 +19,4 @@
                  [org.clojure/tools.trace "0.7.8"]
                  [org.clojure/tools.namespace "0.2.10"]
                  [hiccup "1.0.5"]
-                 [net.mikera/imagez "0.11.0"]
-                 [fivetonine/collage "0.2.1"]])
+                 [net.mikera/imagez "0.11.0"]])

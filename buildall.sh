@@ -72,7 +72,7 @@ if [ $# -lt 1 ]
 then
 	cat <<-EOF 1>&2
 	Usage:
-      -archive           Create a tar archive of the current state of the source.
+    -archive           Create a tar archive of the current state of the source.
 	  -build             Build all components and commit to master.
 	  -email [ADDRESS]   Your email address, to be recorded in the build signature.
 	  -fullname [NAME]   Your full name, to be recorded in the build signature.
@@ -93,6 +93,8 @@ do
 			# 'build' is the expected normal case.
 			trial="FALSE";
 			;;
+    -d|-docker)
+      docker="TRUE";;
 		-e|-email)
 			shift;
 			email=$1;;
@@ -126,7 +128,7 @@ do
 	shift
 done
 
-echo "Trial: ${trial}; email: ${email}; fullname ${fullname}; release: ${release}; webapps: $webappsdir"
+echo "Trial: ${trial}; docker: ${docker}; email: ${email}; fullname ${fullname}; release: ${release}; webapps: $webappsdir"
 
 ls mw-* > /dev/null 2>&1
 if [ $? -ne 0 ]
@@ -200,12 +202,18 @@ do
 	# probably deploy it to local Tomcat for test
 	if [ "${dir}" = "mw-ui" -a "${webappsdir}" != "" ]
 	then
-    	lein ring uberwar
+    lein ring uberwar
 		sudo cp target/microworld.war "${webappsdir}"
 		echo "Deployed new WAR file to local Tomcat at ${webappsdir}"
 	fi
 
-		# Then unset manifest properties prior to committing.
+  if [ "${dir}" = "mw-ui" -a "${docker}" = "TRUE" ]
+  then
+    lein docker build
+    lein docker push
+  fi
+
+	# Then unset manifest properties prior to committing.
 	cat project.clj > ${tmp}/project.bak.2
 	setup-build-sig
 	sed -f ${tmp}/manifest.sed ${tmp}/project.bak.2 > project.clj

@@ -56,8 +56,10 @@
   "Apply a single `rule` to a `cell`. What this is about is that I want to be able,
    for debugging purposes, to tag a cell with the rule text of the rule which
    fired (and especially so when an exception is thrown. So a rule may be either
-   an ifn, or a list (ifn source-text). This function deals with despatching
-   on those two possibilities. `world` is also passed in in order to be able
+   an ifn, a list (ifn source-text), or a list (ifn {:rule source-text :clojure
+   generated-function}.
+   This function deals with despatching on those three possibilities. `world`
+   is also passed in in order to be able
    to access neighbours."
   ([world cell rule]
    (cond
@@ -66,6 +68,7 @@
   ([world cell rule source]
     (let [result (apply rule (list cell world))]
       (cond
+        (and result source (map? source)) (merge result source)
         (and result source) (merge result {:rule source})
         true result))))
 
