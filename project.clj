@@ -1,4 +1,4 @@
-(defproject mw-engine "0.1.5"
+(defproject mw-engine "0.1.6-SNAPSHOT"
   :description "Cellular automaton world builder."
   :url "http://www.journeyman.cc/microworld/"
   :manifest {
