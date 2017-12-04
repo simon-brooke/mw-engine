@@ -107,15 +107,15 @@
   * `imagepath` a file path or URL which indicates an (ideally greyscale) image file."
   ([world imagepath]
     (let [heightmap (imagez/filter-image
-                      (filters/grayscale)
-                      (collage/load-image imagepath))]
+                      (imagez/load-image-resource imagepath)
+                      (filters/grayscale))]
       (map-world
         (map-world world tag-altitude (list heightmap))
         tag-gradient)))
    ([imagepath]
     (let [heightmap (imagez/filter-image
-                      (filters/grayscale)
-                      (collage/load-image imagepath))
+                      (imagez/load-image-resource imagepath)
+                      (filters/grayscale))
           world (make-world (.getWidth heightmap) (.getHeight heightmap))]
       (map-world
         (map-world world tag-altitude (list heightmap))
@@ -132,6 +132,6 @@
       intensity of the corresponding cell of the image."
   [world imagepath property]
     (let [heightmap (imagez/filter-image
-                      (filters/grayscale)
-                      (collage/load-image imagepath))]
+                      (imagez/load-image-resource imagepath)
+                      (filters/grayscale))]
       (map-world world tag-property (list property heightmap))))

@@ -12,10 +12,10 @@
   :license {:name "GNU General Public License v2"
             :url "http://www.gnu.org/licenses/gpl-2.0.html"}
   :plugins [[lein-marginalia "0.7.1"]]
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/math.combinatorics "0.0.7"]
-                 [org.clojure/tools.trace "0.7.8"]
-                 [org.clojure/tools.namespace "0.2.4"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [org.clojure/math.combinatorics "0.1.4"]
+                 [org.clojure/tools.trace "0.7.9"]
+                 [org.clojure/tools.namespace "0.2.10"]
                  [hiccup "1.0.5"]
-                 [net.mikera/imagez "0.3.1"]
+                 [net.mikera/imagez "0.12.0"]
                  [fivetonine/collage "0.2.0"]])

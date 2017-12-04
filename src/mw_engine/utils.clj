@@ -112,7 +112,7 @@
   ([world function additional-args]
     (into []
            (pmap (fn [row]
-                    (into [] (map
+                    (into [] (mapv
                              #(apply function
                                      (cons world (cons % additional-args)))
                              row)))

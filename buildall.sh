@@ -16,7 +16,7 @@ old="unset"
 release=""
 tmp=buildall.tmp.$$
 trial="FALSE"
-webappsdir="/var/lib/tomcat7/webapps"
+webappsdir="/var/lib/tomcat8/webapps"
 
 # Builds the build signature properties in the manifest map file
 # expected arguments: old version tag, version tag, full name of user,
