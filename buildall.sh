@@ -17,6 +17,7 @@ release=""
 tmp=buildall.tmp.$$
 trial="FALSE"
 webappsdir="/var/lib/tomcat8/webapps"
+gitremote="origin"
 
 # Builds the build signature properties in the manifest map file
 # expected arguments: old version tag, version tag, full name of user,
@@ -77,7 +78,8 @@ then
     -docker            Build and push a Docker image.
 	  -email [ADDRESS]   Your email address, to be recorded in the build signature.
 	  -fullname [NAME]   Your full name, to be recorded in the build signature.
-	  -pull				 Pull from remote git repository
+    -git-remote [NAME] Use the specified git remote
+	  -pull				       Pull from remote git repository
 	  -release [LABEL]   Build all components, branch for release on old label, then
 	                     upversion to new LABEL and commit to master.
 	  -trial             Trial build only, do not commit.
@@ -102,9 +104,12 @@ do
 		-f|-fullname)
 			shift;
 			fullname=$1;;
-	    -p|-pull)
-	      	# pull from remote Git origin
-	      	git pull origin master;;
+	  -p|-pull)
+	    # pull from remote Git origin
+	    git pull ${gitremote} master;;
+    -g|-git-remote)
+      shift;
+      gitremote=$1;;
 		-r|-release)
 			# release is branch a release and upversion to new label
 			shift;
@@ -229,7 +234,7 @@ do
       else
         git commit -a -m "$message"
       fi
-      git push origin master
+      git push ${gitremote} master
     fi
 
     if [ "${release}" != "" ]
@@ -238,7 +243,7 @@ do
       if [ "${trial}" = "FALSE" ]
       then
         git branch "${branch}"
-        git push origin "${branch}"
+        git push ${gitremote} "${branch}"
       fi
 
       cat project.clj > ${tmp}/project.bak.3
@@ -267,7 +272,7 @@ do
       then
         git commit -a -m "${message}"
         echo ${message}
-        git push origin master
+        git push ${gitremote} master
       fi
     fi
 
