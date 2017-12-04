@@ -7,7 +7,7 @@
 
 (deftest apply-heightmap-test
   (testing "Heightmap functionality"
-           (let [world (apply-heightmap "heightmaps/test9x9.png")
+           (let [world (apply-heightmap "resources/heightmaps/test9x9.png")
                  altitudes (map #(:altitude %) (flatten world))
                  gradients (map #(:gradient %) (flatten world))]
              (is (= (count world) 9) "World should be 9x9")
@@ -22,7 +22,7 @@
              (is (> (apply + gradients) 0)
                  "At least some gradients must be positive, none should be negative"))
            ;; alternate means of making the world, same tests.
-           (let [world (apply-heightmap (world/make-world 9 9) "heightmaps/test9x9.png")
+           (let [world (apply-heightmap (world/make-world 9 9) "resources/heightmaps/test9x9.png")
                  altitudes (map #(:altitude %) (flatten world))
                  gradients (map #(:gradient %) (flatten world))]
              (is (= (count world) 9) "World should be 9x9")
@@ -42,7 +42,7 @@
 
 (deftest apply-valuemap-test
   (testing "Valuemap functionality"
-    (let [image "heightmaps/test9x9.png"
+    (let [image "resources/heightmaps/test9x9.png"
           world (apply-valuemap (apply-heightmap image) image :arbitrary)
           altitudes (map #(:altitude %) (flatten world))
           arbitraries (map #(:arbitrary %) (flatten world))]

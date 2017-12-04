@@ -15,7 +15,6 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/math.combinatorics "0.1.4"]
                  [org.clojure/tools.trace "0.7.9"]
-                 [org.clojure/tools.namespace "0.2.10"]
+                 [org.clojure/tools.namespace "0.2.11"]
                  [hiccup "1.0.5"]
-                 [net.mikera/imagez "0.12.0"]
-                 [fivetonine/collage "0.2.0"]])
+                 [net.mikera/imagez "0.12.0"]])

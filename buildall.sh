@@ -191,7 +191,7 @@ do
       exit 1
     fi
 
-      lein test
+    lein test
     if [ $? -ne 0 ]
     then
       echo "Sub-project ${dir} failed in test" 1>&2
