@@ -38,11 +38,54 @@
 ;; forward declaration of flow, to allow for a wee bit of mutual recursion.
 (declare flow)
 
+(defn rainfall
+  "Compute rainfall for a cell with this `gradient` west-east, given
+  `remaining` drops to distribute, and this overall map width."
+  [gradient remaining map-width]
+    (cond
+      ;; if there's no rain left in the cloud, it can't fall;
+      (zero? remaining)
+      0
+      (pos? gradient)
+      ;; rain, on prevailing westerly wind, falls preferentially on rising ground;
+      (int (rand gradient))
+      ;; rain falls randomly across the width of the map...
+      (zero? (int (rand map-width))) 1
+      :else
+      0))
+
+(defn rain-row
+  "Return a row like this `row`, across which rainfall has been distributed;
+  if `rain-probability` is specified, it is the probable rainfall on a cell
+  with no gradient."
+  ([row]
+   (rain-row row 1))
+  ([row rain-probability]
+   (rain-row row (count row) 0 (int (* (count row) rain-probability))))
+  ([row map-width previous-altitude drops-in-cloud]
+   (cond
+     (empty? row) nil
+     (pos? drops-in-cloud)
+     (let [cell (first row)
+           alt (or (:altitude cell) 0)
+           rising (- alt previous-altitude)
+           fall (rainfall rising drops-in-cloud map-width)]
+       (cons
+         (assoc cell :rainfall fall)
+         (rain-row (rest row) map-width alt (- drops-in-cloud fall))))
+     :else
+     (map
+       #(assoc % :rainfall 0)
+       row))))
+
+
 (defn rain-world
   "Simulate rainfall on this `world`. TODO: Doesn't really work just now - should
    rain more on west-facing slopes, and less to the east of high ground"
   [world]
-  (map-world world (fn [world cell] (merge cell {:rainfall 1}))))
+  (map
+    rain-row
+    world))
 
 
 (defn flow-contributors
@@ -143,6 +186,29 @@
   [world]
   (map-world (rain-world world) flow))
 
+(defn explore-lake
+  "Return a sequence of cells starting with this `cell` in this `world` which
+  form a contiguous lake"
+  [world cell]
+  )
+
+(defn is-lake?
+  "If this `cell` in this `world` is not part of a lake, return nil. If it is,
+  return a cell like this `cell` tagged as part of a lake."
+  [world cell]
+  (if
+    ;; if it's already tagged as a lake, it's a lake
+    (:lake cell) cell
+    (let
+      [outflow (min (map :altitude (get-neighbours world cell)))]
+      (if-not
+        (> (:altitude cell) outflow)
+        (assoc cell :lake true)))))
+
+
+(defn find-lakes
+  [world]
+  )
 
 (defn run-drainage
   [hmap]

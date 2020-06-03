@@ -28,6 +28,10 @@
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(def ^:dynamic *image-base*
+  "Base url (i.e., url of directory) from which to load tile images."
+  "img/tiles")
+
 (defn format-css-class [state]
   "Format this `state`, assumed to be a keyword indicating a state in the
    world, into a CSS class"
@@ -38,7 +42,7 @@
   "Render this `state`, assumed to be a keyword indicating a state in the
    world, into a path which should recover the corresponding image file."
   [state]
-  (format "img/tiles/%s.png" (format-css-class state)))
+  (format "%s/%s.png" *image-base* (format-css-class state)))
 
 
 (defn format-mouseover [cell]

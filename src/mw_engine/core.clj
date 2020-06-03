@@ -2,8 +2,11 @@
       :author "Simon Brooke"}
   mw-engine.core
   (:require [clojure.core.reducers :as r]
+            [clojure.string :refer [join]]
+            [clojure.tools.cli :refer [parse-opts]]
             [mw-engine.world :as world]
-            [mw-engine.utils :refer [get-int-or-zero map-world]])
+            [mw-engine.utils :refer [get-int-or-zero map-world]]
+            [taoensso.timbre :as l])
   (:gen-class))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -123,9 +126,11 @@
 
   Return the final generation of the world."
   [world init-rules rules generations]
-  (reduce (fn [world _iteration]
+  (reduce (fn [world iteration]
+            (l/info "Running iteration " iteration)
             (transform-world world rules))
         (transform-world world init-rules)
         (range generations)))
+
 
 
