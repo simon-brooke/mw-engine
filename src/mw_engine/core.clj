@@ -3,11 +3,9 @@
   mw-engine.core
   (:require [clojure.core.reducers :as r]
             [clojure.string :refer [join]]
-            [clojure.tools.cli :refer [parse-opts]]
             [mw-engine.world :as world]
             [mw-engine.utils :refer [get-int-or-zero map-world]]
-            [taoensso.timbre :as l])
-  (:gen-class))
+            [taoensso.timbre :as l]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
