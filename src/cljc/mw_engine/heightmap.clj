@@ -1,9 +1,7 @@
 (ns ^{:doc "Functions to apply a heightmap to a world."
       :author "Simon Brooke"}
   mw-engine.heightmap
-  (:import [java.awt.image BufferedImage])
-  (:require [fivetonine.collage.util :as collage :only [load-image]]
-            [mikera.image.core :as imagez :only [filter-image get-pixels]]
+  (:require [mikera.image.core :refer [load-image filter-image get-pixels]]
             [mikera.image.filters :as filters]
             [mw-engine.utils :refer [abs get-int get-neighbours map-world]]
             [mw-engine.world :refer [make-world]]))
@@ -67,9 +65,9 @@
   [world cell]
   (let [heights (remove nil? (map :altitude (get-neighbours world cell)))
         highest (cond (empty? heights) 0 ;; shouldn't happen
-                  true (apply max heights))
+                  :else (apply max heights))
         lowest (cond (empty? heights) 0 ;; shouldn't
-                 true (apply min heights))
+                 :else (apply min heights))
         gradient (- highest lowest)]
     (merge cell {:gradient gradient})))
 
@@ -106,16 +104,16 @@
     a world the size of the heightmap will be created;
   * `imagepath` a file path or URL which indicates an (ideally greyscale) image file."
   ([world imagepath]
-    (let [heightmap (imagez/filter-image
+    (let [heightmap (filter-image
                       (filters/grayscale)
-                      (collage/load-image imagepath))]
+                      (load-image imagepath))]
       (map-world
         (map-world world tag-altitude (list heightmap))
         tag-gradient)))
    ([imagepath]
-    (let [heightmap (imagez/filter-image
+    (let [heightmap (filter-image
                       (filters/grayscale)
-                      (collage/load-image imagepath))
+                      (load-image imagepath))
           world (make-world (.getWidth heightmap) (.getHeight heightmap))]
       (map-world
         (map-world world tag-altitude (list heightmap))
@@ -131,7 +129,7 @@
    * `property` the property of each cell whose value should be added to from the
       intensity of the corresponding cell of the image."
   [world imagepath property]
-    (let [heightmap (imagez/filter-image
+    (let [heightmap (filter-image
                       (filters/grayscale)
-                      (collage/load-image imagepath))]
+                      (load-image imagepath))]
       (map-world world tag-property (list property heightmap))))

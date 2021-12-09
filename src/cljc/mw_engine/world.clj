@@ -1,8 +1,8 @@
 (ns ^{:doc "Functions to create and to print two dimensional cellular automata."
        :author "Simon Brooke"}
   mw-engine.world
-	(:require [clojure.string :as string :only [join]]
-            [mw-engine.utils :refer [population]]))
+	(:require [clojure.string :as string]
+           [mw-engine.utils :refer [population]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;

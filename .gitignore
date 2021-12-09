@@ -8,3 +8,11 @@ pom.xml
 .lein-failures
 
 eastwood.txt
+
+.clj-kondo/
+.lsp/
+.project
+.settings/
+.nrepl-port
+.classpath
+

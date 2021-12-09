@@ -63,60 +63,71 @@
 
 (defn in-bounds
   "True if x, y are in bounds for this world (i.e., there is a cell at x, y)
+   else false. *DEPRECATED*: it's a predicate, prefer `in-bounds?`.
+
+  * `world` a world as defined above;
+  * `x` a number which may or may not be a valid x coordinate within that world;
+  * `y` a number which may or may not be a valid y coordinate within that world."
+  {:deprecated "1.1.7"}
+  [world x y]
+  (and (>= x 0)(>= y 0)(< y (count world))(< x (count (first world)))))
+
+(defn in-bounds?
+  "True if x, y are in bounds for this world (i.e., there is a cell at x, y)
    else false.
 
   * `world` a world as defined above;
   * `x` a number which may or may not be a valid x coordinate within that world;
   * `y` a number which may or may not be a valid y coordinate within that world."
+  {:added "1.1.7"}
   [world x y]
   (and (>= x 0)(>= y 0)(< y (count world))(< x (count (first world)))))
-
 
 (defn map-world-n-n
   "Wholly non-parallel map world implementation; see documentation for `map-world`."
   ([world function]
-    (map-world-n-n world function nil))
+   (map-world-n-n world function nil))
   ([world function additional-args]
-    (into []
-           (map (fn [row]
-                    (into [] (map
-                             #(apply function
-                                     (cons world (cons % additional-args)))
-                             row)))
-                  world))))
+   (into []
+         (map (fn [row]
+                (into [] (map
+                           #(apply function
+                                   (cons world (cons % additional-args)))
+                           row)))
+              world))))
 
 
 (defn map-world-p-p
   "Wholly parallel map-world implementation; see documentation for `map-world`."
   ([world function]
-    (map-world-p-p world function nil))
+   (map-world-p-p world function nil))
   ([world function additional-args]
-    (into []
-           (pmap (fn [row]
-                    (into [] (pmap
-                             #(apply function
-                                     (cons world (cons % additional-args)))
-                             row)))
-                  world))))
+   (into []
+         (pmap (fn [row]
+                 (into [] (pmap
+                            #(apply function
+                                    (cons world (cons % additional-args)))
+                            row)))
+               world))))
 
 
 (defn map-world
   "Apply this `function` to each cell in this `world` to produce a new world.
-   the arguments to the function will be the world, the cell, and any
-   `additional-args` supplied. Note that we parallel map over rows but
-   just map over cells within a row. That's because it isn't worth starting
-   a new thread for each cell, but there may be efficiency gains in
-   running rows in parallel."
+  the arguments to the function will be the world, the cell, and any
+  `additional-args` supplied. Note that we parallel map over rows but
+  just map over cells within a row. That's because it isn't worth starting
+  a new thread for each cell, but there may be efficiency gains in
+  running rows in parallel."
   ([world function]
-    (map-world world function nil))
+   (map-world world function nil))
   ([world function additional-args]
-    (into []
-           (pmap (fn [row]
-                    (into [] (map
-                             #(apply function
-                                     (cons world (cons % additional-args)))
-                             row)))
-                  world))))
+   (into []
+         (pmap (fn [row]
+                 (into [] (map
+                            #(apply function
+                                    (cons world (cons % additional-args)))
+                            row)))
+               world))))
 
 
 (defn get-cell
@@ -126,21 +137,21 @@
   * `x` a number which may or may not be a valid x coordinate within that world;
   * `y` a number which may or may not be a valid y coordinate within that world."
   [world x y]
-  (cond (in-bounds world x y)
+  (when (in-bounds world x y)
     (nth (nth world y) x)))
 
 
 (defn get-int
   "Get the value of a property expected to be an integer from a map; if not present (or not an integer) return 0.
 
-   * `map` a map;
-   * `key` a symbol or keyword, presumed to be a key into the `map`."
+  * `map` a map;
+  * `key` a symbol or keyword, presumed to be a key into the `map`."
   [map key]
-  (cond (map? map)
+  (if (map? map)
     (let [v (map key)]
       (cond (and v (integer? v)) v
             true 0))
-        true (throw (Exception. "No map passed?"))))
+    (throw (Exception. "No map passed?"))))
 
 
 (defn population
@@ -256,11 +267,11 @@
   ([cells property default]
   (cond
    (empty? cells) nil
-   true (let [downstream (get-least-cell (rest cells) property default)]
+   :else (let [downstream (get-least-cell (rest cells) property default)]
           (cond (<
                  (or (property (first cells)) default)
                  (or (property downstream) default)) (first cells)
-                true downstream))))
+                :else downstream))))
   ([cells property]
    (get-least-cell cells property (Integer/MAX_VALUE))))
 
@@ -273,8 +284,7 @@
   (cond
     (and (= x (:x cell)) (= y (:y cell)))
     (merge cell {property value :rule "Set by user"})
-    true
-    cell))
+    :else cell))
 
 
 (defn set-property
