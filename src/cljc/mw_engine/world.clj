@@ -56,7 +56,7 @@
   * `height` y coordinate of the next cell to be created."
   [index width height]
   (cond (= index width) nil
-    true (cons (make-cell index height)
+    :else (cons (make-cell index height)
                (make-world-row (inc index) width height))))
 
 
@@ -69,7 +69,7 @@
   * `height` total height of the matrix, in cells."
   [index width height]
   (cond (= index height) nil
-    true (cons (apply vector (make-world-row 0 width index))
+    :else (cons (apply vector (make-world-row 0 width index))
                (make-world-rows (inc index) width height))))
 
 (defn make-world
@@ -87,7 +87,7 @@
   [cell limit]
   (let [s (:state cell)]
     (cond (> (count (str s)) limit) (subs s 0 limit)
-      true s)))
+      :else s)))
 
 
 (defn format-cell

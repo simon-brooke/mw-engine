@@ -1,10 +1,7 @@
 (ns ^{:doc "Functions to transform a world and run rules."
       :author "Simon Brooke"}
   mw-engine.core
-  (:require [clojure.core.reducers :as r]
-            [clojure.string :refer [join]]
-            [mw-engine.world :as world]
-            [mw-engine.utils :refer [get-int-or-zero map-world]]
+  (:require [mw-engine.utils :refer [get-int-or-zero map-world]]
             [taoensso.timbre :as l]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -68,16 +65,16 @@
     (let [result (apply rule (list cell world))]
       (cond
         (and result source) (merge result {:rule source})
-        true result))))
+        :else result))))
 
 
 (defn- apply-rules
   "Derive a cell from this `cell` of this `world` by applying these `rules`."
   [world cell rules]
   (cond (empty? rules) cell
-    true (let [result (apply-rule world cell (first rules))]
+    :else (let [result (apply-rule world cell (first rules))]
            (cond result result
-             true (apply-rules world cell (rest rules))))))
+             :else (apply-rules world cell (rest rules))))))
 
 
 (defn- transform-cell
@@ -102,16 +99,6 @@
   "Return a world derived from this `world` by applying these `rules` to each cell."
   [world rules]
   (map-world world transform-cell (list rules)))
-
-
-(defn- transform-world-state
-  "Consider this single argument as a map of `:world` and `:rules`; apply the rules
-   to transform the world, and return a map of the new, transformed `:world` and
-   these `:rules`. As a side effect, print the world."
-  [state]
-  (let [world (transform-world (:world state) (:rules state))]
-    ;;(world/print-world world)
-    {:world world :rules (:rules state)}))
 
 
 (defn run-world

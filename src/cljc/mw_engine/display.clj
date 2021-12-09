@@ -1,9 +1,6 @@
 (ns ^{:doc "Simple functions to allow a world to be visualised."
       :author "Simon Brooke"}
-  mw-engine.display
-  (:require [hiccup.core :refer [html]]
-            mw-engine.utils
-            mw-engine.world))
+  mw-engine.display)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
@@ -32,9 +29,10 @@
   "Base url (i.e., url of directory) from which to load tile images."
   "img/tiles")
 
-(defn format-css-class [state]
+(defn format-css-class 
   "Format this `state`, assumed to be a keyword indicating a state in the
    world, into a CSS class"
+  [state]
   (subs (str state) 1))
 
 

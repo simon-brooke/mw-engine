@@ -137,7 +137,7 @@
   * `x` a number which may or may not be a valid x coordinate within that world;
   * `y` a number which may or may not be a valid y coordinate within that world."
   [world x y]
-  (when (in-bounds world x y)
+  (when (in-bounds? world x y)
     (nth (nth world y) x)))
 
 
@@ -150,7 +150,7 @@
   (if (map? map)
     (let [v (map key)]
       (cond (and v (integer? v)) v
-            true 0))
+            :else 0))
     (throw (Exception. "No map passed?"))))
 
 
@@ -308,7 +308,7 @@
   "Return a world like this `world`, but merge the values from this `cell` with
    those from the cell in the world with the same co-ordinates"
   [world cell]
-  (if (in-bounds world (:x cell) (:y cell))
+  (if (in-bounds? world (:x cell) (:y cell))
     (map-world world
                #(if
                   (and

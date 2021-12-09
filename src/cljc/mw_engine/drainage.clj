@@ -145,7 +145,7 @@
    if applied sequentially from the highest altitude to the lowest, see
    `flow-world-nr`."
   [cell world]
-  (if (= (- max-altitude (get-int-or-zero cell :generation))
+  (when (= (- max-altitude (get-int-or-zero cell :generation))
          (get-int-or-zero cell :altitude))
     (merge cell
            {:flow (reduce +
@@ -167,7 +167,7 @@
      (cond
       (not (nil? (:flow cell))) cell
       (<= (or (:altitude cell) 0) *sealevel*) cell
-      true
+      :else
       (merge cell
              {:flow (+ (:rainfall cell)
                        (apply +
@@ -200,8 +200,8 @@
     ;; if it's already tagged as a lake, it's a lake
     (:lake cell) cell
     (let
-      [outflow (min (map :altitude (get-neighbours world cell)))]
-      (if-not
+      [outflow (apply min (map :altitude (get-neighbours world cell)))]
+      (when-not
         (> (:altitude cell) outflow)
         (assoc cell :lake true)))))
 
@@ -211,7 +211,7 @@
   )
 
 (defn run-drainage
-  [hmap]
   "Create a world from the heightmap `hmap`, rain on it, and then compute river
    flows."
+  [hmap]
   (flow-world (rain-world (flood-hollows (heightmap/apply-heightmap hmap)))))

@@ -1,8 +1,7 @@
 (ns ^{:doc "A set of MicroWorld rules describing a simplified natural ecosystem."
        :author "Simon Brooke"}
   mw-engine.natural-rules
-  (:require [mw-engine.utils :refer :all]
-        [mw-engine.world :refer :all]))
+  (:require [mw-engine.utils :refer [get-int get-neighbours get-neighbours-with-state member?]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
