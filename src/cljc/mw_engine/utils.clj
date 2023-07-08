@@ -28,21 +28,9 @@
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn abs
-  "Surprisingly, Clojure doesn't seem to have an abs function, or else I've
-   missed it. So here's one of my own. Maps natural numbers onto themselves,
-   and negative integers onto natural numbers. Also maps negative real numbers
-   onto positive real numbers.
-
-   * `n` a number, on the set of real numbers."
-  [n]
-  (if (neg? n) (- 0 n) n))
-
-
 (defn member?
   "True if elt is a member of col."
   [elt col] (some #(= elt %) col))
-
 
 (defn get-int-or-zero
   "Return the value of this `property` from this `map` if it is a integer;
@@ -51,13 +39,12 @@
   (let [value (map property)]
     (if (integer? value) value 0)))
 
-
 (defn init-generation
   "Return a cell like this `cell`, but having a value for :generation, zero if
    the cell passed had no integer value for generation, otherwise the value
    taken from the cell passed. The `world` argument is present only for
    consistency with the rule engine and is ignored."
-  [world cell]
+  [_ cell]
   (merge cell {:generation (get-int-or-zero cell :generation)}))
 
 

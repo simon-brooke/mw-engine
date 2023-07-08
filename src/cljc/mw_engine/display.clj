@@ -29,7 +29,7 @@
   "Base url (i.e., url of directory) from which to load tile images."
   "img/tiles")
 
-(defn format-css-class 
+(defn format-css-class
   "Format this `state`, assumed to be a keyword indicating a state in the
    world, into a CSS class"
   [state]

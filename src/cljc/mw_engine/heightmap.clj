@@ -1,9 +1,9 @@
 (ns ^{:doc "Functions to apply a heightmap to a world."
       :author "Simon Brooke"}
   mw-engine.heightmap
-  (:require [mikera.image.core :refer [load-image filter-image get-pixels]]
+  (:require [mikera.image.core :refer [load-image filter-image]]
             [mikera.image.filters :as filters]
-            [mw-engine.utils :refer [abs get-int get-neighbours map-world]]
+            [mw-engine.utils :refer [get-int get-neighbours map-world]]
             [mw-engine.world :refer [make-world]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -34,7 +34,6 @@
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
 (defn tag-property
   "Set the value of this `property` of this cell from the corresponding pixel of this `heightmap`.
    If the heightmap you supply is smaller than the world, this will break.
@@ -45,7 +44,7 @@
    * `property` the property (normally a keyword) whose value will be set on the cell.
    * `heightmap` an (ideally) greyscale image, whose x and y dimensions should
      exceed those of the world of which the `cell` forms part."
-  ([world cell property heightmap]
+  ([_ cell property heightmap]
     (tag-property cell property heightmap))
   ([cell property heightmap]
     (merge cell
@@ -57,7 +56,6 @@
                       (.getRGB heightmap
                         (get-int cell :x)
                         (get-int cell :y)) 256))))})))
-
 
 (defn tag-gradient
   "Set the `gradient` property of this `cell` of this `world` to the difference in
@@ -71,13 +69,11 @@
         gradient (- highest lowest)]
     (merge cell {:gradient gradient})))
 
-
 (defn tag-gradients
   "Set the `gradient` property of each cell in this `world` to the difference in
    altitude between its highest and lowest neghbours."
   [world]
   (map-world world tag-gradient))
-
 
 (defn tag-altitude
   "Set the altitude of this cell from the corresponding pixel of this heightmap.
@@ -88,11 +84,10 @@
    * `cell` a cell, as discussed in world.clj, q.v. Alternatively, a map;
    * `heightmap` an (ideally) greyscale image, whose x and y dimensions should
      exceed those of the world of which the `cell` forms part."
-  ([world cell heightmap]
+  ([_ cell heightmap]
     (tag-property cell :altitude heightmap))
   ([cell heightmap]
     (tag-property cell :altitude heightmap)))
-
 
 (defn apply-heightmap
   "Apply the image file loaded from this path to this world, and return a world whose
@@ -105,20 +100,19 @@
   * `imagepath` a file path or URL which indicates an (ideally greyscale) image file."
   ([world imagepath]
     (let [heightmap (filter-image
-                      (filters/grayscale)
-                      (load-image imagepath))]
+                     (load-image imagepath)
+                      (filters/grayscale))]
       (map-world
         (map-world world tag-altitude (list heightmap))
         tag-gradient)))
    ([imagepath]
     (let [heightmap (filter-image
-                      (filters/grayscale)
-                      (load-image imagepath))
+                      (load-image imagepath)
+                      (filters/grayscale))
           world (make-world (.getWidth heightmap) (.getHeight heightmap))]
       (map-world
         (map-world world tag-altitude (list heightmap))
         tag-gradient))))
-
 
 (defn apply-valuemap
   "Generalised from apply-heightmap, set an arbitrary property on each cell
@@ -130,6 +124,6 @@
       intensity of the corresponding cell of the image."
   [world imagepath property]
     (let [heightmap (filter-image
-                      (filters/grayscale)
-                      (load-image imagepath))]
+                      (load-image imagepath)
+                      (filters/grayscale))]
       (map-world world tag-property (list property heightmap))))
