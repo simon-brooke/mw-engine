@@ -1,9 +1,9 @@
 (ns ^{:doc " Utility functions needed by MicroWorld and, specifically, in the
       interpretation of MicroWorld rule."
       :author "Simon Brooke"}
-  mw-engine.utils
+ mw-engine.utils
   (:require
-    [clojure.math.combinatorics :as combo]))
+   [clojure.math.combinatorics :as combo]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
@@ -57,7 +57,7 @@
   * `y` a number which may or may not be a valid y coordinate within that world."
   {:deprecated "1.1.7"}
   [world x y]
-  (and (>= x 0)(>= y 0)(< y (count world))(< x (count (first world)))))
+  (and (>= x 0) (>= y 0) (< y (count world)) (< x (count (first world)))))
 
 (defn in-bounds?
   "True if x, y are in bounds for this world (i.e., there is a cell at x, y)
@@ -68,7 +68,7 @@
   * `y` a number which may or may not be a valid y coordinate within that world."
   {:added "1.1.7"}
   [world x y]
-  (and (>= x 0)(>= y 0)(< y (count world))(< x (count (first world)))))
+  (and (>= x 0) (>= y 0) (< y (count world)) (< x (count (first world)))))
 
 (defn map-world-n-n
   "Wholly non-parallel map world implementation; see documentation for `map-world`."
@@ -78,9 +78,9 @@
    (into []
          (map (fn [row]
                 (into [] (map
-                           #(apply function
-                                   (cons world (cons % additional-args)))
-                           row)))
+                          #(apply function
+                                  (cons world (cons % additional-args)))
+                          row)))
               world))))
 
 
@@ -92,9 +92,9 @@
    (into []
          (pmap (fn [row]
                  (into [] (pmap
-                            #(apply function
-                                    (cons world (cons % additional-args)))
-                            row)))
+                           #(apply function
+                                   (cons world (cons % additional-args)))
+                           row)))
                world))))
 
 
@@ -111,11 +111,10 @@
    (into []
          (pmap (fn [row]
                  (into [] (map
-                            #(apply function
-                                    (cons world (cons % additional-args)))
-                            row)))
+                           #(apply function
+                                   (cons world (cons % additional-args)))
+                           row)))
                world))))
-
 
 (defn get-cell
   "Return the cell a x, y in this world, if any.
@@ -127,9 +126,9 @@
   (when (in-bounds? world x y)
     (nth (nth world y) x)))
 
-
 (defn get-int
-  "Get the value of a property expected to be an integer from a map; if not present (or not an integer) return 0.
+  "Get the value of a property expected to be an integer from a map; if not
+   present (or not an integer) return 0.
 
   * `map` a map;
   * `key` a symbol or keyword, presumed to be a key into the `map`."
@@ -140,6 +139,18 @@
             :else 0))
     (throw (Exception. "No map passed?"))))
 
+(defn get-num
+  "Get the value of a property expected to be a number from a map; if not
+   present (or not a number) return 0.
+
+  * `map` a map;
+  * `key` a symbol or keyword, presumed to be a key into the `map`."
+  [map key]
+  (if (map? map)
+    (let [v (map key)]
+      (cond (and v (number? v)) v
+            :else 0))
+    (throw (Exception. "No map passed?"))))
 
 (defn population
   "Return the population of this species in this cell. Currently a synonym for
@@ -150,7 +161,6 @@
   * `species` a keyword representing a species which may populate that cell."
   [cell species]
   (get-int cell species))
-
 
 (def memo-get-neighbours
   "Memoised get neighbours is more efficient when running deeply recursive
@@ -163,12 +173,11 @@
              (map #(get-cell world (first %) (first (rest %)))
                   (remove #(= % (list x y))
                           (combo/cartesian-product
-                            (range (- x depth) (+ x depth 1))
-                            (range (- y depth) (+ y depth 1)))))))))
-
+                           (range (- x depth) (+ x depth 1))
+                           (range (- y depth) (+ y depth 1)))))))))
 
 (defn get-neighbours
-    "Get the neighbours to distance depth of a cell in this world.
+  "Get the neighbours to distance depth of a cell in this world.
 
     Several overloads:
     * `world` a world, as described in world.clj;
@@ -188,18 +197,17 @@
       should be searched
     Gets the neighbours within the specified distance of the cell at
     coordinates [x,y] in this world."
-    ([world x y depth]
-      (remove nil?
-             (map #(get-cell world (first %) (first (rest %)))
-                  (remove #(= % (list x y))
-                          (combo/cartesian-product
-                            (range (- x depth) (+ x depth 1))
-                            (range (- y depth) (+ y depth 1)))))))
-    ([world cell depth]
-      (memo-get-neighbours world (:x cell) (:y cell) depth))
-    ([world cell]
-      (get-neighbours world cell 1)))
-
+  ([world x y depth]
+   (remove nil?
+           (map #(get-cell world (first %) (first (rest %)))
+                (remove #(= % (list x y))
+                        (combo/cartesian-product
+                         (range (- x depth) (+ x depth 1))
+                         (range (- y depth) (+ y depth 1)))))))
+  ([world cell depth]
+   (memo-get-neighbours world (:x cell) (:y cell) depth))
+  ([world cell]
+   (get-neighbours world cell 1)))
 
 (defn get-neighbours-with-property-value
   "Get the neighbours to distance depth of the cell at x, y in this world which
@@ -215,20 +223,20 @@
 
    It gets messy."
   ([world x y depth property value op]
-    (filter
-      #(eval
-         (list op
-               (or (get % property) (get-int % property))
-               value))
-      (get-neighbours world x y depth)))
+   (filter
+    #(eval
+      (list op
+            (or (get % property) (get-int % property))
+            value))
+    (get-neighbours world x y depth)))
   ([world x y depth property value]
-    (get-neighbours-with-property-value world x y depth property value =))
+   (get-neighbours-with-property-value world x y depth property value =))
   ([world cell depth property value]
-    (get-neighbours-with-property-value world (:x cell) (:y cell) depth
-                                        property value))
+   (get-neighbours-with-property-value world (:x cell) (:y cell) depth
+                                       property value))
   ([world cell property value]
-    (get-neighbours-with-property-value world cell 1
-                                        property value)))
+   (get-neighbours-with-property-value world cell 1
+                                       property value)))
 
 (defn get-neighbours-with-state
   "Get the neighbours to distance depth of the cell at x, y in this world which
@@ -240,27 +248,24 @@
       should be searched;
     * `state` a keyword representing a state in the world."
   ([world x y depth state]
-    (filter #(= (:state %) state) (get-neighbours world x y depth)))
+   (filter #(= (:state %) state) (get-neighbours world x y depth)))
   ([world cell depth state]
-    (get-neighbours-with-state world (:x cell) (:y cell) depth state))
+   (get-neighbours-with-state world (:x cell) (:y cell) depth state))
   ([world cell state]
-    (get-neighbours-with-state world cell 1 state)))
+   (get-neighbours-with-state world cell 1 state)))
 
 
 (defn get-least-cell
   "Return the cell from among these `cells` which has the lowest numeric value
-  for this `property`; if the property is absent or not a number, use this
-  `default`"
-  ([cells property default]
-  (cond
-   (empty? cells) nil
-   :else (let [downstream (get-least-cell (rest cells) property default)]
-          (cond (<
-                 (or (property (first cells)) default)
-                 (or (property downstream) default)) (first cells)
-                :else downstream))))
-  ([cells property]
-   (get-least-cell cells property (Integer/MAX_VALUE))))
+  for this `property`."
+  [cells property]
+  (first (sort-by property (filter #(number? (property %)) cells))))
+
+(defn get-most-cell
+  "Return the cell from among these `cells` which has the highest numeric value
+  for this `property`."
+  [cells property]
+  (last (sort-by property cells)))
 
 
 (defn- set-cell-property
@@ -278,18 +283,17 @@
   "Return a world like this `world` but with the value of exactly one `property`
    of one `cell` changed to this `value`"
   ([world cell property value]
-    (set-property world (:x cell) (:y cell) property value))
+   (set-property world (:x cell) (:y cell) property value))
   ([world x y property value]
-    (apply
-      vector ;; we want a vector of vectors, not a list of lists, for efficiency
-      (map
-        (fn [row]
-          (apply
-            vector
-            (map #(set-cell-property % x y property value)
-                 row)))
-        world))))
-
+   (apply
+    vector ;; we want a vector of vectors, not a list of lists, for efficiency
+    (map
+     (fn [row]
+       (apply
+        vector
+        (map #(set-cell-property % x y property value)
+             row)))
+     world))))
 
 (defn merge-cell
   "Return a world like this `world`, but merge the values from this `cell` with
@@ -298,9 +302,9 @@
   (if (in-bounds? world (:x cell) (:y cell))
     (map-world world
                #(if
-                  (and
-                    (= (:x cell)(:x %2))
-                    (= (:y cell)(:y %2)))
+                 (and
+                  (= (:x cell) (:x %2))
+                  (= (:y cell) (:y %2)))
                   (merge %2 cell)
                   %2))
     world))

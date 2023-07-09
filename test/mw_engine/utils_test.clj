@@ -178,4 +178,20 @@
              (is (:test (get-cell w3c 2 2))
                  "The cell with :test set is at 2, 2"))))
 
-             
+(deftest most-least-tests
+  (let [cells [{:x 0, :y 0, :state :new, :prop 0.4406204774301924} 
+        {:x 1, :y 0, :state :new, :prop 0.26475629405490275} 
+        {:x 2, :y 0, :state :new, :prop 0.34018209505715813} 
+        {:x 0, :y 1, :state :new, :prop 0.35104719397171424} 
+        {:x 1, :y 1, :state :new, :prop 0.6009298123397215} ;; <- max
+        {:x 2, :y 1, :state :new, :prop 0.5580383897506066} 
+        {:x 0, :y 2, :state :new, :prop 0.1780241365266907} ;; <- min
+        {:x 1, :y 2, :state :new, :prop 0.3255028139128574}
+        {:x 2, :y 2, :state :new, :prop 0.3449965660347397}]]
+    (let [expected {:x 1, :y 1, :state :new, :prop 0.6009298123397215}
+          actual (get-most-cell cells :prop)]
+      (is (= actual expected) "get-most-cell failed")
+      )
+    (let [expected {:x 0, :y 2, :state :new, :prop 0.1780241365266907}
+             actual (get-least-cell cells :prop)]
+         (is (= actual expected) "get-least-cell failed"))))
