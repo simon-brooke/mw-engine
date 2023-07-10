@@ -37,7 +37,7 @@
                  :property :q
                  :quantity 2.4}]
       (is (flow? valid world))
-      (let [transferred (execute valid world')
+      (let [transferred (execute world' valid)
             source-q (:q (get-cell transferred 0 0))
             dest-q (:q (get-cell transferred 1 1))]
         (is (= source-q 2.9))
@@ -46,7 +46,7 @@
                     :destination {:x 0  :y 1}
                     :property :q
                     :quantity 1}
-            transferred (execute-flows (list valid valid2) world')
+            transferred (execute-flows world' (list valid valid2))
             source-q (:q (get-cell transferred 0 0))
             inter-q (:q (get-cell transferred 1 1))
             dest-q (:q (get-cell transferred 0 1))]

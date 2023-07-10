@@ -93,7 +93,7 @@
   "Return a world like this `world`, except with the quantity of the property
    described in this `flow` object transferred from the source of that flow
    to its destination."
-  [flow world]
+  [world flow]
   (try
     (let [source (get-cell world (-> flow :source :x) (-> flow :source :y))
         dest (get-cell world (-> flow :destination :x) (-> flow :destination :y))
@@ -103,11 +103,11 @@
         d' (assoc dest p (+ (get-num dest p) q))]
     (merge-cell (merge-cell world s') d'))
     (catch Exception e
-      (warn "Failed to execute flow %s: %s" flow (.getMessage e))
+      (warn (format "Failed to execute flow %s: %s" flow (.getMessage e)))
       ;; return the world unmodified.
       world)))
 
 (defn execute-flows
   "Return a world like this `world`, but with each of these flows executed."
-  [flows world]
+  [world flows]
   (reduce execute world (filter #(flow? % world) flows)))
