@@ -1,4 +1,7 @@
-(ns ^{:doc "Functions to apply a heightmap to a world."
+(ns ^{:doc "Functions to apply a heightmap to a world.
+            
+            Heightmaps are considered only as greyscale images, so colour is redundent
+            (will be ignored). Darker shades are higher."
       :author "Simon Brooke"}
   mw-engine.heightmap
   (:require [mikera.image.core :refer [load-image filter-image]]
@@ -26,11 +29,6 @@
 ;;;; USA.
 ;;;;
 ;;;; Copyright (C) 2014 Simon Brooke
-;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;
-;;;; Heightmaps are considered only as greyscale images, so colour is redundent
-;;;; (will be ignored). Darker shades are higher.
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

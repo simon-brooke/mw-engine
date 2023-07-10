@@ -1,5 +1,10 @@
-(ns ^{:doc "A set of MicroWorld rules describing a simplified natural ecosystem."
-       :author "Simon Brooke"}
+(ns ^{:doc "A set of MicroWorld rules describing a simplified natural ecosystem.
+
+            Since the completion of the rule language this is more or less obsolete -
+            there are still a few things that you can do with rules written in Clojure
+            that you can't do in the rule language, but not many and I doubt they're
+            important. "
+       :author " Simon Brooke "}
   mw-engine.natural-rules
   (:require [mw-engine.utils :refer [get-int get-neighbours get-neighbours-with-state member?]]))
 
@@ -23,13 +28,6 @@
 ;;;; USA.
 ;;;;
 ;;;; Copyright (C) 2014 Simon Brooke
-;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;
-;;;; Since the completion of the rule language this is more or less obsolete -
-;;;; there are still a few things that you can do with rules written in Clojure
-;;;; that you can't do in the rule language, but not many and I doubt they're
-;;;; important.
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -47,7 +47,6 @@
   [_ cell]
   (merge cell {:generation (get-int-or-zero cell :generation)}))
 
-
 (defn in-bounds
   "True if x, y are in bounds for this world (i.e., there is a cell at x, y)
    else false. *DEPRECATED*: it's a predicate, prefer `in-bounds?`.

@@ -1,4 +1,4 @@
-(defproject mw-engine "0.1.6-SNAPSHOT"
+(defproject mw-engine "0.2.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [org.clojure/clojurescript "1.11.60" :scope "provided"]
                  [org.clojure/math.combinatorics "0.2.0"]
