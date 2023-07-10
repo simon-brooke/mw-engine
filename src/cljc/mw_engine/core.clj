@@ -67,7 +67,6 @@
         (and result source) (merge result {:rule source})
         :else result))))
 
-
 (defn- apply-rules
   "Derive a cell from this `cell` of this `world` by applying these `rules`."
   [world cell rules]
@@ -94,12 +93,10 @@
                    :stacktrace (map #(.toString %) (.getStackTrace e))
                    :state :error}))))
 
-
 (defn transform-world
   "Return a world derived from this `world` by applying these `rules` to each cell."
-  [world rules]
-  (map-world world transform-cell (list rules)))
-
+  ([world rules]
+  (map-world world transform-cell (list rules))))
 
 (defn run-world
   "Run this world with these rules for this number of generations.

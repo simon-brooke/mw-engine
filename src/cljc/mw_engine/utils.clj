@@ -29,8 +29,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn member?
-  "True if elt is a member of col."
-  [elt col] (some #(= elt %) col))
+  "Return 'true' if elt is a member of col, else 'false'."
+  [elt col] (boolean ((set col) elt)))
 
 (defn get-int-or-zero
   "Return the value of this `property` from this `map` if it is a integer;
@@ -96,7 +96,6 @@
                                    (cons world (cons % additional-args)))
                            row)))
                world))))
-
 
 (defn map-world
   "Apply this `function` to each cell in this `world` to produce a new world.
@@ -198,16 +197,11 @@
     Gets the neighbours within the specified distance of the cell at
     coordinates [x,y] in this world."
   ([world x y depth]
-   (remove nil?
-           (map #(get-cell world (first %) (first (rest %)))
-                (remove #(= % (list x y))
-                        (combo/cartesian-product
-                         (range (- x depth) (+ x depth 1))
-                         (range (- y depth) (+ y depth 1)))))))
+   (memo-get-neighbours world x y depth))
   ([world cell depth]
    (memo-get-neighbours world (:x cell) (:y cell) depth))
   ([world cell]
-   (get-neighbours world cell 1)))
+   (memo-get-neighbours world (:x cell) (:y cell) 1)))
 
 (defn get-neighbours-with-property-value
   "Get the neighbours to distance depth of the cell at x, y in this world which
@@ -254,7 +248,6 @@
   ([world cell state]
    (get-neighbours-with-state world cell 1 state)))
 
-
 (defn get-least-cell
   "Return the cell from among these `cells` which has the lowest numeric value
   for this `property`."
@@ -265,8 +258,7 @@
   "Return the cell from among these `cells` which has the highest numeric value
   for this `property`."
   [cells property]
-  (last (sort-by property cells)))
-
+  (last (sort-by property (filter #(number? (property %)) cells))))
 
 (defn- set-cell-property
   "If this `cell`s x and y properties are equal to these `x` and `y` values,
@@ -277,7 +269,6 @@
     (and (= x (:x cell)) (= y (:y cell)))
     (merge cell {property value :rule "Set by user"})
     :else cell))
-
 
 (defn set-property
   "Return a world like this `world` but with the value of exactly one `property`

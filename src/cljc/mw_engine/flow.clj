@@ -1,7 +1,7 @@
 (ns mw-engine.flow
   "Allow flows of values between cells in the world."
   (:require [mw-engine.utils :refer [get-cell get-num merge-cell]]
-            [taoensso.timbre :refer [warn]]))
+            [taoensso.timbre :refer [info warn]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
@@ -95,12 +95,18 @@
    to its destination."
   [world flow]
   (try
-    (let [source (get-cell world (-> flow :source :x) (-> flow :source :y))
-        dest (get-cell world (-> flow :destination :x) (-> flow :destination :y))
+    (let [sx (-> flow :source :x)
+          sy (-> flow :source :y)
+          source (get-cell world sx sy)
+        dx (-> flow :destination :x)
+          dy (-> flow :destination :y)
+          dest (get-cell world dx dy)
         p (:property flow)
         q (min (:quantity flow) (get-num source p))
         s' (assoc source p (- (source p) q))
         d' (assoc dest p (+ (get-num dest p) q))]
+      (info (format "Moving %f units of %s from %d,%d to %d,%d"
+                    (float q) (name p) sx sy dx dy))
     (merge-cell (merge-cell world s') d'))
     (catch Exception e
       (warn (format "Failed to execute flow %s: %s" flow (.getMessage e)))
