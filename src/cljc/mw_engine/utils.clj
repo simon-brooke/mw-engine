@@ -30,7 +30,8 @@
 
 (defn member?
   "Return 'true' if elt is a member of col, else 'false'."
-  [elt col] (boolean ((set col) elt)))
+  [elt col] 
+  (contains? (set col) elt))
 
 (defn get-int-or-zero
   "Return the value of this `property` from this `map` if it is a integer;
@@ -51,7 +52,7 @@
   "True if x, y are in bounds for this world (i.e., there is a cell at x, y)
    else false. *DEPRECATED*: it's a predicate, prefer `in-bounds?`.
 
-  * `world` a world as defined above;
+  * `world` a world as defined in [world.clj](mw-engine.world.html);
   * `x` a number which may or may not be a valid x coordinate within that world;
   * `y` a number which may or may not be a valid y coordinate within that world."
   {:deprecated "1.1.7"}
@@ -62,7 +63,7 @@
   "True if x, y are in bounds for this world (i.e., there is a cell at x, y)
    else false.
 
-  * `world` a world as defined above;
+  * `world` a world as defined in [world.clj](mw-engine.world.html);
   * `x` a number which may or may not be a valid x coordinate within that world;
   * `y` a number which may or may not be a valid y coordinate within that world."
   {:added "1.1.7"}
@@ -117,7 +118,7 @@
 (defn get-cell
   "Return the cell a x, y in this world, if any.
 
-  * `world` a world as defined above;
+  * `world` a world as defined in [world.clj](mw-engine.world.html);
   * `x` a number which may or may not be a valid x coordinate within that world;
   * `y` a number which may or may not be a valid y coordinate within that world."
   [world x y]
@@ -178,17 +179,17 @@
   "Get the neighbours to distance depth of a cell in this world.
 
     Several overloads:
-    * `world` a world, as described in world.clj;
+    * `world` a world, as described in [world.clj](mw-engine.world.html);
     * `cell` a cell within that world
     Gets immediate neighbours of the specified cell.
 
-    * `world` a world, as described in world.clj;
+    * `world` a world, as described in[world.clj](mw-engine.world.html);
     * `cell` a cell within that world
     * `depth` an integer representing the depth to search from the
       `cell`
     Gets neighbours within the specified distance of the cell.
 
-    * `world` a world, as described in world.clj;
+    * `world` a world, as described in[world.clj](mw-engine.world.html);
     * `x` an integer representing an x coordinate in that world;
     * `y` an integer representing an y coordinate in that world;
     * `depth` an integer representing the distance from [x,y] that
@@ -206,7 +207,7 @@
   "Get the neighbours to distance depth of the cell at x, y in this world which
    have this value for this property.
 
-    * `world` a world, as described in `world.clj`;
+    * `world` a world, as described in [world.clj](mw-engine.world.html);
     * `cell` a cell within that world;
     * `depth` an integer representing the distance from [x,y] that
       should be searched (optional);
@@ -235,7 +236,7 @@
   "Get the neighbours to distance depth of the cell at x, y in this world which
    have this state.
 
-    * `world` a world, as described in `world.clj`;
+    * `world` a world, as described in [world.clj](mw-engine.world.html);
     * `cell` a cell within that world;
     * `depth` an integer representing the distance from [x,y] that
       should be searched;

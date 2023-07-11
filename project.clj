@@ -1,4 +1,9 @@
 (defproject mw-engine "0.2.0-SNAPSHOT"
+  :cloverage {:output "docs/cloverage"}
+  :codox {:metadata {:doc "**TODO**: write docs"
+                     :doc/format :markdown}
+          :output-path "docs/codox"
+          :source-uri "https://github.com/simon-brooke/mw-engine/blob/master/{filepath}#L{line}"}
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [org.clojure/clojurescript "1.11.60" :scope "provided"]
                  [org.clojure/math.combinatorics "0.2.0"]
@@ -15,9 +20,10 @@
 
   :min-lein-version "2.0.0"
   :plugins [[lein-cljsbuild "1.1.7"]
+            [lein-cloverage "1.2.2"]
+            [lein-codox "0.10.8"]
             [lein-kibit "0.1.2"]
             [lein-marginalia "0.7.1"]]
   :resource-paths ["resources" "target/cljsbuild"]
   :source-paths ["src/clj" "src/cljs" "src/cljc"]
-  :url "http://www.journeyman.cc/microworld/"
-  )
+  :url "http://www.journeyman.cc/microworld/")

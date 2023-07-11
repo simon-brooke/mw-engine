@@ -1,0 +1,431 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../coverage.css"/>  <title> mw_engine/flow.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;mw-engine.flow
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;&quot;Allow&nbsp;flows&nbsp;of&nbsp;values&nbsp;between&nbsp;cells&nbsp;in&nbsp;the&nbsp;world.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;design&nbsp;here&nbsp;is:&nbsp;a&nbsp;flow&nbsp;object&nbsp;is&nbsp;a&nbsp;map&nbsp;with&nbsp;the&nbsp;following&nbsp;properties:
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.&nbsp;`:source`,&nbsp;whose&nbsp;value&nbsp;is&nbsp;a&nbsp;location;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.&nbsp;`:destination`,&nbsp;whose&nbsp;value&nbsp;is&nbsp;a&nbsp;location;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.&nbsp;`:property`,&nbsp;whose&nbsp;value&nbsp;is&nbsp;a&nbsp;keyword;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.&nbsp;`:quantity`,&nbsp;whose&nbsp;value&nbsp;is&nbsp;a&nbsp;positive&nbsp;real&nbsp;number.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;location&nbsp;object&nbsp;is&nbsp;a&nbsp;map&nbsp;with&nbsp;the&nbsp;following&nbsp;properties:
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.&nbsp;`:x`,&nbsp;whose&nbsp;value&nbsp;is&nbsp;a&nbsp;natural&nbsp;number&nbsp;not&nbsp;greater&nbsp;than&nbsp;the&nbsp;extent&nbsp;of&nbsp;the&nbsp;world;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.&nbsp;`:y`,&nbsp;whose&nbsp;value&nbsp;is&nbsp;a&nbsp;natural&nbsp;number&nbsp;not&nbsp;greater&nbsp;than&nbsp;the&nbsp;extent&nbsp;of&nbsp;the&nbsp;world.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To&nbsp;execute&nbsp;a&nbsp;flow&nbsp;is&nbsp;transfer&nbsp;the&nbsp;quantity&nbsp;specified&nbsp;of&nbsp;the&nbsp;property&nbsp;specified
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;the&nbsp;cell&nbsp;at&nbsp;the&nbsp;source&nbsp;specified&nbsp;to&nbsp;the&nbsp;cell&nbsp;at&nbsp;the&nbsp;destination&nbsp;specified;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;the&nbsp;source&nbsp;doesn&#x27;t&nbsp;have&nbsp;sufficient&nbsp;of&nbsp;the&nbsp;property,&nbsp;then&nbsp;all&nbsp;it&nbsp;has&nbsp;should
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;transferred,&nbsp;but&nbsp;no&nbsp;more:&nbsp;properties&nbsp;to&nbsp;be&nbsp;flowed&nbsp;cannot&nbsp;be&nbsp;pulled&nbsp;negative.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                020&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Flowing&nbsp;values&nbsp;through&nbsp;the&nbsp;world&nbsp;is&nbsp;consequently&nbsp;a&nbsp;two&nbsp;stage&nbsp;process:&nbsp;firstly
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                022&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;there&#x27;s&nbsp;a&nbsp;planning&nbsp;stage,&nbsp;in&nbsp;which&nbsp;all&nbsp;the&nbsp;flows&nbsp;to&nbsp;be&nbsp;executed&nbsp;are&nbsp;computed
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;without&nbsp;changing&nbsp;the&nbsp;world,&nbsp;and&nbsp;then&nbsp;an&nbsp;execution&nbsp;stage,&nbsp;where&nbsp;they&#x27;re&nbsp;all&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;executed.&nbsp;This&nbsp;namespace&nbsp;deals&nbsp;with&nbsp;mainly&nbsp;with&nbsp;execution.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                025&nbsp;&nbsp;&nbsp;&nbsp;(:require&nbsp;[mw-engine.utils&nbsp;:refer&nbsp;[get-cell&nbsp;get-num&nbsp;in-bounds?&nbsp;merge-cell]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                026&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[taoensso.timbre&nbsp;:refer&nbsp;[info&nbsp;warn]]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                027&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                029&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;;;;;&nbsp;mw-engine:&nbsp;the&nbsp;state&#x2F;transition&nbsp;engine&nbsp;of&nbsp;MicroWorld.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                031&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                032&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;free&nbsp;software;&nbsp;you&nbsp;can&nbsp;redistribute&nbsp;it&nbsp;and&#x2F;or
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                033&nbsp;&nbsp;;;;;&nbsp;modify&nbsp;it&nbsp;under&nbsp;the&nbsp;terms&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                034&nbsp;&nbsp;;;;;&nbsp;as&nbsp;published&nbsp;by&nbsp;the&nbsp;Free&nbsp;Software&nbsp;Foundation;&nbsp;either&nbsp;version&nbsp;2
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                035&nbsp;&nbsp;;;;;&nbsp;of&nbsp;the&nbsp;License,&nbsp;or&nbsp;(at&nbsp;your&nbsp;option)&nbsp;any&nbsp;later&nbsp;version.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                036&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                037&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;distributed&nbsp;in&nbsp;the&nbsp;hope&nbsp;that&nbsp;it&nbsp;will&nbsp;be&nbsp;useful,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                038&nbsp;&nbsp;;;;;&nbsp;but&nbsp;WITHOUT&nbsp;ANY&nbsp;WARRANTY;&nbsp;without&nbsp;even&nbsp;the&nbsp;implied&nbsp;warranty&nbsp;of
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                039&nbsp;&nbsp;;;;;&nbsp;MERCHANTABILITY&nbsp;or&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE.&nbsp;&nbsp;See&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                040&nbsp;&nbsp;;;;;&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;for&nbsp;more&nbsp;details.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                041&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                042&nbsp;&nbsp;;;;;&nbsp;You&nbsp;should&nbsp;have&nbsp;received&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                043&nbsp;&nbsp;;;;;&nbsp;along&nbsp;with&nbsp;this&nbsp;program;&nbsp;if&nbsp;not,&nbsp;write&nbsp;to&nbsp;the&nbsp;Free&nbsp;Software
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                044&nbsp;&nbsp;;;;;&nbsp;Foundation,&nbsp;Inc.,&nbsp;51&nbsp;Franklin&nbsp;Street,&nbsp;Fifth&nbsp;Floor,&nbsp;Boston,&nbsp;MA&nbsp;&nbsp;02110-1301,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                045&nbsp;&nbsp;;;;;&nbsp;USA.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                046&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                047&nbsp;&nbsp;;;;;&nbsp;Copyright&nbsp;(C)&nbsp;2014&nbsp;Simon&nbsp;Brooke
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                048&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                049&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                050&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                051&nbsp;&nbsp;(defn&nbsp;coordinate?
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                052&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;`true`&nbsp;if&nbsp;this&nbsp;object&nbsp;`o`&nbsp;is&nbsp;a&nbsp;valid&nbsp;coordinate&nbsp;with&nbsp;respect&nbsp;to
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;`world`,&nbsp;else&nbsp;`false`.&nbsp;Assumes&nbsp;square&nbsp;worlds.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                054&nbsp;&nbsp;&nbsp;&nbsp;[o&nbsp;world]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                055&nbsp;&nbsp;&nbsp;&nbsp;(try
+                </span><br/>
+<span class="covered" title="14 out of 14 forms covered">
+                056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(or&nbsp;(zero?&nbsp;o)&nbsp;(pos-int?&nbsp;o))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                057&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;&nbsp;o&nbsp;(count&nbsp;world)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(catch&nbsp;Exception&nbsp;e
+                </span><br/>
+<span class="covered" title="20 out of 20 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(warn&nbsp;(format&nbsp;&quot;Not&nbsp;a&nbsp;valid&nbsp;coordinate:&nbsp;%s;&nbsp;%s&quot;&nbsp;o&nbsp;(.getMessage&nbsp;e)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                061&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                062&nbsp;&nbsp;(defn&nbsp;location?
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                063&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;`true`&nbsp;if&nbsp;this&nbsp;object&nbsp;`o`&nbsp;is&nbsp;a&nbsp;location&nbsp;as&nbsp;defined&nbsp;above&nbsp;with&nbsp;respect&nbsp;to
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;`world`,&nbsp;else&nbsp;`false`.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                065&nbsp;&nbsp;&nbsp;&nbsp;[o&nbsp;world]
+                </span><br/>
+<span class="partial" title="1 out of 2 forms covered">
+                066&nbsp;&nbsp;&nbsp;&nbsp;(try
+                </span><br/>
+<span class="partial" title="14 out of 16 forms covered">
+                067&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(map?&nbsp;o)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                068&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(integer?&nbsp;(:x&nbsp;o))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                069&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(integer?&nbsp;(:y&nbsp;o))
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                070&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(in-bounds?&nbsp;world&nbsp;(:x&nbsp;o)&nbsp;(:y&nbsp;o)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(catch&nbsp;Exception&nbsp;e
+                </span><br/>
+<span class="not-covered" title="0 out of 20 forms covered">
+                072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(warn&nbsp;(format&nbsp;&quot;Not&nbsp;a&nbsp;valid&nbsp;location:&nbsp;%s;&nbsp;%s&quot;&nbsp;o&nbsp;(.getMessage&nbsp;e)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                073&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                074&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                075&nbsp;&nbsp;(defn&nbsp;flow?
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                076&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;`true`&nbsp;if&nbsp;this&nbsp;object&nbsp;`o`&nbsp;is&nbsp;a&nbsp;flow&nbsp;as&nbsp;defined&nbsp;above&nbsp;with&nbsp;respect&nbsp;to
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                077&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;`world`,&nbsp;else&nbsp;`false`.&nbsp;Assumes&nbsp;square&nbsp;worlds.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                078&nbsp;&nbsp;&nbsp;&nbsp;[o&nbsp;world]
+                </span><br/>
+<span class="partial" title="1 out of 2 forms covered">
+                079&nbsp;&nbsp;&nbsp;&nbsp;(try
+                </span><br/>
+<span class="partial" title="16 out of 20 forms covered">
+                080&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(map?&nbsp;o)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                081&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(location?&nbsp;(:source&nbsp;o)&nbsp;world)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                082&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(location?&nbsp;(:destination&nbsp;o)&nbsp;world)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(keyword?&nbsp;(:property&nbsp;o))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pos?&nbsp;(:quantity&nbsp;o)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                085&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(catch&nbsp;Exception&nbsp;e
+                </span><br/>
+<span class="not-covered" title="0 out of 20 forms covered">
+                086&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(warn&nbsp;(format&nbsp;&quot;Not&nbsp;a&nbsp;valid&nbsp;flow:&nbsp;%s;&nbsp;%s&quot;&nbsp;o&nbsp;(.getMessage&nbsp;e)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                087&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                088&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                089&nbsp;&nbsp;(defn&nbsp;execute
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                090&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;a&nbsp;world&nbsp;like&nbsp;this&nbsp;`world`,&nbsp;except&nbsp;with&nbsp;the&nbsp;quantity&nbsp;of&nbsp;the&nbsp;property
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                091&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;described&nbsp;in&nbsp;this&nbsp;`flow`&nbsp;object&nbsp;transferred&nbsp;from&nbsp;the&nbsp;source&nbsp;of&nbsp;that&nbsp;flow
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                092&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;its&nbsp;destination.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                093&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;flow]
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                094&nbsp;&nbsp;&nbsp;&nbsp;(try
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                095&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[sx&nbsp;(-&gt;&nbsp;flow&nbsp;:source&nbsp;:x)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                096&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sy&nbsp;(-&gt;&nbsp;flow&nbsp;:source&nbsp;:y)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                097&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;source&nbsp;(get-cell&nbsp;world&nbsp;sx&nbsp;sy)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                098&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dx&nbsp;(-&gt;&nbsp;flow&nbsp;:destination&nbsp;:x)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                099&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dy&nbsp;(-&gt;&nbsp;flow&nbsp;:destination&nbsp;:y)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dest&nbsp;(get-cell&nbsp;world&nbsp;dx&nbsp;dy)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                101&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p&nbsp;(:property&nbsp;flow)
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                102&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q&nbsp;(min&nbsp;(:quantity&nbsp;flow)&nbsp;(get-num&nbsp;source&nbsp;p))
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                103&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s&#x27;&nbsp;(assoc&nbsp;source&nbsp;p&nbsp;(-&nbsp;(source&nbsp;p)&nbsp;q))
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                104&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d&#x27;&nbsp;(assoc&nbsp;dest&nbsp;p&nbsp;(+&nbsp;(get-num&nbsp;dest&nbsp;p)&nbsp;q))]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(=&nbsp;q&nbsp;(:quantity&nbsp;flow))
+                </span><br/>
+<span class="covered" title="18 out of 18 forms covered">
+                106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(info&nbsp;(format&nbsp;&quot;Moving&nbsp;%f&nbsp;units&nbsp;of&nbsp;%s&nbsp;from&nbsp;%d,%d&nbsp;to&nbsp;%d,%d&quot;
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                107&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(float&nbsp;q)&nbsp;(name&nbsp;p)&nbsp;sx&nbsp;sy&nbsp;dx&nbsp;dy))
+                </span><br/>
+<span class="covered" title="18 out of 18 forms covered">
+                108&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(warn&nbsp;(format&nbsp;&quot;Moving&nbsp;%s&nbsp;from&nbsp;%d,%d&nbsp;to&nbsp;%d,%d;&nbsp;%f&nbsp;units&nbsp;ordered&nbsp;but&nbsp;only&nbsp;%f&nbsp;available&quot;
+                </span><br/>
+<span class="covered" title="13 out of 13 forms covered">
+                109&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(name&nbsp;p)&nbsp;sx&nbsp;sy&nbsp;dx&nbsp;dy&nbsp;(float&nbsp;(:quantity&nbsp;flow))&nbsp;(float&nbsp;q))))
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge-cell&nbsp;(merge-cell&nbsp;world&nbsp;s&#x27;)&nbsp;d&#x27;))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(catch&nbsp;Exception&nbsp;e
+                </span><br/>
+<span class="not-covered" title="0 out of 20 forms covered">
+                112&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(warn&nbsp;(format&nbsp;&quot;Failed&nbsp;to&nbsp;execute&nbsp;flow&nbsp;%s:&nbsp;%s&quot;&nbsp;flow&nbsp;(.getMessage&nbsp;e)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                113&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;return&nbsp;the&nbsp;world&nbsp;unmodified.
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                114&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                115&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                116&nbsp;&nbsp;(defn&nbsp;execute-flows
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                117&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;a&nbsp;world&nbsp;like&nbsp;this&nbsp;`world`,&nbsp;but&nbsp;with&nbsp;each&nbsp;of&nbsp;these&nbsp;flows&nbsp;executed.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                118&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;flows]
+                </span><br/>
+<span class="covered" title="12 out of 12 forms covered">
+                119&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;execute&nbsp;world&nbsp;(filter&nbsp;#(flow?&nbsp;%&nbsp;world)&nbsp;flows)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                120&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                121&nbsp;&nbsp;;;&nbsp;building&nbsp;blocks&nbsp;for&nbsp;compiled&nbsp;flow&nbsp;rules
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                122&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="32 out of 32 forms covered">
+                123&nbsp;&nbsp;(defmacro&nbsp;create-location
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                124&nbsp;&nbsp;&nbsp;&nbsp;[cell]
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                125&nbsp;&nbsp;&nbsp;&nbsp;`(select-keys&nbsp;~cell&nbsp;[:x&nbsp;:y]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                126&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="56 out of 56 forms covered">
+                127&nbsp;&nbsp;(defmacro&nbsp;create-flow-quantity
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                128&nbsp;&nbsp;&nbsp;&nbsp;[source&nbsp;dest&nbsp;prop&nbsp;quantity]
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                129&nbsp;&nbsp;&nbsp;&nbsp;`{:source&nbsp;(create-location&nbsp;~source)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                130&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:destination&nbsp;(create-location&nbsp;~dest)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                131&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:prop&nbsp;~prop
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                132&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:quantity&nbsp;~quantity})
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                133&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="48 out of 48 forms covered">
+                134&nbsp;&nbsp;(defmacro&nbsp;create-flow-fraction
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                135&nbsp;&nbsp;&nbsp;&nbsp;[source&nbsp;dest&nbsp;prop&nbsp;fraction]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                136&nbsp;&nbsp;&nbsp;&nbsp;`(create-flow-quantity&nbsp;~source&nbsp;~dest&nbsp;~prop
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                137&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(*&nbsp;~fraction&nbsp;(get-num&nbsp;~source&nbsp;~prop))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                138&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="36 out of 36 forms covered">
+                139&nbsp;&nbsp;(defmacro&nbsp;create-flow-percent
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                140&nbsp;&nbsp;&nbsp;&nbsp;[source&nbsp;dest&nbsp;prop&nbsp;percent]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                141&nbsp;&nbsp;&nbsp;&nbsp;`(create-flow-fraction&nbsp;~source&nbsp;~dest&nbsp;~prop&nbsp;(&#x2F;&nbsp;~percent&nbsp;100)))
+                </span><br/>
+ </body>
+</html>

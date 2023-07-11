@@ -17,7 +17,7 @@
             that every cell's `:x` and `:y` properties reflect its place in the matrix.
             See `world.clj`.
 
-            Each time the world is transformed (see `transform-world`, for each cell,
+            Each time the world is transformed (see `transform-world`), for each cell,
             rules are applied in turn until one matches. Once one rule has matched no
             further rules can be applied to that cell."
       :author "Simon Brooke"}

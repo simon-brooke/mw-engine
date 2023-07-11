@@ -2,14 +2,16 @@
   "Allow flows of values between cells in the world.
    
    The design here is: a flow object is a map with the following properties:
-   1. :source, whose value is a location;
-   2. :destination, whose value is a location;
-   3. :property, whose value is a keyword;
-   4. :quantity, whose value is a positive real number.
+
+   1. `:source`, whose value is a location;
+   2. `:destination`, whose value is a location;
+   3. `:property`, whose value is a keyword;
+   4. `:quantity`, whose value is a positive real number.
 
    A location object is a map with the following properties:
-   1. :x, whose value is a natural number not greater than the extent of the world;
-   2. :y, whose value is a natural number not greater than the extent of the world.
+
+   1. `:x`, whose value is a natural number not greater than the extent of the world;
+   2. `:y`, whose value is a natural number not greater than the extent of the world.
 
    To execute a flow is transfer the quantity specified of the property specified
    from the cell at the source specified to the cell at the destination specified;
@@ -100,8 +102,11 @@
           q (min (:quantity flow) (get-num source p))
           s' (assoc source p (- (source p) q))
           d' (assoc dest p (+ (get-num dest p) q))]
-      (info (format "Moving %f units of %s from %d,%d to %d,%d"
+      (if (= q (:quantity flow))
+        (info (format "Moving %f units of %s from %d,%d to %d,%d"
                     (float q) (name p) sx sy dx dy))
+        (warn (format "Moving %s from %d,%d to %d,%d; %f units ordered but only %f available"
+                      (name p) sx sy dx dy (float (:quantity flow)) (float q))))
       (merge-cell (merge-cell world s') d'))
     (catch Exception e
       (warn (format "Failed to execute flow %s: %s" flow (.getMessage e)))
@@ -112,3 +117,25 @@
   "Return a world like this `world`, but with each of these flows executed."
   [world flows]
   (reduce execute world (filter #(flow? % world) flows)))
+
+;; building blocks for compiled flow rules
+
+(defmacro create-location
+  [cell]
+  `(select-keys ~cell [:x :y]))
+
+(defmacro create-flow-quantity
+  [source dest prop quantity]
+  `{:source (create-location ~source)
+    :destination (create-location ~dest)
+    :prop ~prop
+    :quantity ~quantity})
+
+(defmacro create-flow-fraction
+  [source dest prop fraction]
+  `(create-flow-quantity ~source ~dest ~prop
+                         (* ~fraction (get-num ~source ~prop))))
+
+(defmacro create-flow-percent
+  [source dest prop percent]
+  `(create-flow-fraction ~source ~dest ~prop (/ ~percent 100)))

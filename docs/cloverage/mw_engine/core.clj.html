@@ -1,0 +1,353 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../coverage.css"/>  <title> mw_engine/core.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;^{:doc&nbsp;&quot;Functions&nbsp;to&nbsp;transform&nbsp;a&nbsp;world&nbsp;and&nbsp;run&nbsp;rules.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Every&nbsp;rule&nbsp;is&nbsp;a&nbsp;function&nbsp;of&nbsp;two&nbsp;arguments,&nbsp;a&nbsp;cell&nbsp;and&nbsp;a&nbsp;world.&nbsp;If&nbsp;the&nbsp;rule
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fires,&nbsp;it&nbsp;returns&nbsp;a&nbsp;new&nbsp;cell,&nbsp;which&nbsp;should&nbsp;have&nbsp;the&nbsp;same&nbsp;values&nbsp;for&nbsp;`:x`&nbsp;and
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`:y`&nbsp;as&nbsp;the&nbsp;old&nbsp;cell.&nbsp;Anything&nbsp;else&nbsp;can&nbsp;be&nbsp;modified.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;While&nbsp;any&nbsp;function&nbsp;of&nbsp;two&nbsp;arguments&nbsp;can&nbsp;be&nbsp;used&nbsp;as&nbsp;a&nbsp;rule,&nbsp;a&nbsp;special&nbsp;high
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;level&nbsp;rule&nbsp;language&nbsp;is&nbsp;provided&nbsp;by&nbsp;the&nbsp;`mw-parser`&nbsp;package,&nbsp;which&nbsp;compiles
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rules&nbsp;expressed&nbsp;in&nbsp;a&nbsp;subset&nbsp;of&nbsp;English&nbsp;rules&nbsp;into&nbsp;suitable&nbsp;functions.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;cell&nbsp;is&nbsp;a&nbsp;map&nbsp;containing&nbsp;at&nbsp;least&nbsp;values&nbsp;for&nbsp;the&nbsp;keys&nbsp;:x,&nbsp;:y,&nbsp;and&nbsp;:state;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;transformation&nbsp;should&nbsp;not&nbsp;alter&nbsp;the&nbsp;values&nbsp;of&nbsp;:x&nbsp;or&nbsp;:y,&nbsp;and&nbsp;should&nbsp;not
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;a&nbsp;cell&nbsp;without&nbsp;a&nbsp;keyword&nbsp;as&nbsp;the&nbsp;value&nbsp;of&nbsp;:state.&nbsp;Anything&nbsp;else&nbsp;is
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;legal.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;world&nbsp;is&nbsp;a&nbsp;two&nbsp;dimensional&nbsp;matrix&nbsp;(sequence&nbsp;of&nbsp;sequences)&nbsp;of&nbsp;cells,&nbsp;such
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;every&nbsp;cell&#x27;s&nbsp;`:x`&nbsp;and&nbsp;`:y`&nbsp;properties&nbsp;reflect&nbsp;its&nbsp;place&nbsp;in&nbsp;the&nbsp;matrix.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See&nbsp;`world.clj`.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                020&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Each&nbsp;time&nbsp;the&nbsp;world&nbsp;is&nbsp;transformed&nbsp;(see&nbsp;`transform-world`),&nbsp;for&nbsp;each&nbsp;cell,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rules&nbsp;are&nbsp;applied&nbsp;in&nbsp;turn&nbsp;until&nbsp;one&nbsp;matches.&nbsp;Once&nbsp;one&nbsp;rule&nbsp;has&nbsp;matched&nbsp;no
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                022&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;further&nbsp;rules&nbsp;can&nbsp;be&nbsp;applied&nbsp;to&nbsp;that&nbsp;cell.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:author&nbsp;&quot;Simon&nbsp;Brooke&quot;}
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                024&nbsp;&nbsp;&nbsp;mw-engine.core
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                025&nbsp;&nbsp;&nbsp;&nbsp;(:require&nbsp;[mw-engine.utils&nbsp;:refer&nbsp;[get-int-or-zero&nbsp;map-world]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                026&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[taoensso.timbre&nbsp;:as&nbsp;l]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                027&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                029&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;;;;;&nbsp;mw-engine:&nbsp;the&nbsp;state&#x2F;transition&nbsp;engine&nbsp;of&nbsp;MicroWorld.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                031&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                032&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;free&nbsp;software;&nbsp;you&nbsp;can&nbsp;redistribute&nbsp;it&nbsp;and&#x2F;or
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                033&nbsp;&nbsp;;;;;&nbsp;modify&nbsp;it&nbsp;under&nbsp;the&nbsp;terms&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                034&nbsp;&nbsp;;;;;&nbsp;as&nbsp;published&nbsp;by&nbsp;the&nbsp;Free&nbsp;Software&nbsp;Foundation;&nbsp;either&nbsp;version&nbsp;2
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                035&nbsp;&nbsp;;;;;&nbsp;of&nbsp;the&nbsp;License,&nbsp;or&nbsp;(at&nbsp;your&nbsp;option)&nbsp;any&nbsp;later&nbsp;version.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                036&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                037&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;distributed&nbsp;in&nbsp;the&nbsp;hope&nbsp;that&nbsp;it&nbsp;will&nbsp;be&nbsp;useful,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                038&nbsp;&nbsp;;;;;&nbsp;but&nbsp;WITHOUT&nbsp;ANY&nbsp;WARRANTY;&nbsp;without&nbsp;even&nbsp;the&nbsp;implied&nbsp;warranty&nbsp;of
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                039&nbsp;&nbsp;;;;;&nbsp;MERCHANTABILITY&nbsp;or&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE.&nbsp;&nbsp;See&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                040&nbsp;&nbsp;;;;;&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;for&nbsp;more&nbsp;details.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                041&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                042&nbsp;&nbsp;;;;;&nbsp;You&nbsp;should&nbsp;have&nbsp;received&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                043&nbsp;&nbsp;;;;;&nbsp;along&nbsp;with&nbsp;this&nbsp;program;&nbsp;if&nbsp;not,&nbsp;write&nbsp;to&nbsp;the&nbsp;Free&nbsp;Software
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                044&nbsp;&nbsp;;;;;&nbsp;Foundation,&nbsp;Inc.,&nbsp;51&nbsp;Franklin&nbsp;Street,&nbsp;Fifth&nbsp;Floor,&nbsp;Boston,&nbsp;MA&nbsp;&nbsp;02110-1301,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                045&nbsp;&nbsp;;;;;&nbsp;USA.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                046&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                047&nbsp;&nbsp;;;;;&nbsp;Copyright&nbsp;(C)&nbsp;2014&nbsp;Simon&nbsp;Brooke
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                048&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                049&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                050&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                051&nbsp;&nbsp;(defn&nbsp;apply-rule
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                052&nbsp;&nbsp;&nbsp;&nbsp;&quot;Apply&nbsp;a&nbsp;single&nbsp;`rule`&nbsp;to&nbsp;a&nbsp;`cell`.&nbsp;What&nbsp;this&nbsp;is&nbsp;about&nbsp;is&nbsp;that&nbsp;I&nbsp;want&nbsp;to&nbsp;be&nbsp;able,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;debugging&nbsp;purposes,&nbsp;to&nbsp;tag&nbsp;a&nbsp;cell&nbsp;with&nbsp;the&nbsp;rule&nbsp;text&nbsp;of&nbsp;the&nbsp;rule&nbsp;which
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                054&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fired&nbsp;(and&nbsp;especially&nbsp;so&nbsp;when&nbsp;an&nbsp;exception&nbsp;is&nbsp;thrown.&nbsp;So&nbsp;a&nbsp;rule&nbsp;may&nbsp;be&nbsp;either
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                055&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;an&nbsp;ifn,&nbsp;or&nbsp;a&nbsp;list&nbsp;(ifn&nbsp;source-text).&nbsp;This&nbsp;function&nbsp;deals&nbsp;with&nbsp;despatching
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;on&nbsp;those&nbsp;two&nbsp;possibilities.&nbsp;`world`&nbsp;is&nbsp;also&nbsp;passed&nbsp;in&nbsp;in&nbsp;order&nbsp;to&nbsp;be&nbsp;able
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                057&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;access&nbsp;neighbours.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                058&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;cell&nbsp;rule]
+                </span><br/>
+<span class="partial" title="2 out of 3 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(ifn?&nbsp;rule)&nbsp;(apply-rule&nbsp;world&nbsp;cell&nbsp;rule&nbsp;nil)
+                </span><br/>
+<span class="covered" title="11 out of 11 forms covered">
+                061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(seq?&nbsp;rule)&nbsp;(let&nbsp;[[afn&nbsp;src]&nbsp;rule]&nbsp;(apply-rule&nbsp;world&nbsp;cell&nbsp;afn&nbsp;src))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                062&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;cell&nbsp;rule&nbsp;source]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                063&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[result&nbsp;(apply&nbsp;rule&nbsp;(list&nbsp;cell&nbsp;world))]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="12 out of 12 forms covered">
+                065&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;result&nbsp;source)&nbsp;(merge&nbsp;result&nbsp;{:rule&nbsp;source})
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                066&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;result))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                067&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                068&nbsp;&nbsp;(defn-&nbsp;apply-rules
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                069&nbsp;&nbsp;&nbsp;&nbsp;&quot;Derive&nbsp;a&nbsp;cell&nbsp;from&nbsp;this&nbsp;`cell`&nbsp;of&nbsp;this&nbsp;`world`&nbsp;by&nbsp;applying&nbsp;these&nbsp;`rules`.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                070&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;cell&nbsp;rules]
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(empty?&nbsp;rules)&nbsp;cell
+                </span><br/>
+<span class="not-covered" title="0 out of 8 forms covered">
+                072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;(let&nbsp;[result&nbsp;(apply-rule&nbsp;world&nbsp;cell&nbsp;(first&nbsp;rules))]
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                073&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;result&nbsp;result
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                074&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;(apply-rules&nbsp;world&nbsp;cell&nbsp;(rest&nbsp;rules))))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                075&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                076&nbsp;&nbsp;(defn-&nbsp;transform-cell
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                077&nbsp;&nbsp;&nbsp;&nbsp;&quot;Derive&nbsp;a&nbsp;cell&nbsp;from&nbsp;this&nbsp;`cell`&nbsp;of&nbsp;this&nbsp;`world`&nbsp;by&nbsp;applying&nbsp;these&nbsp;`rules`.&nbsp;If&nbsp;an
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                078&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exception&nbsp;is&nbsp;thrown,&nbsp;cache&nbsp;its&nbsp;message&nbsp;on&nbsp;the&nbsp;cell&nbsp;and&nbsp;set&nbsp;it&#x27;s&nbsp;state&nbsp;to&nbsp;error&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                079&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;cell&nbsp;rules]
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                080&nbsp;&nbsp;&nbsp;&nbsp;(try
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                081&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                082&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(apply-rules&nbsp;world&nbsp;cell&nbsp;rules)
+                </span><br/>
+<span class="not-covered" title="0 out of 8 forms covered">
+                083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:generation&nbsp;(+&nbsp;(get-int-or-zero&nbsp;cell&nbsp;:generation)&nbsp;1)})
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(catch&nbsp;Exception&nbsp;e
+                </span><br/>
+<span class="not-covered" title="0 out of 8 forms covered">
+                085&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:error
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                086&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(format&nbsp;&quot;%s&nbsp;at&nbsp;generation&nbsp;%d&nbsp;when&nbsp;in&nbsp;state&nbsp;%s&quot;
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                087&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.getMessage&nbsp;e)
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                088&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:generation&nbsp;cell)
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                089&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:state&nbsp;cell))
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                090&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:stacktrace&nbsp;(map&nbsp;#(.toString&nbsp;%)&nbsp;(.getStackTrace&nbsp;e))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                091&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:state&nbsp;:error}))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                092&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                093&nbsp;&nbsp;(defn&nbsp;transform-world
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                094&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;a&nbsp;world&nbsp;derived&nbsp;from&nbsp;this&nbsp;`world`&nbsp;by&nbsp;applying&nbsp;these&nbsp;`rules`&nbsp;to&nbsp;each&nbsp;cell.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                095&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;rules]
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                096&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map-world&nbsp;world&nbsp;transform-cell&nbsp;(list&nbsp;rules))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                097&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                098&nbsp;&nbsp;(defn&nbsp;run-world
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                099&nbsp;&nbsp;&nbsp;&nbsp;&quot;Run&nbsp;this&nbsp;world&nbsp;with&nbsp;these&nbsp;rules&nbsp;for&nbsp;this&nbsp;number&nbsp;of&nbsp;generations.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                100&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                101&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;a&nbsp;world&nbsp;as&nbsp;discussed&nbsp;above;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                102&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`init-rules`&nbsp;a&nbsp;sequence&nbsp;of&nbsp;rules&nbsp;as&nbsp;defined&nbsp;above,&nbsp;to&nbsp;be&nbsp;run&nbsp;once&nbsp;to&nbsp;initialise&nbsp;the&nbsp;world;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                103&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`rules`&nbsp;a&nbsp;sequence&nbsp;of&nbsp;rules&nbsp;as&nbsp;defined&nbsp;above,&nbsp;to&nbsp;be&nbsp;run&nbsp;iteratively&nbsp;for&nbsp;each&nbsp;generation;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                104&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`generations`&nbsp;an&nbsp;(integer)&nbsp;number&nbsp;of&nbsp;generations.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                105&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                106&nbsp;&nbsp;&nbsp;&nbsp;Return&nbsp;the&nbsp;final&nbsp;generation&nbsp;of&nbsp;the&nbsp;world.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                107&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;init-rules&nbsp;rules&nbsp;generations]
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                108&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;(fn&nbsp;[world&nbsp;iteration]
+                </span><br/>
+<span class="not-covered" title="0 out of 17 forms covered">
+                109&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(l&#x2F;info&nbsp;&quot;Running&nbsp;iteration&nbsp;&quot;&nbsp;iteration)
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(transform-world&nbsp;world&nbsp;rules))
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(transform-world&nbsp;world&nbsp;init-rules)
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                112&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(range&nbsp;generations)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                113&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                114&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                115&nbsp;&nbsp;
+                </span><br/>
+ </body>
+</html>

@@ -1,0 +1,659 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../coverage.css"/>  <title> mw_engine/drainage.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;^{:doc&nbsp;&quot;Experimental,&nbsp;probably&nbsp;of&nbsp;no&nbsp;interest&nbsp;to&nbsp;anyone&nbsp;else;&nbsp;attempt&nbsp;to
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compute&nbsp;drainage&nbsp;on&nbsp;a&nbsp;world,&nbsp;assumed&nbsp;to&nbsp;have&nbsp;altitudes&nbsp;already&nbsp;set
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;a&nbsp;heightmap.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:author&nbsp;&quot;Simon&nbsp;Brooke&quot;}
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;&nbsp;&nbsp;mw-engine.drainage
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;&nbsp;&nbsp;(:require&nbsp;[mw-engine.core&nbsp;:refer&nbsp;[run-world]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mw-engine.heightmap&nbsp;:as&nbsp;heightmap]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mw-engine.utils&nbsp;:refer&nbsp;[get-int-or-zero&nbsp;get-least-cell&nbsp;get-neighbours
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;get-neighbours-with-property-value
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;map-world]]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;;;;;&nbsp;mw-engine:&nbsp;the&nbsp;state&#x2F;transition&nbsp;engine&nbsp;of&nbsp;MicroWorld.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;free&nbsp;software;&nbsp;you&nbsp;can&nbsp;redistribute&nbsp;it&nbsp;and&#x2F;or
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;;;;;&nbsp;modify&nbsp;it&nbsp;under&nbsp;the&nbsp;terms&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;;;;;&nbsp;as&nbsp;published&nbsp;by&nbsp;the&nbsp;Free&nbsp;Software&nbsp;Foundation;&nbsp;either&nbsp;version&nbsp;2
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;;;;;&nbsp;of&nbsp;the&nbsp;License,&nbsp;or&nbsp;(at&nbsp;your&nbsp;option)&nbsp;any&nbsp;later&nbsp;version.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                020&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;distributed&nbsp;in&nbsp;the&nbsp;hope&nbsp;that&nbsp;it&nbsp;will&nbsp;be&nbsp;useful,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                022&nbsp;&nbsp;;;;;&nbsp;but&nbsp;WITHOUT&nbsp;ANY&nbsp;WARRANTY;&nbsp;without&nbsp;even&nbsp;the&nbsp;implied&nbsp;warranty&nbsp;of
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                023&nbsp;&nbsp;;;;;&nbsp;MERCHANTABILITY&nbsp;or&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE.&nbsp;&nbsp;See&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                024&nbsp;&nbsp;;;;;&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;for&nbsp;more&nbsp;details.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                025&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                026&nbsp;&nbsp;;;;;&nbsp;You&nbsp;should&nbsp;have&nbsp;received&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                027&nbsp;&nbsp;;;;;&nbsp;along&nbsp;with&nbsp;this&nbsp;program;&nbsp;if&nbsp;not,&nbsp;write&nbsp;to&nbsp;the&nbsp;Free&nbsp;Software
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;;;;;&nbsp;Foundation,&nbsp;Inc.,&nbsp;51&nbsp;Franklin&nbsp;Street,&nbsp;Fifth&nbsp;Floor,&nbsp;Boston,&nbsp;MA&nbsp;&nbsp;02110-1301,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                029&nbsp;&nbsp;;;;;&nbsp;USA.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                031&nbsp;&nbsp;;;;;&nbsp;Copyright&nbsp;(C)&nbsp;2014&nbsp;Simon&nbsp;Brooke
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                032&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                033&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                034&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                035&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                036&nbsp;&nbsp;(def&nbsp;^:dynamic&nbsp;*sealevel*&nbsp;10)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                037&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                038&nbsp;&nbsp;;;&nbsp;forward&nbsp;declaration&nbsp;of&nbsp;flow,&nbsp;to&nbsp;allow&nbsp;for&nbsp;a&nbsp;wee&nbsp;bit&nbsp;of&nbsp;mutual&nbsp;recursion.
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                039&nbsp;&nbsp;(declare&nbsp;flow)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                040&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                041&nbsp;&nbsp;(defn&nbsp;rainfall
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                042&nbsp;&nbsp;&nbsp;&nbsp;&quot;Compute&nbsp;rainfall&nbsp;for&nbsp;a&nbsp;cell&nbsp;with&nbsp;this&nbsp;`gradient`&nbsp;west-east,&nbsp;given
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                043&nbsp;&nbsp;&nbsp;&nbsp;`remaining`&nbsp;drops&nbsp;to&nbsp;distribute,&nbsp;and&nbsp;this&nbsp;overall&nbsp;map&nbsp;width.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                044&nbsp;&nbsp;&nbsp;&nbsp;[gradient&nbsp;remaining&nbsp;map-width]
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                045&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                046&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;there&#x27;s&nbsp;no&nbsp;rain&nbsp;left&nbsp;in&nbsp;the&nbsp;cloud,&nbsp;it&nbsp;can&#x27;t&nbsp;fall;
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                047&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(zero?&nbsp;remaining)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                048&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                049&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pos?&nbsp;gradient)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                050&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;rain,&nbsp;on&nbsp;prevailing&nbsp;westerly&nbsp;wind,&nbsp;falls&nbsp;preferentially&nbsp;on&nbsp;rising&nbsp;ground;
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                051&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(int&nbsp;(rand&nbsp;gradient))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                052&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;rain&nbsp;falls&nbsp;randomly&nbsp;across&nbsp;the&nbsp;width&nbsp;of&nbsp;the&nbsp;map...
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(zero?&nbsp;(int&nbsp;(rand&nbsp;map-width)))&nbsp;1
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                054&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                055&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                056&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                057&nbsp;&nbsp;(defn&nbsp;rain-row
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                058&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;a&nbsp;row&nbsp;like&nbsp;this&nbsp;`row`,&nbsp;across&nbsp;which&nbsp;rainfall&nbsp;has&nbsp;been&nbsp;distributed;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;`rain-probability`&nbsp;is&nbsp;specified,&nbsp;it&nbsp;is&nbsp;the&nbsp;probable&nbsp;rainfall&nbsp;on&nbsp;a&nbsp;cell
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;no&nbsp;gradient.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                061&nbsp;&nbsp;&nbsp;&nbsp;([row]
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rain-row&nbsp;row&nbsp;1))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                063&nbsp;&nbsp;&nbsp;&nbsp;([row&nbsp;rain-probability]
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rain-row&nbsp;row&nbsp;(count&nbsp;row)&nbsp;0&nbsp;(int&nbsp;(*&nbsp;(count&nbsp;row)&nbsp;rain-probability))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                065&nbsp;&nbsp;&nbsp;&nbsp;([row&nbsp;map-width&nbsp;previous-altitude&nbsp;drops-in-cloud]
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                066&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                067&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(empty?&nbsp;row)&nbsp;nil
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                068&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pos?&nbsp;drops-in-cloud)
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                069&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[cell&nbsp;(first&nbsp;row)
+                </span><br/>
+<span class="not-covered" title="0 out of 8 forms covered">
+                070&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alt&nbsp;(or&nbsp;(:altitude&nbsp;cell)&nbsp;0)
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rising&nbsp;(-&nbsp;alt&nbsp;previous-altitude)
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fall&nbsp;(rainfall&nbsp;rising&nbsp;drops-in-cloud&nbsp;map-width)]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                073&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                074&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assoc&nbsp;cell&nbsp;:rainfall&nbsp;fall)
+                </span><br/>
+<span class="not-covered" title="0 out of 10 forms covered">
+                075&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rain-row&nbsp;(rest&nbsp;row)&nbsp;map-width&nbsp;alt&nbsp;(-&nbsp;drops-in-cloud&nbsp;fall))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                076&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                077&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                078&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#(assoc&nbsp;%&nbsp;:rainfall&nbsp;0)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                079&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;row))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                080&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                081&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                082&nbsp;&nbsp;(defn&nbsp;rain-world
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                083&nbsp;&nbsp;&nbsp;&nbsp;&quot;Simulate&nbsp;rainfall&nbsp;on&nbsp;this&nbsp;`world`.&nbsp;TODO:&nbsp;Doesn&#x27;t&nbsp;really&nbsp;work&nbsp;just&nbsp;now&nbsp;-&nbsp;should
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rain&nbsp;more&nbsp;on&nbsp;west-facing&nbsp;slopes,&nbsp;and&nbsp;less&nbsp;to&nbsp;the&nbsp;east&nbsp;of&nbsp;high&nbsp;ground&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                085&nbsp;&nbsp;&nbsp;&nbsp;[world]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                086&nbsp;&nbsp;&nbsp;&nbsp;(map
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                087&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rain-row
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                088&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                089&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                090&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                091&nbsp;&nbsp;(defn&nbsp;flow-contributors
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                092&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;cells&nbsp;in&nbsp;this&nbsp;`world`&nbsp;which&nbsp;are&nbsp;higher&nbsp;than&nbsp;this
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                093&nbsp;&nbsp;&nbsp;&nbsp;`cell`&nbsp;and&nbsp;for&nbsp;which&nbsp;this&nbsp;cell&nbsp;is&nbsp;the&nbsp;lowest&nbsp;neighbour,&nbsp;or&nbsp;which&nbsp;are&nbsp;at&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                094&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;same&nbsp;altitude&nbsp;and&nbsp;have&nbsp;greater&nbsp;flow&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                095&nbsp;&nbsp;&nbsp;&nbsp;[cell&nbsp;world]
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                096&nbsp;&nbsp;&nbsp;&nbsp;(filter&nbsp;#(map?&nbsp;%)
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                097&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                098&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[n]
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                099&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="not-covered" title="0 out of 10 forms covered">
+                100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;cell&nbsp;(get-least-cell&nbsp;(get-neighbours&nbsp;world&nbsp;n)&nbsp;:altitude))&nbsp;n
+                </span><br/>
+<span class="not-covered" title="0 out of 12 forms covered">
+                101&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(=&nbsp;(:altitude&nbsp;cell)&nbsp;(:altitude&nbsp;n))
+                </span><br/>
+<span class="not-covered" title="0 out of 17 forms covered">
+                102&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;&nbsp;(or&nbsp;(:flow&nbsp;n)&nbsp;0)&nbsp;(or&nbsp;(:flow&nbsp;cell)&nbsp;0)))&nbsp;n))
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                103&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-neighbours-with-property-value
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                104&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world&nbsp;(:x&nbsp;cell)&nbsp;(:y&nbsp;cell)&nbsp;1&nbsp;:altitude
+                </span><br/>
+<span class="not-covered" title="0 out of 9 forms covered">
+                105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(or&nbsp;(:altitude&nbsp;cell)&nbsp;0)&nbsp;&gt;=))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                106&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                107&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                108&nbsp;&nbsp;(defn&nbsp;is-hollow
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                109&nbsp;&nbsp;&nbsp;&nbsp;&quot;Detects&nbsp;point&nbsp;hollows&nbsp;-&nbsp;that&nbsp;is,&nbsp;individual&nbsp;cells&nbsp;all&nbsp;of&nbsp;whose&nbsp;neighbours
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;are&nbsp;higher.&nbsp;Return&nbsp;true&nbsp;if&nbsp;this&nbsp;`cell`&nbsp;has&nbsp;an&nbsp;altitude&nbsp;lower&nbsp;than&nbsp;any&nbsp;of
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;its&nbsp;neighbours&nbsp;in&nbsp;this&nbsp;`world`&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                112&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;cell]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                113&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;quicker&nbsp;to&nbsp;count&nbsp;the&nbsp;elements&nbsp;of&nbsp;the&nbsp;list&nbsp;and&nbsp;compare&nbsp;equality&nbsp;of&nbsp;numbers
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                114&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;than&nbsp;recursive&nbsp;equality&nbsp;check&nbsp;on&nbsp;members,&nbsp;I&nbsp;think.&nbsp;But&nbsp;worth&nbsp;benchmarking.
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                115&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[neighbours&nbsp;(get-neighbours&nbsp;world&nbsp;cell)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                116&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;altitude&nbsp;(get-int-or-zero&nbsp;cell&nbsp;:altitude)]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                117&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;(count&nbsp;neighbours)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                118&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(count&nbsp;(get-neighbours-with-property-value
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                119&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world&nbsp;(:x&nbsp;cell)&nbsp;(:y&nbsp;cell)&nbsp;1&nbsp;:altitude&nbsp;altitude&nbsp;&gt;)))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                120&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                121&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                122&nbsp;&nbsp;(defn&nbsp;flood-hollow
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                123&nbsp;&nbsp;&nbsp;&nbsp;&quot;Raise&nbsp;the&nbsp;altitude&nbsp;of&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;`cell`&nbsp;of&nbsp;this&nbsp;`world`&nbsp;to&nbsp;the&nbsp;altitude
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                124&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;lowest&nbsp;of&nbsp;its&nbsp;`neighbours`.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                125&nbsp;&nbsp;&nbsp;&nbsp;([_world&nbsp;cell&nbsp;neighbours]
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                126&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[lowest&nbsp;(get-least-cell&nbsp;neighbours&nbsp;:altitude)]
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                127&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:state&nbsp;:water&nbsp;:altitude&nbsp;(:altitude&nbsp;lowest)})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                128&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;cell]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                129&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(flood-hollow&nbsp;world&nbsp;cell&nbsp;(get-neighbours&nbsp;world&nbsp;cell))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                130&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                131&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                132&nbsp;&nbsp;(defn&nbsp;flood-hollows
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                133&nbsp;&nbsp;&nbsp;&nbsp;&quot;Flood&nbsp;all&nbsp;local&nbsp;hollows&nbsp;in&nbsp;this&nbsp;`world`.&nbsp;At&nbsp;this&nbsp;stage&nbsp;only&nbsp;floods&nbsp;single
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                134&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cell&nbsp;hollows.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                135&nbsp;&nbsp;&nbsp;&nbsp;[world]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                136&nbsp;&nbsp;&nbsp;&nbsp;(map-world&nbsp;world
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                137&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#(if&nbsp;(is-hollow&nbsp;%1&nbsp;%2)&nbsp;(flood-hollow&nbsp;%1&nbsp;%2)&nbsp;%2)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                138&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                139&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                140&nbsp;&nbsp;(def&nbsp;max-altitude&nbsp;255)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                141&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                142&nbsp;&nbsp;(defn&nbsp;flow-nr
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                143&nbsp;&nbsp;&nbsp;&nbsp;&quot;Experimental&nbsp;non&nbsp;recursive&nbsp;flow&nbsp;algorithm,&nbsp;needs&nbsp;to&nbsp;be&nbsp;run&nbsp;on&nbsp;a&nbsp;world&nbsp;as
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                144&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;many&nbsp;times&nbsp;as&nbsp;there&nbsp;are&nbsp;distinct&nbsp;altitude&nbsp;values.&nbsp;This&nbsp;algorithm&nbsp;works&nbsp;only
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                145&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;applied&nbsp;sequentially&nbsp;from&nbsp;the&nbsp;highest&nbsp;altitude&nbsp;to&nbsp;the&nbsp;lowest,&nbsp;see
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                146&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`flow-world-nr`.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                147&nbsp;&nbsp;&nbsp;&nbsp;[cell&nbsp;world]
+                </span><br/>
+<span class="not-covered" title="0 out of 9 forms covered">
+                148&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(=&nbsp;(-&nbsp;max-altitude&nbsp;(get-int-or-zero&nbsp;cell&nbsp;:generation))
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                149&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-int-or-zero&nbsp;cell&nbsp;:altitude))
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                150&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                151&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:flow&nbsp;(reduce&nbsp;+
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                152&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                153&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#(+&nbsp;(get-int-or-zero&nbsp;%&nbsp;:rainfall)
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                154&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-int-or-zero&nbsp;%&nbsp;:flow))
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                155&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(flow-contributors&nbsp;cell&nbsp;world)))})))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                156&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                157&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                158&nbsp;&nbsp;(def&nbsp;flow
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                159&nbsp;&nbsp;&nbsp;&nbsp;&quot;Compute&nbsp;the&nbsp;total&nbsp;flow&nbsp;upstream&nbsp;of&nbsp;this&nbsp;`cell`&nbsp;in&nbsp;this&nbsp;`world`,&nbsp;and&nbsp;return&nbsp;a&nbsp;cell&nbsp;identical
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                160&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;this&nbsp;one&nbsp;but&nbsp;having&nbsp;a&nbsp;value&nbsp;of&nbsp;its&nbsp;flow&nbsp;property&nbsp;set&nbsp;from&nbsp;that&nbsp;computation.&nbsp;The&nbsp;function&nbsp;is
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                161&nbsp;&nbsp;&nbsp;&nbsp;memoised&nbsp;because&nbsp;the&nbsp;consequence&nbsp;of&nbsp;mapping&nbsp;a&nbsp;recursive&nbsp;function&nbsp;across&nbsp;an&nbsp;array&nbsp;is&nbsp;that&nbsp;many
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                162&nbsp;&nbsp;&nbsp;&nbsp;cells&nbsp;will&nbsp;be&nbsp;revisited&nbsp;-&nbsp;potentially&nbsp;many&nbsp;times.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                163&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                164&nbsp;&nbsp;&nbsp;&nbsp;Flow&nbsp;comes&nbsp;from&nbsp;a&nbsp;higher&nbsp;cell&nbsp;to&nbsp;a&nbsp;lower&nbsp;only&nbsp;if&nbsp;the&nbsp;lower&nbsp;is&nbsp;the&nbsp;lowest&nbsp;neighbour&nbsp;of&nbsp;the&nbsp;higher.&quot;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                165&nbsp;&nbsp;&nbsp;&nbsp;(memoize
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                166&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;world]
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                167&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="not-covered" title="0 out of 8 forms covered">
+                168&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not&nbsp;(nil?&nbsp;(:flow&nbsp;cell)))&nbsp;cell
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                169&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;=&nbsp;(or&nbsp;(:altitude&nbsp;cell)&nbsp;0)&nbsp;*sealevel*)&nbsp;cell
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                171&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                172&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:flow&nbsp;(+&nbsp;(:rainfall&nbsp;cell)
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                173&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(apply&nbsp;+
+                </span><br/>
+<span class="not-covered" title="0 out of 9 forms covered">
+                174&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map&nbsp;(fn&nbsp;[neighbour]&nbsp;(:flow&nbsp;(flow&nbsp;neighbour&nbsp;world)))
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                175&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(flow-contributors&nbsp;cell&nbsp;world))))})))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                176&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                177&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                178&nbsp;&nbsp;(defn&nbsp;flow-world-nr
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                179&nbsp;&nbsp;&nbsp;&nbsp;&quot;Experimental&nbsp;non-recursive&nbsp;flow-world&nbsp;algorithm&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                180&nbsp;&nbsp;&nbsp;&nbsp;[world]
+                </span><br/>
+<span class="not-covered" title="0 out of 8 forms covered">
+                181&nbsp;&nbsp;&nbsp;&nbsp;(run-world&nbsp;world&nbsp;nil&nbsp;(list&nbsp;flow-nr)&nbsp;max-altitude))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                182&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                183&nbsp;&nbsp;(defn&nbsp;flow-world
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                184&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;a&nbsp;world&nbsp;like&nbsp;this&nbsp;`world`,&nbsp;but&nbsp;with&nbsp;cells&nbsp;tagged&nbsp;with&nbsp;the&nbsp;amount&nbsp;of
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                185&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;water&nbsp;flowing&nbsp;through&nbsp;them.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                186&nbsp;&nbsp;&nbsp;&nbsp;[world]
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                187&nbsp;&nbsp;&nbsp;&nbsp;(map-world&nbsp;(rain-world&nbsp;world)&nbsp;flow))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                188&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                189&nbsp;&nbsp;(defn&nbsp;explore-lake
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                190&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;a&nbsp;sequence&nbsp;of&nbsp;cells&nbsp;starting&nbsp;with&nbsp;this&nbsp;`cell`&nbsp;in&nbsp;this&nbsp;`world`&nbsp;which
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                191&nbsp;&nbsp;&nbsp;&nbsp;form&nbsp;a&nbsp;contiguous&nbsp;lake&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                192&nbsp;&nbsp;&nbsp;&nbsp;[_world&nbsp;_cell]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                193&nbsp;&nbsp;&nbsp;&nbsp;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                194&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                195&nbsp;&nbsp;(defn&nbsp;is-lake?
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                196&nbsp;&nbsp;&nbsp;&nbsp;&quot;If&nbsp;this&nbsp;`cell`&nbsp;in&nbsp;this&nbsp;`world`&nbsp;is&nbsp;not&nbsp;part&nbsp;of&nbsp;a&nbsp;lake,&nbsp;return&nbsp;nil.&nbsp;If&nbsp;it&nbsp;is,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                197&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;a&nbsp;cell&nbsp;like&nbsp;this&nbsp;`cell`&nbsp;tagged&nbsp;as&nbsp;part&nbsp;of&nbsp;a&nbsp;lake.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                198&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;cell]
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                199&nbsp;&nbsp;&nbsp;&nbsp;(if
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;it&#x27;s&nbsp;already&nbsp;tagged&nbsp;as&nbsp;a&nbsp;lake,&nbsp;it&#x27;s&nbsp;a&nbsp;lake
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                201&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:lake&nbsp;cell)&nbsp;cell
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                202&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let
+                </span><br/>
+<span class="not-covered" title="0 out of 10 forms covered">
+                203&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[outflow&nbsp;(apply&nbsp;min&nbsp;(map&nbsp;:altitude&nbsp;(get-neighbours&nbsp;world&nbsp;cell)))]
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                204&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when-not
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                205&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;&nbsp;(:altitude&nbsp;cell)&nbsp;outflow)
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                206&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assoc&nbsp;cell&nbsp;:lake&nbsp;true)))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                207&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                208&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                209&nbsp;&nbsp;(defn&nbsp;find-lakes
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                210&nbsp;&nbsp;&nbsp;&nbsp;[_world]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                211&nbsp;&nbsp;&nbsp;&nbsp;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                212&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                213&nbsp;&nbsp;(defn&nbsp;run-drainage
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                214&nbsp;&nbsp;&nbsp;&nbsp;&quot;Create&nbsp;a&nbsp;world&nbsp;from&nbsp;the&nbsp;heightmap&nbsp;`hmap`,&nbsp;rain&nbsp;on&nbsp;it,&nbsp;and&nbsp;then&nbsp;compute&nbsp;river
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                215&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flows.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                216&nbsp;&nbsp;&nbsp;&nbsp;[hmap]
+                </span><br/>
+<span class="not-covered" title="0 out of 9 forms covered">
+                217&nbsp;&nbsp;&nbsp;&nbsp;(flow-world&nbsp;(rain-world&nbsp;(flood-hollows&nbsp;(heightmap&#x2F;apply-heightmap&nbsp;hmap)))))
+                </span><br/>
+ </body>
+</html>

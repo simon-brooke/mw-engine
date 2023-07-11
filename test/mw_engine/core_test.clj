@@ -1,11 +1,11 @@
 (ns mw-engine.core-test
-  (:require [clojure.test :refer :all]
-            [mw-engine.core :refer :all]))
+  (:require [clojure.test :refer [deftest is testing]]
+            [mw-engine.core :refer [apply-rule]]))
 
 (deftest apply-rule-test
   (testing "Application of a single rule"
            (let [afn (eval 
-                       (fn [cell world]
+                       (fn [cell _world]
                          (cond 
                            (= (:state cell) :new) 
                            (merge cell {:state :grassland}))))

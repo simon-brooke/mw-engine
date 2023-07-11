@@ -1,0 +1,275 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../coverage.css"/>  <title> mw_engine/world.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;^{:doc&nbsp;&quot;Functions&nbsp;to&nbsp;create&nbsp;and&nbsp;to&nbsp;print&nbsp;two&nbsp;dimensional&nbsp;cellular&nbsp;automata.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Nothing&nbsp;in&nbsp;this&nbsp;namespace&nbsp;should&nbsp;determine&nbsp;what&nbsp;states&nbsp;are&nbsp;possible&nbsp;within
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;automaton,&nbsp;except&nbsp;for&nbsp;the&nbsp;initial&nbsp;state,&nbsp;:new.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;cell&nbsp;is&nbsp;a&nbsp;map&nbsp;containing&nbsp;at&nbsp;least&nbsp;values&nbsp;for&nbsp;the&nbsp;keys&nbsp;`:x`,&nbsp;`:y`,&nbsp;and&nbsp;`:state`.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;world&nbsp;is&nbsp;a&nbsp;two&nbsp;dimensional&nbsp;matrix&nbsp;(sequence&nbsp;of&nbsp;sequences)&nbsp;of&nbsp;cells,&nbsp;such
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;every&nbsp;cell&#x27;s&nbsp;`:x`&nbsp;and&nbsp;`:y`&nbsp;properties&nbsp;reflect&nbsp;its&nbsp;place&nbsp;in&nbsp;the&nbsp;matrix.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:author&nbsp;&quot;Simon&nbsp;Brooke&quot;}
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;&nbsp;mw-engine.world
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;&nbsp;&nbsp;(:require&nbsp;[clojure.string&nbsp;:as&nbsp;string]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mw-engine.utils&nbsp;:refer&nbsp;[population]]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;;;;;&nbsp;mw-engine:&nbsp;the&nbsp;state&#x2F;transition&nbsp;engine&nbsp;of&nbsp;MicroWorld.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;free&nbsp;software;&nbsp;you&nbsp;can&nbsp;redistribute&nbsp;it&nbsp;and&#x2F;or
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                020&nbsp;&nbsp;;;;;&nbsp;modify&nbsp;it&nbsp;under&nbsp;the&nbsp;terms&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;;;;;&nbsp;as&nbsp;published&nbsp;by&nbsp;the&nbsp;Free&nbsp;Software&nbsp;Foundation;&nbsp;either&nbsp;version&nbsp;2
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                022&nbsp;&nbsp;;;;;&nbsp;of&nbsp;the&nbsp;License,&nbsp;or&nbsp;(at&nbsp;your&nbsp;option)&nbsp;any&nbsp;later&nbsp;version.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                023&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                024&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;distributed&nbsp;in&nbsp;the&nbsp;hope&nbsp;that&nbsp;it&nbsp;will&nbsp;be&nbsp;useful,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                025&nbsp;&nbsp;;;;;&nbsp;but&nbsp;WITHOUT&nbsp;ANY&nbsp;WARRANTY;&nbsp;without&nbsp;even&nbsp;the&nbsp;implied&nbsp;warranty&nbsp;of
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                026&nbsp;&nbsp;;;;;&nbsp;MERCHANTABILITY&nbsp;or&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE.&nbsp;&nbsp;See&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                027&nbsp;&nbsp;;;;;&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;for&nbsp;more&nbsp;details.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                029&nbsp;&nbsp;;;;;&nbsp;You&nbsp;should&nbsp;have&nbsp;received&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;;;;;&nbsp;along&nbsp;with&nbsp;this&nbsp;program;&nbsp;if&nbsp;not,&nbsp;write&nbsp;to&nbsp;the&nbsp;Free&nbsp;Software
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                031&nbsp;&nbsp;;;;;&nbsp;Foundation,&nbsp;Inc.,&nbsp;51&nbsp;Franklin&nbsp;Street,&nbsp;Fifth&nbsp;Floor,&nbsp;Boston,&nbsp;MA&nbsp;&nbsp;02110-1301,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                032&nbsp;&nbsp;;;;;&nbsp;USA.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                033&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                034&nbsp;&nbsp;;;;;&nbsp;Copyright&nbsp;(C)&nbsp;2014&nbsp;Simon&nbsp;Brooke
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                035&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                036&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                037&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="30 out of 30 forms covered">
+                038&nbsp;&nbsp;(defmacro&nbsp;make-cell
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                039&nbsp;&nbsp;&nbsp;&nbsp;&quot;Create&nbsp;a&nbsp;minimal&nbsp;default&nbsp;cell&nbsp;at&nbsp;x,&nbsp;y
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                040&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                041&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`x`&nbsp;the&nbsp;x&nbsp;coordinate&nbsp;at&nbsp;which&nbsp;this&nbsp;cell&nbsp;is&nbsp;created;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                042&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`y`&nbsp;the&nbsp;y&nbsp;coordinate&nbsp;at&nbsp;which&nbsp;this&nbsp;cell&nbsp;is&nbsp;created.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                043&nbsp;&nbsp;&nbsp;&nbsp;[x&nbsp;y]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                044&nbsp;&nbsp;&nbsp;&nbsp;`{:x&nbsp;~x&nbsp;:y&nbsp;~y&nbsp;:state&nbsp;:new})
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                045&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                046&nbsp;&nbsp;(defn&nbsp;make-world
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                047&nbsp;&nbsp;&nbsp;&nbsp;&quot;Make&nbsp;a&nbsp;world&nbsp;width&nbsp;cells&nbsp;from&nbsp;east&nbsp;to&nbsp;west,&nbsp;and&nbsp;height&nbsp;cells&nbsp;from&nbsp;north&nbsp;to
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                048&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;south.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                049&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                050&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`width`&nbsp;a&nbsp;natural&nbsp;number&nbsp;representing&nbsp;the&nbsp;width&nbsp;of&nbsp;the&nbsp;matrix&nbsp;to&nbsp;be&nbsp;created;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                051&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`height`&nbsp;a&nbsp;natural&nbsp;number&nbsp;representing&nbsp;the&nbsp;height&nbsp;of&nbsp;the&nbsp;matrix&nbsp;to&nbsp;be&nbsp;created.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                052&nbsp;&nbsp;&nbsp;&nbsp;[width&nbsp;height]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                053&nbsp;&nbsp;&nbsp;&nbsp;(apply&nbsp;vector
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                054&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map&nbsp;(fn&nbsp;[h]
+                </span><br/>
+<span class="covered" title="16 out of 16 forms covered">
+                055&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(apply&nbsp;vector&nbsp;(map&nbsp;#(make-cell&nbsp;%&nbsp;h)&nbsp;(range&nbsp;width))))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(range&nbsp;height))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                057&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                058&nbsp;&nbsp;(defn&nbsp;truncate-state
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;&quot;Truncate&nbsp;the&nbsp;print&nbsp;name&nbsp;of&nbsp;the&nbsp;state&nbsp;of&nbsp;this&nbsp;cell&nbsp;to&nbsp;at&nbsp;most&nbsp;limit&nbsp;characters.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;[cell&nbsp;limit]
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                061&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[s&nbsp;(:state&nbsp;cell)]
+                </span><br/>
+<span class="not-covered" title="0 out of 13 forms covered">
+                062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(&gt;&nbsp;(count&nbsp;(str&nbsp;s))&nbsp;limit)&nbsp;(subs&nbsp;s&nbsp;0&nbsp;limit)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                063&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;s)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                064&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                065&nbsp;&nbsp;(defn&nbsp;format-cell
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                066&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;a&nbsp;formatted&nbsp;string&nbsp;summarising&nbsp;the&nbsp;current&nbsp;state&nbsp;of&nbsp;this&nbsp;cell.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                067&nbsp;&nbsp;&nbsp;&nbsp;[cell]
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                068&nbsp;&nbsp;&nbsp;&nbsp;(format&nbsp;&quot;%10s(%2d&#x2F;%2d)&quot;
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                069&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(truncate-state&nbsp;cell&nbsp;10)
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                070&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(population&nbsp;cell&nbsp;:deer)
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(population&nbsp;cell&nbsp;:wolves)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                072&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                073&nbsp;&nbsp;(defn-&nbsp;format-world-row
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                074&nbsp;&nbsp;&nbsp;&nbsp;&quot;Format&nbsp;one&nbsp;row&nbsp;in&nbsp;the&nbsp;state&nbsp;of&nbsp;a&nbsp;world&nbsp;for&nbsp;printing.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                075&nbsp;&nbsp;&nbsp;&nbsp;[row]
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                076&nbsp;&nbsp;&nbsp;&nbsp;(string&#x2F;join&nbsp;(map&nbsp;format-cell&nbsp;row)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                077&nbsp;&nbsp;
+                </span><br/>
+<span class="partial" title="1 out of 2 forms covered">
+                078&nbsp;&nbsp;(defn&nbsp;print-world
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                079&nbsp;&nbsp;&nbsp;&nbsp;&quot;Print&nbsp;the&nbsp;current&nbsp;state&nbsp;of&nbsp;this&nbsp;world,&nbsp;and&nbsp;return&nbsp;nil.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                080&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                081&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;a&nbsp;world&nbsp;as&nbsp;defined&nbsp;above.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                082&nbsp;&nbsp;&nbsp;&nbsp;[world]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                083&nbsp;&nbsp;&nbsp;&nbsp;(println)
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                084&nbsp;&nbsp;&nbsp;&nbsp;(dorun
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                085&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                086&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#(println
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                087&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(format-world-row&nbsp;%))
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                088&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                089&nbsp;&nbsp;&nbsp;&nbsp;nil)
+                </span><br/>
+ </body>
+</html>

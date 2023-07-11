@@ -1,0 +1,911 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../coverage.css"/>  <title> mw_engine/utils.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;^{:doc&nbsp;&quot;&nbsp;Utility&nbsp;functions&nbsp;needed&nbsp;by&nbsp;MicroWorld&nbsp;and,&nbsp;specifically,&nbsp;in&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interpretation&nbsp;of&nbsp;MicroWorld&nbsp;rule.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:author&nbsp;&quot;Simon&nbsp;Brooke&quot;}
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;mw-engine.utils
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;&nbsp;&nbsp;(:require
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[clojure.math.combinatorics&nbsp;:as&nbsp;combo]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;;;;;&nbsp;mw-engine:&nbsp;the&nbsp;state&#x2F;transition&nbsp;engine&nbsp;of&nbsp;MicroWorld.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;free&nbsp;software;&nbsp;you&nbsp;can&nbsp;redistribute&nbsp;it&nbsp;and&#x2F;or
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;;;;;&nbsp;modify&nbsp;it&nbsp;under&nbsp;the&nbsp;terms&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;;;;;&nbsp;as&nbsp;published&nbsp;by&nbsp;the&nbsp;Free&nbsp;Software&nbsp;Foundation;&nbsp;either&nbsp;version&nbsp;2
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;;;;;&nbsp;of&nbsp;the&nbsp;License,&nbsp;or&nbsp;(at&nbsp;your&nbsp;option)&nbsp;any&nbsp;later&nbsp;version.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;distributed&nbsp;in&nbsp;the&nbsp;hope&nbsp;that&nbsp;it&nbsp;will&nbsp;be&nbsp;useful,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;;;;;&nbsp;but&nbsp;WITHOUT&nbsp;ANY&nbsp;WARRANTY;&nbsp;without&nbsp;even&nbsp;the&nbsp;implied&nbsp;warranty&nbsp;of
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;;;;;&nbsp;MERCHANTABILITY&nbsp;or&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE.&nbsp;&nbsp;See&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                020&nbsp;&nbsp;;;;;&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;for&nbsp;more&nbsp;details.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                022&nbsp;&nbsp;;;;;&nbsp;You&nbsp;should&nbsp;have&nbsp;received&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                023&nbsp;&nbsp;;;;;&nbsp;along&nbsp;with&nbsp;this&nbsp;program;&nbsp;if&nbsp;not,&nbsp;write&nbsp;to&nbsp;the&nbsp;Free&nbsp;Software
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                024&nbsp;&nbsp;;;;;&nbsp;Foundation,&nbsp;Inc.,&nbsp;51&nbsp;Franklin&nbsp;Street,&nbsp;Fifth&nbsp;Floor,&nbsp;Boston,&nbsp;MA&nbsp;&nbsp;02110-1301,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                025&nbsp;&nbsp;;;;;&nbsp;USA.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                026&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                027&nbsp;&nbsp;;;;;&nbsp;Copyright&nbsp;(C)&nbsp;2014&nbsp;Simon&nbsp;Brooke
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                029&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                031&nbsp;&nbsp;(defn&nbsp;member?
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                032&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;&#x27;true&#x27;&nbsp;if&nbsp;elt&nbsp;is&nbsp;a&nbsp;member&nbsp;of&nbsp;col,&nbsp;else&nbsp;&#x27;false&#x27;.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                033&nbsp;&nbsp;&nbsp;&nbsp;[elt&nbsp;col]&nbsp;
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                034&nbsp;&nbsp;&nbsp;&nbsp;(contains?&nbsp;(set&nbsp;col)&nbsp;elt))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                035&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                036&nbsp;&nbsp;(defn&nbsp;get-int-or-zero
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                037&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;the&nbsp;value&nbsp;of&nbsp;this&nbsp;`property`&nbsp;from&nbsp;this&nbsp;`map`&nbsp;if&nbsp;it&nbsp;is&nbsp;a&nbsp;integer;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                038&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;otherwise&nbsp;return&nbsp;zero.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                039&nbsp;&nbsp;&nbsp;&nbsp;[map&nbsp;property]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                040&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[value&nbsp;(map&nbsp;property)]
+                </span><br/>
+<span class="partial" title="5 out of 6 forms covered">
+                041&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(integer?&nbsp;value)&nbsp;value&nbsp;0)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                042&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                043&nbsp;&nbsp;(defn&nbsp;init-generation
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                044&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;a&nbsp;cell&nbsp;like&nbsp;this&nbsp;`cell`,&nbsp;but&nbsp;having&nbsp;a&nbsp;value&nbsp;for&nbsp;:generation,&nbsp;zero&nbsp;if
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                045&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;cell&nbsp;passed&nbsp;had&nbsp;no&nbsp;integer&nbsp;value&nbsp;for&nbsp;generation,&nbsp;otherwise&nbsp;the&nbsp;value
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                046&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;taken&nbsp;from&nbsp;the&nbsp;cell&nbsp;passed.&nbsp;The&nbsp;`world`&nbsp;argument&nbsp;is&nbsp;present&nbsp;only&nbsp;for
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                047&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;consistency&nbsp;with&nbsp;the&nbsp;rule&nbsp;engine&nbsp;and&nbsp;is&nbsp;ignored.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                048&nbsp;&nbsp;&nbsp;&nbsp;[_&nbsp;cell]
+                </span><br/>
+<span class="not-covered" title="0 out of 9 forms covered">
+                049&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:generation&nbsp;(get-int-or-zero&nbsp;cell&nbsp;:generation)}))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                050&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                051&nbsp;&nbsp;(defn&nbsp;in-bounds
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                052&nbsp;&nbsp;&nbsp;&nbsp;&quot;True&nbsp;if&nbsp;x,&nbsp;y&nbsp;are&nbsp;in&nbsp;bounds&nbsp;for&nbsp;this&nbsp;world&nbsp;(i.e.,&nbsp;there&nbsp;is&nbsp;a&nbsp;cell&nbsp;at&nbsp;x,&nbsp;y)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else&nbsp;false.&nbsp;*DEPRECATED*:&nbsp;it&#x27;s&nbsp;a&nbsp;predicate,&nbsp;prefer&nbsp;`in-bounds?`.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                054&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                055&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;a&nbsp;world&nbsp;as&nbsp;defined&nbsp;in&nbsp;[world.clj](mw-engine.world.html);
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                056&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`x`&nbsp;a&nbsp;number&nbsp;which&nbsp;may&nbsp;or&nbsp;may&nbsp;not&nbsp;be&nbsp;a&nbsp;valid&nbsp;x&nbsp;coordinate&nbsp;within&nbsp;that&nbsp;world;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                057&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`y`&nbsp;a&nbsp;number&nbsp;which&nbsp;may&nbsp;or&nbsp;may&nbsp;not&nbsp;be&nbsp;a&nbsp;valid&nbsp;y&nbsp;coordinate&nbsp;within&nbsp;that&nbsp;world.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                058&nbsp;&nbsp;&nbsp;&nbsp;{:deprecated&nbsp;&quot;1.1.7&quot;}
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;x&nbsp;y]
+                </span><br/>
+<span class="not-covered" title="0 out of 28 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(&gt;=&nbsp;x&nbsp;0)&nbsp;(&gt;=&nbsp;y&nbsp;0)&nbsp;(&lt;&nbsp;y&nbsp;(count&nbsp;world))&nbsp;(&lt;&nbsp;x&nbsp;(count&nbsp;(first&nbsp;world)))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                061&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                062&nbsp;&nbsp;(defn&nbsp;in-bounds?
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                063&nbsp;&nbsp;&nbsp;&nbsp;&quot;True&nbsp;if&nbsp;x,&nbsp;y&nbsp;are&nbsp;in&nbsp;bounds&nbsp;for&nbsp;this&nbsp;world&nbsp;(i.e.,&nbsp;there&nbsp;is&nbsp;a&nbsp;cell&nbsp;at&nbsp;x,&nbsp;y)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else&nbsp;false.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                065&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                066&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;a&nbsp;world&nbsp;as&nbsp;defined&nbsp;in&nbsp;[world.clj](mw-engine.world.html);
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                067&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`x`&nbsp;a&nbsp;number&nbsp;which&nbsp;may&nbsp;or&nbsp;may&nbsp;not&nbsp;be&nbsp;a&nbsp;valid&nbsp;x&nbsp;coordinate&nbsp;within&nbsp;that&nbsp;world;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                068&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`y`&nbsp;a&nbsp;number&nbsp;which&nbsp;may&nbsp;or&nbsp;may&nbsp;not&nbsp;be&nbsp;a&nbsp;valid&nbsp;y&nbsp;coordinate&nbsp;within&nbsp;that&nbsp;world.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                069&nbsp;&nbsp;&nbsp;&nbsp;{:added&nbsp;&quot;1.1.7&quot;}
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                070&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;x&nbsp;y]
+                </span><br/>
+<span class="covered" title="28 out of 28 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(&gt;=&nbsp;x&nbsp;0)&nbsp;(&gt;=&nbsp;y&nbsp;0)&nbsp;(&lt;&nbsp;y&nbsp;(count&nbsp;world))&nbsp;(&lt;&nbsp;x&nbsp;(count&nbsp;(first&nbsp;world)))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                072&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                073&nbsp;&nbsp;(defn&nbsp;map-world-n-n
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                074&nbsp;&nbsp;&nbsp;&nbsp;&quot;Wholly&nbsp;non-parallel&nbsp;map&nbsp;world&nbsp;implementation;&nbsp;see&nbsp;documentation&nbsp;for&nbsp;`map-world`.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                075&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;function]
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                076&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map-world-n-n&nbsp;world&nbsp;function&nbsp;nil))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                077&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;function&nbsp;additional-args]
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                078&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(into&nbsp;[]
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                079&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map&nbsp;(fn&nbsp;[row]
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                080&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(into&nbsp;[]&nbsp;(map
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                081&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#(apply&nbsp;function
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                082&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;world&nbsp;(cons&nbsp;%&nbsp;additional-args)))
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;row)))
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                085&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                086&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                087&nbsp;&nbsp;(defn&nbsp;map-world-p-p
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                088&nbsp;&nbsp;&nbsp;&nbsp;&quot;Wholly&nbsp;parallel&nbsp;map-world&nbsp;implementation;&nbsp;see&nbsp;documentation&nbsp;for&nbsp;`map-world`.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                089&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;function]
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                090&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map-world-p-p&nbsp;world&nbsp;function&nbsp;nil))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                091&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;function&nbsp;additional-args]
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                092&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(into&nbsp;[]
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                093&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pmap&nbsp;(fn&nbsp;[row]
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                094&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(into&nbsp;[]&nbsp;(pmap
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                095&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#(apply&nbsp;function
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                096&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;world&nbsp;(cons&nbsp;%&nbsp;additional-args)))
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                097&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;row)))
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                098&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                099&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                100&nbsp;&nbsp;(defn&nbsp;map-world
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                101&nbsp;&nbsp;&nbsp;&nbsp;&quot;Apply&nbsp;this&nbsp;`function`&nbsp;to&nbsp;each&nbsp;cell&nbsp;in&nbsp;this&nbsp;`world`&nbsp;to&nbsp;produce&nbsp;a&nbsp;new&nbsp;world.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                102&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;arguments&nbsp;to&nbsp;the&nbsp;function&nbsp;will&nbsp;be&nbsp;the&nbsp;world,&nbsp;the&nbsp;cell,&nbsp;and&nbsp;any
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                103&nbsp;&nbsp;&nbsp;&nbsp;`additional-args`&nbsp;supplied.&nbsp;Note&nbsp;that&nbsp;we&nbsp;parallel&nbsp;map&nbsp;over&nbsp;rows&nbsp;but
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                104&nbsp;&nbsp;&nbsp;&nbsp;just&nbsp;map&nbsp;over&nbsp;cells&nbsp;within&nbsp;a&nbsp;row.&nbsp;That&#x27;s&nbsp;because&nbsp;it&nbsp;isn&#x27;t&nbsp;worth&nbsp;starting
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                105&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;new&nbsp;thread&nbsp;for&nbsp;each&nbsp;cell,&nbsp;but&nbsp;there&nbsp;may&nbsp;be&nbsp;efficiency&nbsp;gains&nbsp;in
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                106&nbsp;&nbsp;&nbsp;&nbsp;running&nbsp;rows&nbsp;in&nbsp;parallel.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                107&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;function]
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                108&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map-world&nbsp;world&nbsp;function&nbsp;nil))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                109&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;function&nbsp;additional-args]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(into&nbsp;[]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pmap&nbsp;(fn&nbsp;[row]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                112&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(into&nbsp;[]&nbsp;(map
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                113&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#(apply&nbsp;function
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                114&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;world&nbsp;(cons&nbsp;%&nbsp;additional-args)))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                115&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;row)))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                116&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                117&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                118&nbsp;&nbsp;(defn&nbsp;get-cell
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                119&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;the&nbsp;cell&nbsp;a&nbsp;x,&nbsp;y&nbsp;in&nbsp;this&nbsp;world,&nbsp;if&nbsp;any.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                120&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                121&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;a&nbsp;world&nbsp;as&nbsp;defined&nbsp;in&nbsp;[world.clj](mw-engine.world.html);
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                122&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`x`&nbsp;a&nbsp;number&nbsp;which&nbsp;may&nbsp;or&nbsp;may&nbsp;not&nbsp;be&nbsp;a&nbsp;valid&nbsp;x&nbsp;coordinate&nbsp;within&nbsp;that&nbsp;world;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                123&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`y`&nbsp;a&nbsp;number&nbsp;which&nbsp;may&nbsp;or&nbsp;may&nbsp;not&nbsp;be&nbsp;a&nbsp;valid&nbsp;y&nbsp;coordinate&nbsp;within&nbsp;that&nbsp;world.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                124&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;x&nbsp;y]
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                125&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(in-bounds?&nbsp;world&nbsp;x&nbsp;y)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                126&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(nth&nbsp;(nth&nbsp;world&nbsp;y)&nbsp;x)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                127&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                128&nbsp;&nbsp;(defn&nbsp;get-int
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                129&nbsp;&nbsp;&nbsp;&nbsp;&quot;Get&nbsp;the&nbsp;value&nbsp;of&nbsp;a&nbsp;property&nbsp;expected&nbsp;to&nbsp;be&nbsp;an&nbsp;integer&nbsp;from&nbsp;a&nbsp;map;&nbsp;if&nbsp;not
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                130&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;present&nbsp;(or&nbsp;not&nbsp;an&nbsp;integer)&nbsp;return&nbsp;0.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                131&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                132&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`map`&nbsp;a&nbsp;map;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                133&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`key`&nbsp;a&nbsp;symbol&nbsp;or&nbsp;keyword,&nbsp;presumed&nbsp;to&nbsp;be&nbsp;a&nbsp;key&nbsp;into&nbsp;the&nbsp;`map`.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                134&nbsp;&nbsp;&nbsp;&nbsp;[map&nbsp;key]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                135&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(map?&nbsp;map)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                136&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[v&nbsp;(map&nbsp;key)]
+                </span><br/>
+<span class="covered" title="12 out of 12 forms covered">
+                137&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(and&nbsp;v&nbsp;(integer?&nbsp;v))&nbsp;v
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                138&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;0))
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                139&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(throw&nbsp;(Exception.&nbsp;&quot;No&nbsp;map&nbsp;passed?&quot;))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                140&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                141&nbsp;&nbsp;(defn&nbsp;get-num
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                142&nbsp;&nbsp;&nbsp;&nbsp;&quot;Get&nbsp;the&nbsp;value&nbsp;of&nbsp;a&nbsp;property&nbsp;expected&nbsp;to&nbsp;be&nbsp;a&nbsp;number&nbsp;from&nbsp;a&nbsp;map;&nbsp;if&nbsp;not
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                143&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;present&nbsp;(or&nbsp;not&nbsp;a&nbsp;number)&nbsp;return&nbsp;0.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                144&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                145&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`map`&nbsp;a&nbsp;map;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                146&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`key`&nbsp;a&nbsp;symbol&nbsp;or&nbsp;keyword,&nbsp;presumed&nbsp;to&nbsp;be&nbsp;a&nbsp;key&nbsp;into&nbsp;the&nbsp;`map`.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                147&nbsp;&nbsp;&nbsp;&nbsp;[map&nbsp;key]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                148&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(map?&nbsp;map)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                149&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[v&nbsp;(map&nbsp;key)]
+                </span><br/>
+<span class="covered" title="12 out of 12 forms covered">
+                150&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(and&nbsp;v&nbsp;(number?&nbsp;v))&nbsp;v
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                151&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;0))
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                152&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(throw&nbsp;(Exception.&nbsp;&quot;No&nbsp;map&nbsp;passed?&quot;))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                153&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                154&nbsp;&nbsp;(defn&nbsp;population
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                155&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;the&nbsp;population&nbsp;of&nbsp;this&nbsp;species&nbsp;in&nbsp;this&nbsp;cell.&nbsp;Currently&nbsp;a&nbsp;synonym&nbsp;for
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                156&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`get-int`,&nbsp;but&nbsp;may&nbsp;not&nbsp;always&nbsp;be&nbsp;(depending&nbsp;whether&nbsp;species&nbsp;are&nbsp;later
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                157&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;implemented&nbsp;as&nbsp;actors)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                158&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                159&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`cell`&nbsp;a&nbsp;map;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                160&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`species`&nbsp;a&nbsp;keyword&nbsp;representing&nbsp;a&nbsp;species&nbsp;which&nbsp;may&nbsp;populate&nbsp;that&nbsp;cell.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                161&nbsp;&nbsp;&nbsp;&nbsp;[cell&nbsp;species]
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                162&nbsp;&nbsp;&nbsp;&nbsp;(get-int&nbsp;cell&nbsp;species))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                163&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                164&nbsp;&nbsp;(def&nbsp;memo-get-neighbours
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                165&nbsp;&nbsp;&nbsp;&nbsp;&quot;Memoised&nbsp;get&nbsp;neighbours&nbsp;is&nbsp;more&nbsp;efficient&nbsp;when&nbsp;running&nbsp;deeply&nbsp;recursive
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                166&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;algorithms&nbsp;on&nbsp;the&nbsp;same&nbsp;world.&nbsp;But&nbsp;it&#x27;s&nbsp;less&nbsp;efficient&nbsp;when&nbsp;running&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                167&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;engine&nbsp;in&nbsp;its&nbsp;normal&nbsp;iterative&nbsp;style,&nbsp;because&nbsp;then&nbsp;we&nbsp;will&nbsp;rarely&nbsp;call
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                168&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;get&nbsp;naighbours&nbsp;on&nbsp;the&nbsp;same&nbsp;cell&nbsp;of&nbsp;the&nbsp;same&nbsp;world&nbsp;twice.&quot;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                169&nbsp;&nbsp;&nbsp;&nbsp;(memoize
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[world&nbsp;x&nbsp;y&nbsp;depth]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                171&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(remove&nbsp;nil?
+                </span><br/>
+<span class="covered" title="14 out of 14 forms covered">
+                172&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map&nbsp;#(get-cell&nbsp;world&nbsp;(first&nbsp;%)&nbsp;(first&nbsp;(rest&nbsp;%)))
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                173&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(remove&nbsp;#(=&nbsp;%&nbsp;(list&nbsp;x&nbsp;y))
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                174&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(combo&#x2F;cartesian-product
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                175&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(range&nbsp;(-&nbsp;x&nbsp;depth)&nbsp;(+&nbsp;x&nbsp;depth&nbsp;1))
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                176&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(range&nbsp;(-&nbsp;y&nbsp;depth)&nbsp;(+&nbsp;y&nbsp;depth&nbsp;1)))))))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                177&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                178&nbsp;&nbsp;(defn&nbsp;get-neighbours
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                179&nbsp;&nbsp;&nbsp;&nbsp;&quot;Get&nbsp;the&nbsp;neighbours&nbsp;to&nbsp;distance&nbsp;depth&nbsp;of&nbsp;a&nbsp;cell&nbsp;in&nbsp;this&nbsp;world.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                180&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                181&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Several&nbsp;overloads:
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                182&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;a&nbsp;world,&nbsp;as&nbsp;described&nbsp;in&nbsp;[world.clj](mw-engine.world.html);
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                183&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`cell`&nbsp;a&nbsp;cell&nbsp;within&nbsp;that&nbsp;world
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                184&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gets&nbsp;immediate&nbsp;neighbours&nbsp;of&nbsp;the&nbsp;specified&nbsp;cell.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                185&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                186&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;a&nbsp;world,&nbsp;as&nbsp;described&nbsp;in[world.clj](mw-engine.world.html);
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                187&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`cell`&nbsp;a&nbsp;cell&nbsp;within&nbsp;that&nbsp;world
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                188&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`depth`&nbsp;an&nbsp;integer&nbsp;representing&nbsp;the&nbsp;depth&nbsp;to&nbsp;search&nbsp;from&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                189&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`cell`
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                190&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gets&nbsp;neighbours&nbsp;within&nbsp;the&nbsp;specified&nbsp;distance&nbsp;of&nbsp;the&nbsp;cell.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                191&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                192&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;a&nbsp;world,&nbsp;as&nbsp;described&nbsp;in[world.clj](mw-engine.world.html);
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                193&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`x`&nbsp;an&nbsp;integer&nbsp;representing&nbsp;an&nbsp;x&nbsp;coordinate&nbsp;in&nbsp;that&nbsp;world;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                194&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`y`&nbsp;an&nbsp;integer&nbsp;representing&nbsp;an&nbsp;y&nbsp;coordinate&nbsp;in&nbsp;that&nbsp;world;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                195&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`depth`&nbsp;an&nbsp;integer&nbsp;representing&nbsp;the&nbsp;distance&nbsp;from&nbsp;[x,y]&nbsp;that
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                196&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;should&nbsp;be&nbsp;searched
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                197&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gets&nbsp;the&nbsp;neighbours&nbsp;within&nbsp;the&nbsp;specified&nbsp;distance&nbsp;of&nbsp;the&nbsp;cell&nbsp;at
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                198&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;coordinates&nbsp;[x,y]&nbsp;in&nbsp;this&nbsp;world.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                199&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;x&nbsp;y&nbsp;depth]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(memo-get-neighbours&nbsp;world&nbsp;x&nbsp;y&nbsp;depth))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                201&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;cell&nbsp;depth]
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                202&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(memo-get-neighbours&nbsp;world&nbsp;(:x&nbsp;cell)&nbsp;(:y&nbsp;cell)&nbsp;depth))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                203&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;cell]
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                204&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(memo-get-neighbours&nbsp;world&nbsp;(:x&nbsp;cell)&nbsp;(:y&nbsp;cell)&nbsp;1)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                205&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                206&nbsp;&nbsp;(defn&nbsp;get-neighbours-with-property-value
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                207&nbsp;&nbsp;&nbsp;&nbsp;&quot;Get&nbsp;the&nbsp;neighbours&nbsp;to&nbsp;distance&nbsp;depth&nbsp;of&nbsp;the&nbsp;cell&nbsp;at&nbsp;x,&nbsp;y&nbsp;in&nbsp;this&nbsp;world&nbsp;which
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                208&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;have&nbsp;this&nbsp;value&nbsp;for&nbsp;this&nbsp;property.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                209&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                210&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;a&nbsp;world,&nbsp;as&nbsp;described&nbsp;in&nbsp;[world.clj](mw-engine.world.html);
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                211&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`cell`&nbsp;a&nbsp;cell&nbsp;within&nbsp;that&nbsp;world;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                212&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`depth`&nbsp;an&nbsp;integer&nbsp;representing&nbsp;the&nbsp;distance&nbsp;from&nbsp;[x,y]&nbsp;that
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                213&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;should&nbsp;be&nbsp;searched&nbsp;(optional);
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                214&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`property`&nbsp;a&nbsp;keyword&nbsp;representing&nbsp;a&nbsp;property&nbsp;of&nbsp;the&nbsp;neighbours;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                215&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`value`&nbsp;a&nbsp;value&nbsp;of&nbsp;that&nbsp;property&nbsp;(or,&nbsp;possibly,&nbsp;the&nbsp;name&nbsp;of&nbsp;another);
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                216&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`op`&nbsp;a&nbsp;comparator&nbsp;function&nbsp;to&nbsp;use&nbsp;in&nbsp;place&nbsp;of&nbsp;`=`&nbsp;(optional).
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                217&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                218&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It&nbsp;gets&nbsp;messy.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                219&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;x&nbsp;y&nbsp;depth&nbsp;property&nbsp;value&nbsp;op]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                220&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(filter
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                221&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#(eval
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                222&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;op
+                </span><br/>
+<span class="covered" title="11 out of 11 forms covered">
+                223&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(or&nbsp;(get&nbsp;%&nbsp;property)&nbsp;(get-int&nbsp;%&nbsp;property))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                224&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value))
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                225&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-neighbours&nbsp;world&nbsp;x&nbsp;y&nbsp;depth)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                226&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;x&nbsp;y&nbsp;depth&nbsp;property&nbsp;value]
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                227&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-neighbours-with-property-value&nbsp;world&nbsp;x&nbsp;y&nbsp;depth&nbsp;property&nbsp;value&nbsp;=))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                228&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;cell&nbsp;depth&nbsp;property&nbsp;value]
+                </span><br/>
+<span class="not-covered" title="0 out of 10 forms covered">
+                229&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-neighbours-with-property-value&nbsp;world&nbsp;(:x&nbsp;cell)&nbsp;(:y&nbsp;cell)&nbsp;depth
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                230&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;property&nbsp;value))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                231&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;cell&nbsp;property&nbsp;value]
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                232&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-neighbours-with-property-value&nbsp;world&nbsp;cell&nbsp;1
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                233&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;property&nbsp;value)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                234&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                235&nbsp;&nbsp;(defn&nbsp;get-neighbours-with-state
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                236&nbsp;&nbsp;&nbsp;&nbsp;&quot;Get&nbsp;the&nbsp;neighbours&nbsp;to&nbsp;distance&nbsp;depth&nbsp;of&nbsp;the&nbsp;cell&nbsp;at&nbsp;x,&nbsp;y&nbsp;in&nbsp;this&nbsp;world&nbsp;which
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                237&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;have&nbsp;this&nbsp;state.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                238&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                239&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;a&nbsp;world,&nbsp;as&nbsp;described&nbsp;in&nbsp;[world.clj](mw-engine.world.html);
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`cell`&nbsp;a&nbsp;cell&nbsp;within&nbsp;that&nbsp;world;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                241&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`depth`&nbsp;an&nbsp;integer&nbsp;representing&nbsp;the&nbsp;distance&nbsp;from&nbsp;[x,y]&nbsp;that
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                242&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;should&nbsp;be&nbsp;searched;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                243&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`state`&nbsp;a&nbsp;keyword&nbsp;representing&nbsp;a&nbsp;state&nbsp;in&nbsp;the&nbsp;world.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                244&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;x&nbsp;y&nbsp;depth&nbsp;state]
+                </span><br/>
+<span class="not-covered" title="0 out of 14 forms covered">
+                245&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(filter&nbsp;#(=&nbsp;(:state&nbsp;%)&nbsp;state)&nbsp;(get-neighbours&nbsp;world&nbsp;x&nbsp;y&nbsp;depth)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                246&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;cell&nbsp;depth&nbsp;state]
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                247&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-neighbours-with-state&nbsp;world&nbsp;(:x&nbsp;cell)&nbsp;(:y&nbsp;cell)&nbsp;depth&nbsp;state))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                248&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;cell&nbsp;state]
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                249&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-neighbours-with-state&nbsp;world&nbsp;cell&nbsp;1&nbsp;state)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                250&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                251&nbsp;&nbsp;(defn&nbsp;get-least-cell
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                252&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;the&nbsp;cell&nbsp;from&nbsp;among&nbsp;these&nbsp;`cells`&nbsp;which&nbsp;has&nbsp;the&nbsp;lowest&nbsp;numeric&nbsp;value
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                253&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;this&nbsp;`property`.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                254&nbsp;&nbsp;&nbsp;&nbsp;[cells&nbsp;property]
+                </span><br/>
+<span class="covered" title="14 out of 14 forms covered">
+                255&nbsp;&nbsp;&nbsp;&nbsp;(first&nbsp;(sort-by&nbsp;property&nbsp;(filter&nbsp;#(number?&nbsp;(property&nbsp;%))&nbsp;cells))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                256&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                257&nbsp;&nbsp;(defn&nbsp;get-most-cell
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                258&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;the&nbsp;cell&nbsp;from&nbsp;among&nbsp;these&nbsp;`cells`&nbsp;which&nbsp;has&nbsp;the&nbsp;highest&nbsp;numeric&nbsp;value
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                259&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;this&nbsp;`property`.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                260&nbsp;&nbsp;&nbsp;&nbsp;[cells&nbsp;property]
+                </span><br/>
+<span class="covered" title="14 out of 14 forms covered">
+                261&nbsp;&nbsp;&nbsp;&nbsp;(last&nbsp;(sort-by&nbsp;property&nbsp;(filter&nbsp;#(number?&nbsp;(property&nbsp;%))&nbsp;cells))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                262&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                263&nbsp;&nbsp;(defn-&nbsp;set-cell-property
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                264&nbsp;&nbsp;&nbsp;&nbsp;&quot;If&nbsp;this&nbsp;`cell`s&nbsp;x&nbsp;and&nbsp;y&nbsp;properties&nbsp;are&nbsp;equal&nbsp;to&nbsp;these&nbsp;`x`&nbsp;and&nbsp;`y`&nbsp;values,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                265&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;a&nbsp;cell&nbsp;like&nbsp;this&nbsp;cell&nbsp;but&nbsp;with&nbsp;the&nbsp;value&nbsp;of&nbsp;this&nbsp;`property`&nbsp;set&nbsp;to
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                266&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;`value`.&nbsp;Otherwise,&nbsp;just&nbsp;return&nbsp;this&nbsp;`cell`.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                267&nbsp;&nbsp;&nbsp;&nbsp;[cell&nbsp;x&nbsp;y&nbsp;property&nbsp;value]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                268&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="14 out of 14 forms covered">
+                269&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(=&nbsp;x&nbsp;(:x&nbsp;cell))&nbsp;(=&nbsp;y&nbsp;(:y&nbsp;cell)))
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                270&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{property&nbsp;value&nbsp;:rule&nbsp;&quot;Set&nbsp;by&nbsp;user&quot;})
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                271&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;cell))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                272&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                273&nbsp;&nbsp;(defn&nbsp;set-property
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                274&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;a&nbsp;world&nbsp;like&nbsp;this&nbsp;`world`&nbsp;but&nbsp;with&nbsp;the&nbsp;value&nbsp;of&nbsp;exactly&nbsp;one&nbsp;`property`
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                275&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;one&nbsp;`cell`&nbsp;changed&nbsp;to&nbsp;this&nbsp;`value`&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                276&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;cell&nbsp;property&nbsp;value]
+                </span><br/>
+<span class="covered" title="11 out of 11 forms covered">
+                277&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(set-property&nbsp;world&nbsp;(:x&nbsp;cell)&nbsp;(:y&nbsp;cell)&nbsp;property&nbsp;value))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                278&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;x&nbsp;y&nbsp;property&nbsp;value]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                279&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(apply
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                280&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vector&nbsp;;;&nbsp;we&nbsp;want&nbsp;a&nbsp;vector&nbsp;of&nbsp;vectors,&nbsp;not&nbsp;a&nbsp;list&nbsp;of&nbsp;lists,&nbsp;for&nbsp;efficiency
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                281&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                282&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[row]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                283&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(apply
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                284&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vector
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                285&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map&nbsp;#(set-cell-property&nbsp;%&nbsp;x&nbsp;y&nbsp;property&nbsp;value)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                286&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;row)))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                287&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                288&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                289&nbsp;&nbsp;(defn&nbsp;merge-cell
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                290&nbsp;&nbsp;&nbsp;&nbsp;&quot;Return&nbsp;a&nbsp;world&nbsp;like&nbsp;this&nbsp;`world`,&nbsp;but&nbsp;merge&nbsp;the&nbsp;values&nbsp;from&nbsp;this&nbsp;`cell`&nbsp;with
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                291&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;those&nbsp;from&nbsp;the&nbsp;cell&nbsp;in&nbsp;the&nbsp;world&nbsp;with&nbsp;the&nbsp;same&nbsp;co-ordinates&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                292&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;cell]
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                293&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(in-bounds?&nbsp;world&nbsp;(:x&nbsp;cell)&nbsp;(:y&nbsp;cell))
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                294&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map-world&nbsp;world
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                295&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#(if
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                296&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                297&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;(:x&nbsp;cell)&nbsp;(:x&nbsp;%2))
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                298&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;(:y&nbsp;cell)&nbsp;(:y&nbsp;%2)))
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                299&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;%2&nbsp;cell)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                300&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%2))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                301&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world))
+                </span><br/>
+ </body>
+</html>

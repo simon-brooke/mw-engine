@@ -1,8 +1,11 @@
 (ns mw-engine.utils-test
-  (:use [mw-engine.world :as world])
-  (:require [clojure.test :refer :all]
-            [clojure.math.combinatorics :as combo]
-            [mw-engine.utils :refer :all]))
+  (:require [clojure.math.combinatorics :as combo]
+            [clojure.test :refer [deftest is testing]]
+            [mw-engine.utils :refer [get-cell get-least-cell get-most-cell
+                                     get-neighbours
+                                     get-neighbours-with-property-value 
+                                     map-world merge-cell set-property]]
+            [mw-engine.world :refer [make-world]]))
 
 (deftest abs-test 
   (testing "Absolute value function"
@@ -116,8 +119,8 @@
            (let [w1a (make-world 3 3)
                  w2b (set-property w1a (get-cell w1a 1 1) :location :centre)
                  w3c (set-property w2b 0 0 :location :top-left)]
-             (is (= (:location (get-cell w3c 0 0) :top-left)))
-             (is (= (:location (get-cell w3c 1 1) :centre)))
+             (is (= (:location (get-cell w3c 0 0)) :top-left))
+             (is (= (:location (get-cell w3c 1 1)) :centre))
              (is (nil? (:location (get-cell w3c 2 2))) 
                  "Cell at 2,2 should not have location set")
              (is (= (count (remove nil? (map #(:location %) (flatten w3c)))) 2)

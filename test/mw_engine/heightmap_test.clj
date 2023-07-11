@@ -1,9 +1,8 @@
 (ns mw-engine.heightmap-test
-  (:use clojure.java.io)
-  (:require [clojure.test :refer :all]
-            [mw-engine.heightmap :refer :all]
-            [mw-engine.world :as world :only [make-world]]
-            [clojure.math.combinatorics :as combo]))
+  (:require [clojure.java.io :refer [as-file]]
+            [clojure.test :refer [deftest is testing]]
+            [mw-engine.heightmap :refer [apply-heightmap apply-valuemap]]
+            [mw-engine.world :refer [make-world]]))
 
 (deftest apply-heightmap-test
   (testing "Heightmap functionality"
@@ -22,7 +21,7 @@
              (is (> (apply + gradients) 0)
                  "At least some gradients must be positive, none should be negative"))
            ;; alternate means of making the world, same tests.
-           (let [world (apply-heightmap (world/make-world 9 9) (as-file "resources/heightmaps/test9x9.png"))
+           (let [world (apply-heightmap (make-world 9 9) (as-file "resources/heightmaps/test9x9.png"))
                  altitudes (map #(:altitude %) (flatten world))
                  gradients (map #(:gradient %) (flatten world))]
              (is (= (count world) 9) "World should be 9x9")

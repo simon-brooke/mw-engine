@@ -1,6 +1,6 @@
 (ns mw-engine.world-test
-  (:require [clojure.test :refer :all]
-            [mw-engine.world :refer :all]
+  (:require [clojure.test :refer [deftest is testing]]
+            [mw-engine.world :refer [make-world]]
             [clojure.math.combinatorics :as combo]))
 
 (deftest genesis-test

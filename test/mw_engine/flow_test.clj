@@ -1,6 +1,7 @@
 (ns mw-engine.flow-test
   (:require [clojure.test :refer [deftest is testing]]
-            [mw-engine.flow :refer [coordinate? execute execute-flows flow?
+            [mw-engine.flow :refer [coordinate? create-flow-percent
+                                    create-location execute execute-flows flow?
                                     location?]]
             [mw-engine.utils :refer [get-cell merge-cell]]
             [mw-engine.world :refer [make-world]]))
@@ -52,4 +53,33 @@
             dest-q (:q (get-cell transferred 0 1))]
         (is (= source-q 2.9))
         (is (= inter-q 1.4))
-        (is (= dest-q 1))))))
+        (is (= dest-q 1))))
+    (let [world (make-world 3 3)
+          world' (merge-cell world {:x 0, :y 0, :state :new :q 5.3})
+          highdemand {:source {:x 0 :y 0}
+                 :destination {:x 1 :y 1}
+                 :property :q
+                 :quantity 7.4}
+          transferred (execute world' highdemand)
+          source-q (:q (get-cell transferred 0 0))
+          dest-q (:q (get-cell transferred 1 1))
+          sx 0.0
+          dx 5.3]
+      (is (= source-q sx) "The entire stock should have gone;")
+      (is (= dest-q dx) "Only as much as was available should have arrived."))))
+
+  (deftest creator-macro-tests
+    (testing "Creator macros"
+      (let [source {:x 1 :y 2 :q 5.7 :state :house}
+            dest {:x 3 :y 3 :q 1 :state :house}
+            prop :q]
+        (let [expected {:x 1, :y 2}
+              actual (create-location source)]
+          (is (= actual expected)))
+        (let [expected {:source {:x 1, :y 2},
+                        :prop :q,
+                        :quantity 1.425,
+                        :destination {:x 3, :y 3}}
+              actual (create-flow-percent source dest prop 25)]
+          (is (= actual expected))
+          (is (= (:quantity actual) (* 0.25 (:q source))))))))

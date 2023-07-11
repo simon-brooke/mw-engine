@@ -1,0 +1,389 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../coverage.css"/>  <title> mw_engine/heightmap.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;^{:doc&nbsp;&quot;Functions&nbsp;to&nbsp;apply&nbsp;a&nbsp;heightmap&nbsp;to&nbsp;a&nbsp;world.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heightmaps&nbsp;are&nbsp;considered&nbsp;only&nbsp;as&nbsp;greyscale&nbsp;images,&nbsp;so&nbsp;colour&nbsp;is&nbsp;redundent
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(will&nbsp;be&nbsp;ignored).&nbsp;Darker&nbsp;shades&nbsp;are&nbsp;higher.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:author&nbsp;&quot;Simon&nbsp;Brooke&quot;}
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;&nbsp;&nbsp;mw-engine.heightmap
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;&nbsp;&nbsp;(:require&nbsp;[mikera.image.core&nbsp;:refer&nbsp;[load-image&nbsp;filter-image]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mikera.image.filters&nbsp;:as&nbsp;filters]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mw-engine.utils&nbsp;:refer&nbsp;[get-int&nbsp;get-neighbours&nbsp;map-world]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mw-engine.world&nbsp;:refer&nbsp;[make-world]]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;;;;;&nbsp;mw-engine:&nbsp;the&nbsp;state&#x2F;transition&nbsp;engine&nbsp;of&nbsp;MicroWorld.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;free&nbsp;software;&nbsp;you&nbsp;can&nbsp;redistribute&nbsp;it&nbsp;and&#x2F;or
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;;;;;&nbsp;modify&nbsp;it&nbsp;under&nbsp;the&nbsp;terms&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;;;;;&nbsp;as&nbsp;published&nbsp;by&nbsp;the&nbsp;Free&nbsp;Software&nbsp;Foundation;&nbsp;either&nbsp;version&nbsp;2
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;;;;;&nbsp;of&nbsp;the&nbsp;License,&nbsp;or&nbsp;(at&nbsp;your&nbsp;option)&nbsp;any&nbsp;later&nbsp;version.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                020&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;distributed&nbsp;in&nbsp;the&nbsp;hope&nbsp;that&nbsp;it&nbsp;will&nbsp;be&nbsp;useful,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                022&nbsp;&nbsp;;;;;&nbsp;but&nbsp;WITHOUT&nbsp;ANY&nbsp;WARRANTY;&nbsp;without&nbsp;even&nbsp;the&nbsp;implied&nbsp;warranty&nbsp;of
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                023&nbsp;&nbsp;;;;;&nbsp;MERCHANTABILITY&nbsp;or&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE.&nbsp;&nbsp;See&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                024&nbsp;&nbsp;;;;;&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;for&nbsp;more&nbsp;details.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                025&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                026&nbsp;&nbsp;;;;;&nbsp;You&nbsp;should&nbsp;have&nbsp;received&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                027&nbsp;&nbsp;;;;;&nbsp;along&nbsp;with&nbsp;this&nbsp;program;&nbsp;if&nbsp;not,&nbsp;write&nbsp;to&nbsp;the&nbsp;Free&nbsp;Software
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;;;;;&nbsp;Foundation,&nbsp;Inc.,&nbsp;51&nbsp;Franklin&nbsp;Street,&nbsp;Fifth&nbsp;Floor,&nbsp;Boston,&nbsp;MA&nbsp;&nbsp;02110-1301,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                029&nbsp;&nbsp;;;;;&nbsp;USA.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                031&nbsp;&nbsp;;;;;&nbsp;Copyright&nbsp;(C)&nbsp;2014&nbsp;Simon&nbsp;Brooke
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                032&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                033&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                034&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                035&nbsp;&nbsp;(defn&nbsp;tag-property
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                036&nbsp;&nbsp;&nbsp;&nbsp;&quot;Set&nbsp;the&nbsp;value&nbsp;of&nbsp;this&nbsp;`property`&nbsp;of&nbsp;this&nbsp;cell&nbsp;from&nbsp;the&nbsp;corresponding&nbsp;pixel&nbsp;of&nbsp;this&nbsp;`heightmap`.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;the&nbsp;heightmap&nbsp;you&nbsp;supply&nbsp;is&nbsp;smaller&nbsp;than&nbsp;the&nbsp;world,&nbsp;this&nbsp;will&nbsp;break.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                038&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                039&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;not&nbsp;actually&nbsp;used,&nbsp;but&nbsp;present&nbsp;to&nbsp;enable&nbsp;this&nbsp;function&nbsp;to&nbsp;be
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;passed&nbsp;as&nbsp;an&nbsp;argument&nbsp;to&nbsp;`mw-engine.utils&#x2F;map-world`,&nbsp;q.v.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                041&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`cell`&nbsp;a&nbsp;cell,&nbsp;as&nbsp;discussed&nbsp;in&nbsp;world.clj,&nbsp;q.v.&nbsp;Alternatively,&nbsp;a&nbsp;map;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                042&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`property`&nbsp;the&nbsp;property&nbsp;(normally&nbsp;a&nbsp;keyword)&nbsp;whose&nbsp;value&nbsp;will&nbsp;be&nbsp;set&nbsp;on&nbsp;the&nbsp;cell.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                043&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`heightmap`&nbsp;an&nbsp;(ideally)&nbsp;greyscale&nbsp;image,&nbsp;whose&nbsp;x&nbsp;and&nbsp;y&nbsp;dimensions&nbsp;should
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                044&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exceed&nbsp;those&nbsp;of&nbsp;the&nbsp;world&nbsp;of&nbsp;which&nbsp;the&nbsp;`cell`&nbsp;forms&nbsp;part.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                045&nbsp;&nbsp;&nbsp;&nbsp;([_&nbsp;cell&nbsp;property&nbsp;heightmap]
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                046&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(tag-property&nbsp;cell&nbsp;property&nbsp;heightmap))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                047&nbsp;&nbsp;&nbsp;&nbsp;([cell&nbsp;property&nbsp;heightmap]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                048&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                049&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{property
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                050&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(+&nbsp;(get-int&nbsp;cell&nbsp;property)
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                051&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(-&nbsp;256
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                052&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(abs
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(mod
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                054&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.getRGB&nbsp;heightmap
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                055&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-int&nbsp;cell&nbsp;:x)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-int&nbsp;cell&nbsp;:y))&nbsp;256))))})))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                057&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                058&nbsp;&nbsp;(defn&nbsp;tag-gradient
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;&quot;Set&nbsp;the&nbsp;`gradient`&nbsp;property&nbsp;of&nbsp;this&nbsp;`cell`&nbsp;of&nbsp;this&nbsp;`world`&nbsp;to&nbsp;the&nbsp;difference&nbsp;in
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;altitude&nbsp;between&nbsp;its&nbsp;highest&nbsp;and&nbsp;lowest&nbsp;neghbours.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                061&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;cell]
+                </span><br/>
+<span class="covered" title="11 out of 11 forms covered">
+                062&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[heights&nbsp;(remove&nbsp;nil?&nbsp;(map&nbsp;:altitude&nbsp;(get-neighbours&nbsp;world&nbsp;cell)))
+                </span><br/>
+<span class="partial" title="5 out of 6 forms covered">
+                063&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;highest&nbsp;(cond&nbsp;(empty?&nbsp;heights)&nbsp;0&nbsp;;;&nbsp;shouldn&#x27;t&nbsp;happen
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;(apply&nbsp;max&nbsp;heights))
+                </span><br/>
+<span class="partial" title="5 out of 6 forms covered">
+                065&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lowest&nbsp;(cond&nbsp;(empty?&nbsp;heights)&nbsp;0&nbsp;;;&nbsp;shouldn&#x27;t
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                066&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;(apply&nbsp;min&nbsp;heights))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                067&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gradient&nbsp;(-&nbsp;highest&nbsp;lowest)]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                068&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:gradient&nbsp;gradient})))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                069&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                070&nbsp;&nbsp;(defn&nbsp;tag-gradients
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;&quot;Set&nbsp;the&nbsp;`gradient`&nbsp;property&nbsp;of&nbsp;each&nbsp;cell&nbsp;in&nbsp;this&nbsp;`world`&nbsp;to&nbsp;the&nbsp;difference&nbsp;in
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;altitude&nbsp;between&nbsp;its&nbsp;highest&nbsp;and&nbsp;lowest&nbsp;neghbours.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                073&nbsp;&nbsp;&nbsp;&nbsp;[world]
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                074&nbsp;&nbsp;&nbsp;&nbsp;(map-world&nbsp;world&nbsp;tag-gradient))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                075&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                076&nbsp;&nbsp;(defn&nbsp;tag-altitude
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                077&nbsp;&nbsp;&nbsp;&nbsp;&quot;Set&nbsp;the&nbsp;altitude&nbsp;of&nbsp;this&nbsp;cell&nbsp;from&nbsp;the&nbsp;corresponding&nbsp;pixel&nbsp;of&nbsp;this&nbsp;heightmap.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                078&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;the&nbsp;heightmap&nbsp;you&nbsp;supply&nbsp;is&nbsp;smaller&nbsp;than&nbsp;the&nbsp;world,&nbsp;this&nbsp;will&nbsp;break.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                079&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                080&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;not&nbsp;actually&nbsp;used,&nbsp;but&nbsp;present&nbsp;to&nbsp;enable&nbsp;this&nbsp;function&nbsp;to&nbsp;be
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                081&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;passed&nbsp;as&nbsp;an&nbsp;argument&nbsp;to&nbsp;`mw-engine.utils&#x2F;map-world`,&nbsp;q.v.;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                082&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`cell`&nbsp;a&nbsp;cell,&nbsp;as&nbsp;discussed&nbsp;in&nbsp;world.clj,&nbsp;q.v.&nbsp;Alternatively,&nbsp;a&nbsp;map;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`heightmap`&nbsp;an&nbsp;(ideally)&nbsp;greyscale&nbsp;image,&nbsp;whose&nbsp;x&nbsp;and&nbsp;y&nbsp;dimensions&nbsp;should
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exceed&nbsp;those&nbsp;of&nbsp;the&nbsp;world&nbsp;of&nbsp;which&nbsp;the&nbsp;`cell`&nbsp;forms&nbsp;part.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                085&nbsp;&nbsp;&nbsp;&nbsp;([_&nbsp;cell&nbsp;heightmap]
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                086&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(tag-property&nbsp;cell&nbsp;:altitude&nbsp;heightmap))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                087&nbsp;&nbsp;&nbsp;&nbsp;([cell&nbsp;heightmap]
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                088&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(tag-property&nbsp;cell&nbsp;:altitude&nbsp;heightmap)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                089&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                090&nbsp;&nbsp;(defn&nbsp;apply-heightmap
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                091&nbsp;&nbsp;&nbsp;&nbsp;&quot;Apply&nbsp;the&nbsp;image&nbsp;file&nbsp;loaded&nbsp;from&nbsp;this&nbsp;path&nbsp;to&nbsp;this&nbsp;world,&nbsp;and&nbsp;return&nbsp;a&nbsp;world&nbsp;whose
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                092&nbsp;&nbsp;&nbsp;&nbsp;altitudes&nbsp;are&nbsp;modified&nbsp;(added&nbsp;to)&nbsp;by&nbsp;the&nbsp;altitudes&nbsp;in&nbsp;the&nbsp;heightmap.&nbsp;It&nbsp;is&nbsp;assumed&nbsp;that
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                093&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;heightmap&nbsp;is&nbsp;at&nbsp;least&nbsp;as&nbsp;large&nbsp;in&nbsp;x&nbsp;and&nbsp;y&nbsp;dimensions&nbsp;as&nbsp;the&nbsp;world.&nbsp;Note&nbsp;that,&nbsp;in
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                094&nbsp;&nbsp;&nbsp;&nbsp;addition&nbsp;to&nbsp;setting&nbsp;the&nbsp;`:altitude`&nbsp;of&nbsp;each&nbsp;cell,&nbsp;this&nbsp;function&nbsp;also&nbsp;sets&nbsp;the&nbsp;`:gradient`.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                095&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                096&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;a&nbsp;world,&nbsp;as&nbsp;defined&nbsp;in&nbsp;`world.clj`,&nbsp;q.v.;&nbsp;if&nbsp;world&nbsp;is&nbsp;not&nbsp;supplied,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                097&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;world&nbsp;the&nbsp;size&nbsp;of&nbsp;the&nbsp;heightmap&nbsp;will&nbsp;be&nbsp;created;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                098&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`imagepath`&nbsp;a&nbsp;file&nbsp;path&nbsp;or&nbsp;URL&nbsp;which&nbsp;indicates&nbsp;an&nbsp;(ideally&nbsp;greyscale)&nbsp;image&nbsp;file.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                099&nbsp;&nbsp;&nbsp;&nbsp;([world&nbsp;imagepath]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[heightmap&nbsp;(filter-image
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                101&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(load-image&nbsp;imagepath)
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                102&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(filters&#x2F;grayscale))]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                103&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map-world
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                104&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map-world&nbsp;world&nbsp;tag-altitude&nbsp;(list&nbsp;heightmap))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tag-gradient)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([imagepath]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                107&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[heightmap&nbsp;(filter-image
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                108&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(load-image&nbsp;imagepath)
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                109&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(filters&#x2F;grayscale))
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world&nbsp;(make-world&nbsp;(.getWidth&nbsp;heightmap)&nbsp;(.getHeight&nbsp;heightmap))]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map-world
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                112&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map-world&nbsp;world&nbsp;tag-altitude&nbsp;(list&nbsp;heightmap))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                113&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tag-gradient))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                114&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                115&nbsp;&nbsp;(defn&nbsp;apply-valuemap
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                116&nbsp;&nbsp;&nbsp;&nbsp;&quot;Generalised&nbsp;from&nbsp;apply-heightmap,&nbsp;set&nbsp;an&nbsp;arbitrary&nbsp;property&nbsp;on&nbsp;each&nbsp;cell
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                117&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;this&nbsp;`world`&nbsp;from&nbsp;the&nbsp;values&nbsp;in&nbsp;this&nbsp;(ideally&nbsp;greyscale)&nbsp;heightmap.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                118&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                119&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`world`&nbsp;a&nbsp;world,&nbsp;as&nbsp;defined&nbsp;in&nbsp;`world.clj`,&nbsp;q.v.;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                120&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`imagepath`&nbsp;a&nbsp;file&nbsp;path&nbsp;or&nbsp;URL&nbsp;which&nbsp;indicates&nbsp;an&nbsp;(ideally&nbsp;greyscale)&nbsp;image&nbsp;file;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                121&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;`property`&nbsp;the&nbsp;property&nbsp;of&nbsp;each&nbsp;cell&nbsp;whose&nbsp;value&nbsp;should&nbsp;be&nbsp;added&nbsp;to&nbsp;from&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                122&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;intensity&nbsp;of&nbsp;the&nbsp;corresponding&nbsp;cell&nbsp;of&nbsp;the&nbsp;image.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                123&nbsp;&nbsp;&nbsp;&nbsp;[world&nbsp;imagepath&nbsp;property]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                124&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[heightmap&nbsp;(filter-image
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                125&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(load-image&nbsp;imagepath)
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                126&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(filters&#x2F;grayscale))]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                127&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map-world&nbsp;world&nbsp;tag-property&nbsp;(list&nbsp;property&nbsp;heightmap))))
+                </span><br/>
+ </body>
+</html>

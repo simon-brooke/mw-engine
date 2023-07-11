@@ -1,0 +1,560 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../coverage.css"/>  <title> mw_engine/natural_rules.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;^{:doc&nbsp;&quot;A&nbsp;set&nbsp;of&nbsp;MicroWorld&nbsp;rules&nbsp;describing&nbsp;a&nbsp;simplified&nbsp;natural&nbsp;ecosystem.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Since&nbsp;the&nbsp;completion&nbsp;of&nbsp;the&nbsp;rule&nbsp;language&nbsp;this&nbsp;is&nbsp;more&nbsp;or&nbsp;less&nbsp;obsolete&nbsp;-
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;there&nbsp;are&nbsp;still&nbsp;a&nbsp;few&nbsp;things&nbsp;that&nbsp;you&nbsp;can&nbsp;do&nbsp;with&nbsp;rules&nbsp;written&nbsp;in&nbsp;Clojure
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;you&nbsp;can&#x27;t&nbsp;do&nbsp;in&nbsp;the&nbsp;rule&nbsp;language,&nbsp;but&nbsp;not&nbsp;many&nbsp;and&nbsp;I&nbsp;doubt&nbsp;they&#x27;re
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;important.&nbsp;&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:author&nbsp;&quot;&nbsp;Simon&nbsp;Brooke&nbsp;&quot;}
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;&nbsp;&nbsp;mw-engine.natural-rules
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;&nbsp;&nbsp;(:require&nbsp;[mw-engine.utils&nbsp;:refer&nbsp;[get-int&nbsp;get-neighbours&nbsp;get-neighbours-with-state&nbsp;member?]]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;;;;;&nbsp;mw-engine:&nbsp;the&nbsp;state&#x2F;transition&nbsp;engine&nbsp;of&nbsp;MicroWorld.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;free&nbsp;software;&nbsp;you&nbsp;can&nbsp;redistribute&nbsp;it&nbsp;and&#x2F;or
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;;;;;&nbsp;modify&nbsp;it&nbsp;under&nbsp;the&nbsp;terms&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;;;;;&nbsp;as&nbsp;published&nbsp;by&nbsp;the&nbsp;Free&nbsp;Software&nbsp;Foundation;&nbsp;either&nbsp;version&nbsp;2
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;;;;;&nbsp;of&nbsp;the&nbsp;License,&nbsp;or&nbsp;(at&nbsp;your&nbsp;option)&nbsp;any&nbsp;later&nbsp;version.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                020&nbsp;&nbsp;;;;;&nbsp;This&nbsp;program&nbsp;is&nbsp;distributed&nbsp;in&nbsp;the&nbsp;hope&nbsp;that&nbsp;it&nbsp;will&nbsp;be&nbsp;useful,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;;;;;&nbsp;but&nbsp;WITHOUT&nbsp;ANY&nbsp;WARRANTY;&nbsp;without&nbsp;even&nbsp;the&nbsp;implied&nbsp;warranty&nbsp;of
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                022&nbsp;&nbsp;;;;;&nbsp;MERCHANTABILITY&nbsp;or&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE.&nbsp;&nbsp;See&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                023&nbsp;&nbsp;;;;;&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;for&nbsp;more&nbsp;details.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                024&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                025&nbsp;&nbsp;;;;;&nbsp;You&nbsp;should&nbsp;have&nbsp;received&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                026&nbsp;&nbsp;;;;;&nbsp;along&nbsp;with&nbsp;this&nbsp;program;&nbsp;if&nbsp;not,&nbsp;write&nbsp;to&nbsp;the&nbsp;Free&nbsp;Software
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                027&nbsp;&nbsp;;;;;&nbsp;Foundation,&nbsp;Inc.,&nbsp;51&nbsp;Franklin&nbsp;Street,&nbsp;Fifth&nbsp;Floor,&nbsp;Boston,&nbsp;MA&nbsp;&nbsp;02110-1301,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;;;;;&nbsp;USA.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                029&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;;;;;&nbsp;Copyright&nbsp;(C)&nbsp;2014&nbsp;Simon&nbsp;Brooke
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                031&nbsp;&nbsp;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                032&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                033&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                034&nbsp;&nbsp;;;&nbsp;treeline&nbsp;at&nbsp;arbitrary&nbsp;altitude.
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                035&nbsp;&nbsp;(def&nbsp;treeline&nbsp;150)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                036&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                037&nbsp;&nbsp;;;&nbsp;waterline&nbsp;also&nbsp;at&nbsp;arbitrary&nbsp;altitude.
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                038&nbsp;&nbsp;(def&nbsp;waterline&nbsp;10)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                039&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                040&nbsp;&nbsp;;;&nbsp;and&nbsp;finally&nbsp;snowline&nbsp;is&nbsp;also&nbsp;arbitrary.
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                041&nbsp;&nbsp;(def&nbsp;snowline&nbsp;200)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                042&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                043&nbsp;&nbsp;;;&nbsp;Rare&nbsp;chance&nbsp;of&nbsp;lightning&nbsp;strikes
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                044&nbsp;&nbsp;(def&nbsp;lightning-probability&nbsp;500)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                045&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                046&nbsp;&nbsp;;;&nbsp;rules&nbsp;describing&nbsp;vegetation
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                047&nbsp;&nbsp;(def&nbsp;vegetation-rules
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                048&nbsp;&nbsp;&nbsp;&nbsp;(list
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                049&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;Randomly,&nbsp;birds&nbsp;plant&nbsp;tree&nbsp;seeds&nbsp;into&nbsp;grassland.
+                </span><br/>
+<span class="partial" title="1 out of 23 forms covered">
+                050&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]&nbsp;(cond&nbsp;(and&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:grassland)(&lt;&nbsp;(rand&nbsp;10)&nbsp;1))(merge&nbsp;cell&nbsp;{:state&nbsp;:heath})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                051&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;heath&nbsp;below&nbsp;the&nbsp;treeline&nbsp;grows&nbsp;gradually&nbsp;into&nbsp;forest,&nbsp;providing&nbsp;browsing&nbsp;pressure&nbsp;is&nbsp;not&nbsp;to&nbsp;high
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                052&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(and
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                054&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:heath)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                055&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;browsing&nbsp;limit&nbsp;really&nbsp;ought&nbsp;to&nbsp;vary&nbsp;with&nbsp;soil&nbsp;fertility,&nbsp;but...
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;&nbsp;(+&nbsp;(get-int&nbsp;cell&nbsp;:deer)(get-int&nbsp;cell&nbsp;:sheep))&nbsp;6)
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                057&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;&nbsp;(get-int&nbsp;cell&nbsp;:altitude)&nbsp;treeline))
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:state&nbsp;:scrub})))
+                </span><br/>
+<span class="partial" title="1 out of 14 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]&nbsp;(cond&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:scrub)&nbsp;(merge&nbsp;cell&nbsp;{:state&nbsp;:forest})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;Forest&nbsp;on&nbsp;fertile&nbsp;land&nbsp;grows&nbsp;to&nbsp;climax
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                063&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:forest)
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                065&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;&nbsp;(get-int&nbsp;cell&nbsp;:fertility)&nbsp;10))
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                066&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:state&nbsp;:climax})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                067&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;Climax&nbsp;forest&nbsp;occasionally&nbsp;catches&nbsp;fire&nbsp;(e.g.&nbsp;lightning&nbsp;strikes)
+                </span><br/>
+<span class="partial" title="1 out of 23 forms covered">
+                068&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]&nbsp;(cond&nbsp;(and&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:climax)(&lt;&nbsp;(rand&nbsp;lightning-probability)&nbsp;1))&nbsp;(merge&nbsp;cell&nbsp;{:state&nbsp;:fire})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                069&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;Climax&nbsp;forest&nbsp;neighbouring&nbsp;fires&nbsp;is&nbsp;likely&nbsp;to&nbsp;catch&nbsp;fire
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                070&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;world]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="not-covered" title="0 out of 14 forms covered">
+                072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:climax)
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                073&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;&nbsp;(rand&nbsp;3)&nbsp;1)
+                </span><br/>
+<span class="not-covered" title="0 out of 14 forms covered">
+                074&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not&nbsp;(empty?&nbsp;(get-neighbours-with-state&nbsp;world&nbsp;(:x&nbsp;cell)&nbsp;(:y&nbsp;cell)&nbsp;1&nbsp;:fire))))
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                075&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:state&nbsp;:fire})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                076&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;After&nbsp;fire&nbsp;we&nbsp;get&nbsp;waste
+                </span><br/>
+<span class="partial" title="1 out of 14 forms covered">
+                077&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]&nbsp;(cond&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:fire)&nbsp;(merge&nbsp;cell&nbsp;{:state&nbsp;:waste})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                078&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;And&nbsp;after&nbsp;waste&nbsp;we&nbsp;get&nbsp;pioneer&nbsp;species;&nbsp;if&nbsp;there&#x27;s&nbsp;a&nbsp;woodland&nbsp;seed
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                079&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;source,&nbsp;it&#x27;s&nbsp;going&nbsp;to&nbsp;be&nbsp;heath,&nbsp;otherwise&nbsp;grassland.
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                080&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;world]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                081&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="not-covered" title="0 out of 10 forms covered">
+                082&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:waste)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(empty?
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                085&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(flatten
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                086&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                087&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-neighbours-with-state&nbsp;world&nbsp;(:x&nbsp;cell)&nbsp;(:y&nbsp;cell)&nbsp;1&nbsp;:scrub)
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                088&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-neighbours-with-state&nbsp;world&nbsp;(:x&nbsp;cell)&nbsp;(:y&nbsp;cell)&nbsp;1&nbsp;:forest)
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                089&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(get-neighbours-with-state&nbsp;world&nbsp;(:x&nbsp;cell)&nbsp;(:y&nbsp;cell)&nbsp;1&nbsp;:climax))))))
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                090&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:state&nbsp;:heath})))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                091&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                092&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:waste)
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                093&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:state&nbsp;:grassland})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                094&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;Forest&nbsp;increases&nbsp;soil&nbsp;fertility
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                095&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]
+                </span><br/>
+<span class="not-covered" title="0 out of 8 forms covered">
+                096&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(member?&nbsp;(:state&nbsp;cell)&nbsp;&#x27;(:forest&nbsp;:climax))
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                097&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:fertility&nbsp;(+&nbsp;(get-int&nbsp;cell&nbsp;:fertility)&nbsp;1)})))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                098&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                099&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                100&nbsp;&nbsp;;;&nbsp;rules&nbsp;describing&nbsp;herbivore&nbsp;behaviour
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                101&nbsp;&nbsp;(def&nbsp;herbivore-rules
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                102&nbsp;&nbsp;&nbsp;&nbsp;(list
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                103&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;there&nbsp;are&nbsp;too&nbsp;many&nbsp;deer&nbsp;for&nbsp;the&nbsp;fertility&nbsp;of&nbsp;the&nbsp;area&nbsp;to&nbsp;sustain,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                104&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;some&nbsp;die&nbsp;or&nbsp;move&nbsp;on.
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(&gt;&nbsp;(get-int&nbsp;cell&nbsp;:deer)&nbsp;(get-int&nbsp;cell&nbsp;:fertility))
+                </span><br/>
+<span class="not-covered" title="0 out of 9 forms covered">
+                107&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:deer&nbsp;(get-int&nbsp;cell&nbsp;:fertility)})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                108&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;deer&nbsp;arrive&nbsp;occasionally&nbsp;at&nbsp;the&nbsp;edge&nbsp;of&nbsp;the&nbsp;map.
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                109&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;world]
+                </span><br/>
+<span class="not-covered" title="0 out of 23 forms covered">
+                110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(and&nbsp;(&lt;&nbsp;(count&nbsp;(get-neighbours&nbsp;world&nbsp;cell))&nbsp;8)
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;&nbsp;(rand&nbsp;50)&nbsp;1)
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                112&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;&nbsp;(get-int&nbsp;cell&nbsp;:fertility)&nbsp;0)
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                113&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;(get-int&nbsp;cell&nbsp;:deer)&nbsp;0))
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                114&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:deer&nbsp;2})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                115&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;deer&nbsp;gradually&nbsp;spread&nbsp;through&nbsp;the&nbsp;world&nbsp;by&nbsp;breeding&nbsp;or&nbsp;migrating.
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                116&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;world]
+                </span><br/>
+<span class="not-covered" title="0 out of 15 forms covered">
+                117&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[n&nbsp;(apply&nbsp;+&nbsp;(map&nbsp;#(get-int&nbsp;%&nbsp;:deer)&nbsp;(get-neighbours&nbsp;world&nbsp;cell)))]
+                </span><br/>
+<span class="not-covered" title="0 out of 12 forms covered">
+                118&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(and
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                119&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;&nbsp;(get-int&nbsp;cell&nbsp;:fertility)&nbsp;0)
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                120&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;(get-int&nbsp;cell&nbsp;:deer)&nbsp;0)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                121&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;=&nbsp;n&nbsp;2))
+                </span><br/>
+<span class="not-covered" title="0 out of 9 forms covered">
+                122&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:deer&nbsp;(int&nbsp;(&#x2F;&nbsp;n&nbsp;2))}))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                123&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;deer&nbsp;breed.
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                124&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                125&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                126&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;=&nbsp;(get-int&nbsp;cell&nbsp;:deer)&nbsp;2)
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                127&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:deer&nbsp;(int&nbsp;(*&nbsp;(:deer&nbsp;cell)&nbsp;2))})))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                128&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                129&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;rules&nbsp;describing&nbsp;predator&nbsp;behaviour
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                130&nbsp;&nbsp;&nbsp;&nbsp;(def&nbsp;predator-rules
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                131&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                132&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;wolves&nbsp;eat&nbsp;deer
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                133&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                134&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                135&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;=&nbsp;(get-int&nbsp;cell&nbsp;:wolves)&nbsp;1)
+                </span><br/>
+<span class="not-covered" title="0 out of 16 forms covered">
+                136&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:deer&nbsp;(max&nbsp;0&nbsp;(-&nbsp;(get-int&nbsp;cell&nbsp;:deer)&nbsp;(get-int&nbsp;cell&nbsp;:wolves)))})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                137&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;not&nbsp;more&nbsp;than&nbsp;eight&nbsp;wolves&nbsp;in&nbsp;a&nbsp;pack,&nbsp;for&nbsp;now&nbsp;(hack&nbsp;because&nbsp;wolves&nbsp;are&nbsp;not&nbsp;dying)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                138&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;world]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                139&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(&gt;&nbsp;(get-int&nbsp;cell&nbsp;:wolves)&nbsp;8)&nbsp;(merge&nbsp;cell&nbsp;{:wolves&nbsp;8})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                140&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;there&nbsp;are&nbsp;not&nbsp;enough&nbsp;deer&nbsp;to&nbsp;sustain&nbsp;the&nbsp;get-int&nbsp;of&nbsp;wolves,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                141&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;some&nbsp;wolves&nbsp;die&nbsp;or&nbsp;move&nbsp;on.&nbsp;(doesn&#x27;t&nbsp;seem&nbsp;to&nbsp;be&nbsp;working?)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                142&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                143&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(&gt;&nbsp;(get-int&nbsp;cell&nbsp;:wolves)&nbsp;(get-int&nbsp;cell&nbsp;:deer))
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                144&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:wolves&nbsp;0})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                145&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;wolves&nbsp;arrive&nbsp;occasionally&nbsp;at&nbsp;the&nbsp;edge&nbsp;of&nbsp;the&nbsp;map.
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                146&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;world]
+                </span><br/>
+<span class="not-covered" title="0 out of 23 forms covered">
+                147&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(and&nbsp;(&lt;&nbsp;(count&nbsp;(get-neighbours&nbsp;world&nbsp;cell))&nbsp;8)
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                148&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;&nbsp;(rand&nbsp;50)&nbsp;1)
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                149&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:water))
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                150&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;(get-int&nbsp;cell&nbsp;:wolves)&nbsp;0))
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                151&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:wolves&nbsp;2})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                152&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;wolves&nbsp;gradually&nbsp;spread&nbsp;through&nbsp;the&nbsp;world&nbsp;by&nbsp;breeding&nbsp;or&nbsp;migrating.
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                153&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;world]
+                </span><br/>
+<span class="not-covered" title="0 out of 15 forms covered">
+                154&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[n&nbsp;(apply&nbsp;+&nbsp;(map&nbsp;#(get-int&nbsp;%&nbsp;:wolves)&nbsp;(get-neighbours&nbsp;world&nbsp;cell)))]
+                </span><br/>
+<span class="not-covered" title="0 out of 12 forms covered">
+                155&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(and
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                156&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:water))
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                157&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;(get-int&nbsp;cell&nbsp;:wolves)&nbsp;0)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                158&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;=&nbsp;n&nbsp;2))
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                159&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:wolves&nbsp;2}))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                160&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;wolves&nbsp;breed.
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                161&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                162&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                163&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;=&nbsp;(get-int&nbsp;cell&nbsp;:wolves)&nbsp;2)
+                </span><br/>
+<span class="not-covered" title="0 out of 11 forms covered">
+                164&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(merge&nbsp;cell&nbsp;{:wolves&nbsp;(int&nbsp;(*&nbsp;(:wolves&nbsp;cell)&nbsp;2))})))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                165&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                166&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                167&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;rules&nbsp;which&nbsp;initialise&nbsp;the&nbsp;world
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                168&nbsp;&nbsp;&nbsp;&nbsp;(def&nbsp;init-rules
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                169&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;below&nbsp;the&nbsp;waterline,&nbsp;we&nbsp;have&nbsp;water.
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                171&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]
+                </span><br/>
+<span class="not-covered" title="0 out of 23 forms covered">
+                172&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(and&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:new)&nbsp;(&lt;&nbsp;(get-int&nbsp;cell&nbsp;:altitude)&nbsp;waterline))&nbsp;(merge&nbsp;cell&nbsp;{:state&nbsp;:water})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                173&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;above&nbsp;the&nbsp;snowline,&nbsp;we&nbsp;have&nbsp;snow.
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                174&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]
+                </span><br/>
+<span class="not-covered" title="0 out of 23 forms covered">
+                175&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(and&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:new)&nbsp;(&gt;&nbsp;(get-int&nbsp;cell&nbsp;:altitude)&nbsp;snowline))&nbsp;(merge&nbsp;cell&nbsp;{:state&nbsp;:snow})))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                176&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;in&nbsp;between,&nbsp;we&nbsp;have&nbsp;a&nbsp;wasteland.
+                </span><br/>
+<span class="partial" title="1 out of 14 forms covered">
+                177&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[cell&nbsp;_]&nbsp;(cond&nbsp;(=&nbsp;(:state&nbsp;cell)&nbsp;:new)&nbsp;(merge&nbsp;cell&nbsp;{:state&nbsp;:grassland})))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                178&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                179&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                180&nbsp;&nbsp;(def&nbsp;natural-rules&nbsp;(flatten
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                181&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                182&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vegetation-rules
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                183&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;herbivore-rules
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                184&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;predator-rules)))
+                </span><br/>
+ </body>
+</html>

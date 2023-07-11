@@ -122,7 +122,7 @@
 (defn flood-hollow
   "Raise the altitude of a copy of this `cell` of this `world` to the altitude
    of the lowest of its `neighbours`."
-  ([world cell neighbours]
+  ([_world cell neighbours]
     (let [lowest (get-least-cell neighbours :altitude)]
       (merge cell {:state :water :altitude (:altitude lowest)})))
   ([world cell]
@@ -189,7 +189,7 @@
 (defn explore-lake
   "Return a sequence of cells starting with this `cell` in this `world` which
   form a contiguous lake"
-  [world cell]
+  [_world _cell]
   )
 
 (defn is-lake?
@@ -207,7 +207,7 @@
 
 
 (defn find-lakes
-  [world]
+  [_world]
   )
 
 (defn run-drainage
