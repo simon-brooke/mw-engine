@@ -22,7 +22,8 @@
    there's a planning stage, in which all the flows to be executed are computed
    without changing the world, and then an execution stage, where they're all 
    executed. This namespace deals with mainly with execution."
-  (:require [mw-engine.utils :refer [get-cell get-num in-bounds? merge-cell]]
+  (:require [mw-engine.utils :refer [get-cell get-num in-bounds? merge-cell
+                                     rule-type]]
             [taoensso.timbre :refer [info warn]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -104,7 +105,7 @@
           d' (assoc dest p (+ (get-num dest p) q))]
       (if (= q (:quantity flow))
         (info (format "Moving %f units of %s from %d,%d to %d,%d"
-                    (float q) (name p) sx sy dx dy))
+                      (float q) (name p) sx sy dx dy))
         (warn (format "Moving %s from %d,%d to %d,%d; %f units ordered but only %f available"
                       (name p) sx sy dx dy (float (:quantity flow)) (float q))))
       (merge-cell (merge-cell world s') d'))
@@ -117,6 +118,28 @@
   "Return a world like this `world`, but with each of these flows executed."
   [world flows]
   (reduce execute world (filter #(flow? % world) flows)))
+
+(defn plan-flows
+  "Plan, but do not execute, all the flows in this `world` implied by these
+   `flow-rules` (which are expected to be pre-compiled). Return the list of
+   plans, as flow objects."
+  [world flow-rules]
+  (assert (every? #(= :flow (rule-type %)) flow-rules))
+  (remove nil?
+          (flatten
+           (map ;; across all the cells
+            (fn [cell]
+              (map ;; across all the rules
+               (fn [rule] (apply rule (list cell world)))
+               flow-rules))
+            (flatten world)))))
+
+(defn flow-world
+      "Return a world derived from this `world` by applying the flow rules 
+      found among these `rules` to each cell, and executing all the flows
+       planned."
+  [world rules]
+  (execute-flows world (plan-flows world (filter #(= :flow (rule-type %)) rules))))
 
 ;; building blocks for compiled flow rules
 

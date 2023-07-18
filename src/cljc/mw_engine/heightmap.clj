@@ -32,6 +32,12 @@
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn abs 
+  "Prior to Clojure 1.11, there is no native `abs` function. Afterwards, there
+   is."
+  [n] 
+  (Math/abs n))
+
 (defn tag-property
   "Set the value of this `property` of this cell from the corresponding pixel of this `heightmap`.
    If the heightmap you supply is smaller than the world, this will break.

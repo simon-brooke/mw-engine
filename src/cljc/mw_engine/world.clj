@@ -35,6 +35,24 @@
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn cell?
+  "Return `true` if `obj` is a cell, as understood by MicroWorld, else `false`."
+  [obj]
+  (and (map? obj) ;; it's a map...
+       ;; TODO: it's worth checking (and this does not) that cells have the
+       ;; right co-ordinates!
+       (pos-int? (:x obj)) ;; with an x co-ordinate...
+       (pos-int? (:y obj)) ;; and a y co-ordinate...
+       (keyword? (:state obj)))) ;; and a state which is a keyword.
+
+(defn world?
+  "Return `true` if `obj` is a world, as understood by MicroWorld, else `false`."
+  [obj]
+  (and (coll? obj) ;; it's a collection...
+       (every? coll? obj) ;; of collections...
+       (= 1 (count (set (map count obj)))) ;; all of which are the same length...
+       (every? cell? (flatten obj)))) ;; and every element of each of those is a cell.
+
 (defmacro make-cell
   "Create a minimal default cell at x, y
 

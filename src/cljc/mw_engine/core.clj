@@ -22,7 +22,9 @@
             further rules can be applied to that cell."
       :author "Simon Brooke"}
  mw-engine.core
-  (:require [mw-engine.utils :refer [get-int-or-zero map-world]]
+  (:require [clojure.string :refer [starts-with?]]
+            [mw-engine.flow :refer [flow-world]]
+            [mw-engine.utils :refer [get-int-or-zero map-world rule-type]]
             [taoensso.timbre :as l]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -55,23 +57,21 @@
    an ifn, or a list (ifn source-text). This function deals with despatching
    on those two possibilities. `world` is also passed in in order to be able
    to access neighbours."
-  ([world cell rule]
-   (cond
-     (ifn? rule) (apply-rule world cell rule nil)
-     (seq? rule) (let [[afn src] rule] (apply-rule world cell afn src))))
-  ([world cell rule source]
-   (let [result (apply rule (list cell world))]
-     (cond
-       (and result source) (merge result {:rule source})
-       :else result))))
+  [world cell rule]
+  (cond
+    (ifn? rule) (apply rule (list cell world))
+    (seq? rule) (let [[afn src lisp] rule
+                      result (apply-rule world cell afn)]
+                  (when result
+                    (merge result {:rule src
+                                   :lisp lisp})))))
 
 (defn- apply-rules
   "Derive a cell from this `cell` of this `world` by applying these `rules`."
   [world cell rules]
-  (cond (empty? rules) cell
-        :else (let [result (apply-rule world cell (first rules))]
-                (cond result result
-                      :else (apply-rules world cell (rest rules))))))
+  (or
+   (first (remove nil? (map #(apply-rule world cell %) rules)))
+   cell))
 
 (defn- transform-cell
   "Derive a cell from this `cell` of this `world` by applying these `rules`. If an
@@ -83,33 +83,45 @@
      {:generation (+ (get-int-or-zero cell :generation) 1)})
     (catch Exception e
       (merge cell {:error
-                   (format "%s at generation %d when in state %s"
+                   (format "%s with message `%s` at generation %d when in state %s"
+                           (-> e .getClass .getName)
                            (.getMessage e)
                            (:generation cell)
                            (:state cell))
-                   :stacktrace (map #(.toString %) (.getStackTrace e))
+                   :stacktrace ;; (remove #(starts-with? % "clojure.") 
+                                       (map #(.toString %) (.getStackTrace e))
+                               ;;)
                    :state :error}))))
 
 (defn transform-world
-  "Return a world derived from this `world` by applying these `rules` to each cell."
-  ([world rules]
-   (map-world world transform-cell (list rules))))
+  "Return a world derived from this `world` by applying the production rules 
+  found among these `rules` to each cell."
+  [world rules]
+  (map-world world transform-cell
+             ;; Yes, that `list` is there for a reason! 
+             (list
+              (filter
+               #(= :production (rule-type %))
+               rules))))
 
 (defn run-world
   "Run this world with these rules for this number of generations.
 
-  * `world` a world as discussed above;
-  * `init-rules` a sequence of rules as defined above, to be run once to initialise the world;
-  * `rules` a sequence of rules as defined above, to be run iteratively for each generation;
-  * `generations` an (integer) number of generations.
+   * `world` a world as discussed above;
+   * `init-rules` a sequence of rules as defined above, to be run once to initialise the world;
+   * `rules` a sequence of rules as defined above, to be run iteratively for each generation;
+   * `generations` an (integer) number of generations.
+   
+   **NOTE THAT** all rules **must** be tagged with `rule-type` metadata, or thet **will not**
+   be executed.
 
-  Return the final generation of the world."
-  [world init-rules rules generations]
-  (reduce (fn [world iteration]
-            (l/info "Running iteration " iteration)
-            (transform-world world rules))
-          (transform-world world init-rules)
-          (range generations)))
-
-
-
+   Return the final generation of the world."
+  ([world rules generations]
+   (run-world world rules rules (dec generations)))
+  ([world init-rules rules generations]
+   (reduce (fn [world iteration]
+             (l/info "Running iteration " iteration)
+             (let [w' (transform-world world rules)]
+               (flow-world w' rules)))
+           (transform-world world init-rules)
+           (range generations))))

@@ -299,3 +299,8 @@
                   (merge %2 cell)
                   %2))
     world))
+
+(defn rule-type
+  "Return the rule-type of this compiled `rule`."
+  [rule]
+  (:rule-type (meta rule)))
