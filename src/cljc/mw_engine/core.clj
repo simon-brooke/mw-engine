@@ -82,16 +82,17 @@
      (apply-rules world cell rules)
      {:generation (+ (get-int-or-zero cell :generation) 1)})
     (catch Exception e
-      (merge cell {:error
-                   (format "%s with message `%s` at generation %d when in state %s"
-                           (-> e .getClass .getName)
-                           (.getMessage e)
-                           (:generation cell)
-                           (:state cell))
+      (let [narrative (format "%s with message `%s` at generation %d when in state %s"
+                              (-> e .getClass .getName)
+                              (.getMessage e)
+                              (:generation cell)
+                              (:state cell))]
+        (l/warn e narrative)
+      (merge cell {:error narrative 
                    :stacktrace ;; (remove #(starts-with? % "clojure.") 
                                        (map #(.toString %) (.getStackTrace e))
                                ;;)
-                   :state :error}))))
+                   :state :error})))))
 
 (defn transform-world
   "Return a world derived from this `world` by applying the production rules 
