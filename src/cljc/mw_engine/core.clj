@@ -53,18 +53,14 @@
 (defn apply-rule
   "Apply a single `rule` to a `cell`. What this is about is that I want to be able,
    for debugging purposes, to tag a cell with the rule text of the rule which
-   fired (and especially so when an exception is thrown. So a rule may be either
-   an ifn, or a list (ifn source-text). This function deals with despatching
-   on those two possibilities. `world` is also passed in in order to be able
-   to access neighbours."
+   fired (and especially so when an exception is thrown). "
+  ;; as of version 0-3-0, metadata for rules is now passed around on the metadata
+  ;; of the rule function itself. Yes, I know, this is obvious; but I'll confess
+  ;; I didn't think of it before.
   [world cell rule]
-  (cond
-    (ifn? rule) (apply rule (list cell world))
-    (seq? rule) (let [[afn src lisp] rule
-                      result (apply-rule world cell afn)]
-                  (when result
-                    (merge result {:rule src
-                                   :lisp lisp})))))
+  (let [result (apply rule (list cell world))]
+    (when result
+      (merge result (meta rule)))))
 
 (defn- apply-rules
   "Derive a cell from this `cell` of this `world` by applying these `rules`."

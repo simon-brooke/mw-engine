@@ -13,6 +13,13 @@ You can see MicroWorld in action [here](http://www.journeyman.cc/microworld/) -
 but please don't be mean to my poor little server. If you want to run big maps
 or complex rule-sets, please run it on your own machines.
 
+### Version compatibility
+
+There are substantial changes in how rule functions are evaluated between 0.1.x 
+versions of MicroWorld libraries and 0.3.x versions. In particular, in 0.3.x 
+metadata is held on rule functions which is essential to the functioning of the
+engine. Consequently, you cannot mix 0.1.x and 0.3.x libraries: it will not work.
+
 ## Usage
 
 Primary entry points are make-world and run-world, both in mw-engine.core. See
