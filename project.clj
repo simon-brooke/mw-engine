@@ -1,4 +1,4 @@
-(defproject mw-engine "0.2.0-SNAPSHOT"
+(defproject mw-engine "0.3.0-SNAPSHOT"
   :cloverage {:output "docs/cloverage"}
   :codox {:metadata {:doc "**TODO**: write docs"
                      :doc/format :markdown}
