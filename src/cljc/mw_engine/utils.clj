@@ -138,16 +138,16 @@
             :else 0))
     (throw (Exception. "No map passed?"))))
 
-(defn get-num
+(defmacro get-num
   "Get the value of a property expected to be a number from a map; if not
    present (or not a number) return 0.
 
   * `map` a map;
   * `key` a symbol or keyword, presumed to be a key into the `map`."
   [map key]
-  (if (map? map)
-    (let [v (map key)]
-      (cond (and v (number? v)) v
+  `(if (map? ~map)
+    (let [~'v (~map ~key)]
+      (cond (and ~'v (number? ~'v)) ~'v
             :else 0))
     (throw (Exception. "No map passed?"))))
 

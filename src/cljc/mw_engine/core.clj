@@ -58,7 +58,16 @@
   ;; of the rule function itself. Yes, I know, this is obvious; but I'll confess
   ;; I didn't think of it before.
   [world cell rule]
-  (let [result (apply rule (list cell world))]
+  (let [result (try
+                 (apply rule (list cell world))
+                 (catch Exception e
+                   (l/warn e
+                           (format
+                            "Error in `apply-rule`: `%s` (%s) while executing rule `%s` on cell `%s`"
+                            e
+                            (.getMessage e)
+                            (-> rule meta :lisp)
+                            cell))))]
     (when result
       (merge result (meta rule)))))
 
@@ -66,7 +75,18 @@
   "Derive a cell from this `cell` of this `world` by applying these `rules`."
   [world cell rules]
   (or
-   (first (remove nil? (map #(apply-rule world cell %) rules)))
+   (first
+    (remove
+     nil?
+     (try
+       (map #(apply-rule world cell %) rules)
+       (catch Exception e
+         (l/warn e
+                 (format
+                  "Error in `apply-rules`: `%s` (%s) while executing rules on cell `%s`"
+                  e
+                  (.getMessage e)
+                  cell))))))
    cell))
 
 (defn- transform-cell
@@ -78,17 +98,13 @@
      (apply-rules world cell rules)
      {:generation (+ (get-int-or-zero cell :generation) 1)})
     (catch Exception e
-      (let [narrative (format "%s with message `%s` at generation %d when in state %s"
+      (let [narrative (format "Error in `transform-cell`: `%s` (%s) at generation %d when in state %s;"
                               (-> e .getClass .getName)
                               (.getMessage e)
                               (:generation cell)
                               (:state cell))]
         (l/warn e narrative)
-      (merge cell {:error narrative 
-                   :stacktrace ;; (remove #(starts-with? % "clojure.") 
-                                       (map #(.toString %) (.getStackTrace e))
-                               ;;)
-                   :state :error})))))
+        cell))))
 
 (defn transform-world
   "Return a world derived from this `world` by applying the production rules 
