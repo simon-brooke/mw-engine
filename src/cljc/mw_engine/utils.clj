@@ -2,8 +2,8 @@
       interpretation of MicroWorld rule."
       :author "Simon Brooke"}
  mw-engine.utils
-  (:require
-   [clojure.math.combinatorics :as combo]))
+  (:require [clojure.math.combinatorics :as combo]
+            [clojure.string :refer [join]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
@@ -304,3 +304,43 @@
   "Return the rule-type of this compiled `rule`."
   [rule]
   (:rule-type (meta rule)))
+
+(defn history-string
+  "Return the history of this `cell` as a string for presentation to the user."
+  [cell]
+  (join "\n"
+        (map #(format "%6d: %s" (:generation %) (:rule %))
+             (:history cell))))
+
+(defn- extend-summary [summary rs rl event]
+  (str summary
+       (if rs (format "%d-%d (%d occurances): %s\n" rs
+                      (:generation event)
+                      rl
+                      (:rule event))
+           (format "%d: %s\n" (:generation event)
+                   (:rule event)))))
+
+(defn summarise-history
+  "Return, as a string, a shorter summary of the history of this cell"
+  [cell]
+  (loop [history (rest (:history cell))
+         event (first (:history cell))
+         prev nil
+         rs nil
+         rl 0
+         summary ""]
+    (cond (nil? event) (extend-summary summary rs rl prev)
+          (= (:rule event) (:rule prev)) (recur
+                                          (rest history)
+                                          (first history)
+                                          event
+                                          (or rs (:generation event))
+                                          (inc rl)
+                                          summary)
+          :else (recur (rest history)
+                       (first history)
+                       event
+                       nil
+                       0
+                       (extend-summary summary rs (inc rl) event)))))
