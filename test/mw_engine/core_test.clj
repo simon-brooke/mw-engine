@@ -1,6 +1,7 @@
 (ns mw-engine.core-test
   (:require [clojure.test :refer [deftest is testing]]
             [mw-engine.core :refer [apply-rule transform-world]]
+            [mw-engine.utils :refer [map-world]]
             [mw-engine.world :refer [make-world]]))
 
 (deftest apply-rule-test
@@ -17,8 +18,8 @@
           "Rule shouldn't fire when state is wrong")
       (is (= (:state (apply-rule nil {:state :new} afn)) :grassland)
           "Rule should fire when state is correct") 
-      (is (= (:rule (apply-rule nil {:state :new} afn)) "Test source")
-          "Rule text cached on cell if provided"))))
+      (is (seq? (:history (apply-rule nil {:state :new} afn)))
+          "Event cached on history of cell"))))
 
 (deftest transform-world-tests
   (testing "Application of a single rule"
@@ -31,8 +32,8 @@
                merge {:rule-type :production
                       :rule "Test source"})
           world (make-world 3 3)
-          expected [[[{:y 0, :state :grassland, :x 0, :rule-type :production, :rule "Test source", :generation 1} {:y 0, :state :grassland, :x 1, :rule-type :production, :rule "Test source", :generation 1} {:y 0, :state :grassland, :x 2, :rule-type :production, :rule "Test source", :generation 1}] 
-                     [{:y 1, :state :grassland, :x 0, :rule-type :production, :rule "Test source", :generation 1} {:y 1, :state :grassland, :x 1, :rule-type :production, :rule "Test source", :generation 1} {:y 1, :state :grassland, :x 2, :rule-type :production, :rule "Test source", :generation 1}] 
-                     [{:y 2, :state :grassland, :x 0, :rule-type :production, :rule "Test source", :generation 1} {:y 2, :state :grassland, :x 1, :rule-type :production, :rule "Test source", :generation 1} {:y 2, :state :grassland, :x 2, :rule-type :production, :rule "Test source", :generation 1}]]]
-          actual (transform-world world (list afn))]
+          expected [[{:y 0, :state :grassland, :x 0} {:y 0, :state :grassland, :x 1} {:y 0, :state :grassland, :x 2}] 
+                     [{:y 1, :state :grassland, :x 0} {:y 1, :state :grassland, :x 1} {:y 1, :state :grassland, :x 2}] 
+                     [{:y 2, :state :grassland, :x 0} {:y 2, :state :grassland, :x 1} {:y 2, :state :grassland, :x 2}]]
+          actual (map-world (transform-world world (list afn)) (fn [_ c] (select-keys c [:x :y :state])))]
       (is (= actual expected)))))

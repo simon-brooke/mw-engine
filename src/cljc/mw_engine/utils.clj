@@ -30,7 +30,7 @@
 
 (defn member?
   "Return 'true' if elt is a member of col, else 'false'."
-  [elt col] 
+  [elt col]
   (contains? (set col) elt))
 
 (defn get-int-or-zero
@@ -146,10 +146,10 @@
   * `key` a symbol or keyword, presumed to be a key into the `map`."
   [map key]
   `(if (map? ~map)
-    (let [~'v (~map ~key)]
-      (cond (and ~'v (number? ~'v)) ~'v
-            :else 0))
-    (throw (Exception. "No map passed?"))))
+     (let [~'v (~map ~key)]
+       (cond (and ~'v (number? ~'v)) ~'v
+             :else 0))
+     (throw (Exception. "No map passed?"))))
 
 (defn population
   "Return the population of this species in this cell. Currently a synonym for
@@ -305,11 +305,44 @@
   [rule]
   (:rule-type (meta rule)))
 
+(defn add-history-event
+  "If `cell` is non-nil, expect it to be a map representing a cell; add
+   to its history an an event recording the firing of this rule. If
+   `detail` is passed, treat it as a map of additional data to be
+   added to the event."
+  ([cell rule]
+   (when cell (add-history-event cell rule {})))
+  ([result rule detail]
+   (when result
+     (let [rule-meta (meta rule)
+           event {:rule (:source rule-meta)
+                  :rule-type (:rule-type rule-meta)
+                  :generation (get-int-or-zero
+                               result
+                               :generation)}
+           event' (if detail (merge event detail) event)]
+       (merge result
+              {:history (concat
+                         (:history result)
+                         (list event'))})))))
+
+(defn- event-narrative [event]
+  (case (:rule-type event)
+    :production (:rule event)
+    :flow (format "%s %f units of %s %s %d,%d:\n    %s"
+                  (name (:direction event))
+                  (:quantity event)
+                  (:property event)
+                  (if (= :sent (:direction event)) "to" "from")
+                  (:x (:other event))
+                  (:y (:other event))
+                  (:rule event))))
+
 (defn history-string
   "Return the history of this `cell` as a string for presentation to the user."
   [cell]
   (join "\n"
-        (map #(format "%6d: %s" (:generation %) (:rule %))
+        (map #(format "%6d: %s" (:generation %) (event-narrative %))
              (:history cell))))
 
 (defn- extend-summary [summary rs rl event]
@@ -317,9 +350,9 @@
        (if rs (format "%d-%d (%d occurances): %s\n" rs
                       (:generation event)
                       rl
-                      (:rule event))
+                      (event-narrative event))
            (format "%d: %s\n" (:generation event)
-                   (:rule event)))))
+                   (event-narrative event)))))
 
 (defn summarise-history
   "Return, as a string, a shorter summary of the history of this cell"

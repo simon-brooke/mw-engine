@@ -22,8 +22,8 @@
    there's a planning stage, in which all the flows to be executed are computed
    without changing the world, and then an execution stage, where they're all 
    executed. This namespace deals with mainly with execution."
-  (:require [mw-engine.utils :refer [get-cell get-num in-bounds? merge-cell
-                                     rule-type]]
+  (:require [mw-engine.utils :refer [add-history-event get-cell get-num
+                                     in-bounds? map-world merge-cell rule-type]]
             [taoensso.timbre :refer [info warn]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -101,8 +101,14 @@
           dest (get-cell world dx dy)
           p (:property flow)
           q (min (:quantity flow) (get-num source p))
-          s' (assoc source p (- (source p) q))
-          d' (assoc dest p (+ (get-num dest p) q))]
+          s' (add-history-event 
+              (assoc source p (- (source p) q)) 
+              (:rule flow) 
+              {:direction :sent :other {:x dx :y dy} :property p :quantity q})
+          d' (add-history-event
+              (assoc dest p (+ (get-num dest p) q))
+              (:rule flow)
+              {:direction :received :other {:x sx :y sy} :property p :quantity q})]
       (if (= q (:quantity flow))
         (info (format "Moving %f units of %s from %d,%d to %d,%d"
                       (float q) (name p) sx sy dx dy))
@@ -119,27 +125,36 @@
   [world flows]
   (reduce execute world (filter #(flow? % world) flows)))
 
+(defn- plan-cell-flows 
+  [world cell rules]
+  (map ;; across all the rules
+   (fn [rule] (let [r (try 
+                        (apply rule (list cell world))
+                           (catch Exception any
+                             (throw (ex-info "Planning of flows failed"
+                                             (merge (meta rule) {:cell cell})
+                                             any))))] 
+                (when r (map #(assoc % :rule rule) r))))
+   rules))
+
 (defn plan-flows
   "Plan, but do not execute, all the flows in this `world` implied by these
-   `flow-rules` (which are expected to be pre-compiled). Return the list of
-   plans, as flow objects."
-  [world flow-rules]
-  (assert (every? #(= :flow (rule-type %)) flow-rules))
+   those of these `rules` (which are expected to be pre-compiled) which are
+   flow rules. Return the list of plans, as flow objects."
+  [world rules]
   (remove nil?
           (flatten
-           (map ;; across all the cells
-            (fn [cell]
-              (map ;; across all the rules
-               (fn [rule] (apply rule (list cell world)))
-               flow-rules))
-            (flatten world)))))
+           (map-world
+            world
+            plan-cell-flows
+            (list (filter #(= :flow (rule-type %)) rules))))))
 
 (defn flow-world
       "Return a world derived from this `world` by applying the flow rules 
       found among these `rules` to each cell, and executing all the flows
        planned."
   [world rules]
-  (execute-flows world (plan-flows world (filter #(= :flow (rule-type %)) rules))))
+  (execute-flows world (plan-flows world rules)))
 
 ;; building blocks for compiled flow rules
 

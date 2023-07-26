@@ -23,7 +23,7 @@
       :author "Simon Brooke"}
  mw-engine.core
   (:require [mw-engine.flow :refer [flow-world]]
-            [mw-engine.utils :refer [get-int-or-zero map-world rule-type]]
+            [mw-engine.utils :refer [add-history-event get-int-or-zero map-world rule-type]]
             [taoensso.timbre :as l]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -66,17 +66,8 @@
                             e
                             (.getMessage e)
                             (-> rule meta :lisp)
-                            cell))))
-        rule-meta (meta rule)]
-    (when result
-      (merge result 
-             {:history (concat 
-                        (:history result) 
-                        (list {:rule (:source rule-meta) 
-                               :rule-type (:rule-type rule-meta)
-                               :generation (get-int-or-zero 
-                                            result 
-                                            :generation)}))}))))
+                            cell))))]
+    (add-history-event result rule)))
 
 (defn- apply-rules
   "Derive a cell from this `cell` of this `world` by applying these `rules`."
